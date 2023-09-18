@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 class CoreMultilineFormField extends StatefulWidget {
   const CoreMultilineFormField({
     super.key,
-    required this.initialData,
     required this.onChanged,
     required this.controller,
     required this.focusNode,
     required this.onValidator
   });
 
-  final String initialData;
   final ValueChanged<String> onChanged;
   final TextEditingController controller;
 

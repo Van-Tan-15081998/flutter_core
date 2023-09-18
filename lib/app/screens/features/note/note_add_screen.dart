@@ -19,6 +19,7 @@ import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../../core/stores/fonts/CoreStoreFonts.dart';
 import '../../../services/database/database_provider.dart';
 import 'controllers/note_controller.dart';
 import 'note_list_screen.dart';
@@ -38,10 +39,8 @@ class NoteAddScreen extends StatefulWidget {
 
 class _NoteAddScreenState extends State<NoteAddScreen> {
   final FocusNode _titleFocusNode = FocusNode();
-  String _title = '';
 
   final FocusNode _detailContentFocusNode = FocusNode();
-  String _detailContent = '';
 
   final _formKey = GlobalKey<FormState>();
 
@@ -58,17 +57,21 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     // TODO: implement initState
     super.initState();
 
-    List<FocusNode> focusNodeInsidePage = [_titleFocusNode, _detailContentFocusNode];
+    List<FocusNode> focusNodeInsidePage = [
+      _titleFocusNode,
+      _detailContentFocusNode
+    ];
 
     _titleFocusNode.addListener(() {
       if (_titleFocusNode.hasFocus) {
-
         if (!_titleFocusNodeHasFocus) {
           _titleFocusNodeHasFocus = true;
+
+          _detailContentFocusNodeHasFocus = false;
         }
 
-        for(FocusNode focusNode in focusNodeInsidePage) {
-          if(focusNode != _titleFocusNode) {
+        for (FocusNode focusNode in focusNodeInsidePage) {
+          if (focusNode != _titleFocusNode) {
             focusNode.unfocus();
           }
         }
@@ -77,13 +80,14 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
 
     _detailContentFocusNode.addListener(() {
       if (_detailContentFocusNode.hasFocus) {
-
         if (!_detailContentFocusNodeHasFocus) {
           _detailContentFocusNodeHasFocus = true;
+
+          _titleFocusNodeHasFocus = false;
         }
 
-        for(FocusNode focusNode in focusNodeInsidePage) {
-          if(focusNode != _detailContentFocusNode) {
+        for (FocusNode focusNode in focusNodeInsidePage) {
+          if (focusNode != _detailContentFocusNode) {
             focusNode.unfocus();
           }
         }
@@ -100,6 +104,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
       descriptionController.text = widget.note!.description;
     }
 
+    List listFontFamiliesParsed = CoreStoreFonts.listFontFamiliesParsed();
+
     return CoreFullScreenDialog(
       title: widget.note == null ? 'Add a note' : 'Edit note',
       isConfirmToClose: true,
@@ -107,7 +113,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
           _formKey.currentState!.save();
-          // Gửi form hoặc thực hiện xử lý dữ liệu ở đây
+
+          /// Gửi form hoặc thực hiện xử lý dữ liệu ở đây
 
           final title = titleController.value.text;
           final description = descriptionController.value.text;
@@ -144,47 +151,242 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
               isScrollControlled: true,
               builder: (BuildContext context) {
                 return CoreStandardBottomSheet(
-                    coreStandardBottomHeight: CoreStandardBottomHeight.half,
-                    child: ListView.builder(
-                        // itemBuilder: (context, index) => Text(
-                        //     CoreStoreIcons.trees[index]
-                        // ),
-                        itemBuilder: (context, index) =>
-                            CoreElevatedButton.iconOnly(
-                              onPressed: () {
-                                if (_titleFocusNodeHasFocus) {
-                                  setState(() {
-                                    titleController.text += CoreStoreIcons.trees[index];
+                  coreStandardBottomHeight: CoreStandardBottomHeight.half,
+                  // child: ListView.builder(
+                  //     // itemBuilder: (context, index) => Text(
+                  //     //     CoreStoreIcons.trees[index]
+                  //     // ),
+                  //     itemBuilder: (context, index) =>
+                  //         CoreElevatedButton.iconOnly(
+                  //           onPressed: () {
+                  //             if (_titleFocusNodeHasFocus) {
+                  //               setState(() {
+                  //                 titleController.text += CoreStoreIcons.activeIcons[index];
+                  //
+                  //                 // final updatedText = titleController.text + CoreStoreIcons.trees[index].toString();
+                  //                 //
+                  //                 // titleController.value = titleController.value.copyWith(
+                  //                 //   text: updatedText,
+                  //                 //   selection: TextSelection.collapsed(offset: updatedText.length),
+                  //                 // );
+                  //
+                  //                 print(titleController.text);
+                  //               });
+                  //             }
+                  //
+                  //             else if (_detailContentFocusNodeHasFocus) {
+                  //               setState(() {
+                  //                 descriptionController.text +=
+                  //                     CoreStoreIcons.activeIcons[index];
+                  //               });
+                  //             }
+                  //           },
+                  //           coreButtonStyle: CoreButtonStyle.options(
+                  //             coreFixedSizeButton:
+                  //                 CoreFixedSizeButton.squareIcon4060,
+                  //             coreStyle: CoreStyle.outlined,
+                  //             coreColor: CoreColor.turtles,
+                  //             coreRadius: CoreRadius.radius_6,
+                  //             kitForegroundColorOption: Colors.black,
+                  //           ),
+                  //           icon: Text(CoreStoreIcons.activeIcons[index]),
+                  //         ),
+                  //     itemCount: CoreStoreIcons.activeIcons.length)
+                  child: DefaultTabController(
+                    length: 3,
+                    child: Scaffold(
+                      appBar: PreferredSize(
+                        preferredSize: Size.fromHeight(kToolbarHeight),
 
-                                    // final updatedText = titleController.text + CoreStoreIcons.trees[index].toString();
-                                    //
-                                    // titleController.value = titleController.value.copyWith(
-                                    //   text: updatedText,
-                                    //   selection: TextSelection.collapsed(offset: updatedText.length),
-                                    // );
+                        /// Đặt kích thước tùy chỉnh cho AppBar
+                        child: AppBar(
+                          automaticallyImplyLeading: false, // Ẩn nút back
+                          title: null,
 
-                                    print(titleController.text);
-                                  });
-                                }
+                          /// Ẩn tiêu đề
+                          elevation: 0,
 
-                                else if (_detailContentFocusNodeHasFocus) {
-                                  setState(() {
-                                    descriptionController.text +=
-                                        CoreStoreIcons.trees[index];
-                                  });
-                                }
-                              },
-                              coreButtonStyle: CoreButtonStyle.options(
-                                coreFixedSizeButton:
-                                    CoreFixedSizeButton.squareIcon4060,
-                                coreStyle: CoreStyle.outlined,
-                                coreColor: CoreColor.turtles,
-                                coreRadius: CoreRadius.radius_6,
-                                kitForegroundColorOption: Colors.black,
+                          /// Loại bỏ độ đổ bóng
+                          bottom: TabBar(
+                            tabs: [
+                              const Tab(icon: FaIcon(FontAwesomeIcons.font, size: 18.0)),
+                              Tab(icon: Row(
+                                children: [
+                                  FaIcon(FontAwesomeIcons.bold, size: 18.0),
+                                  FaIcon(FontAwesomeIcons.italic, size: 18.0),
+                                  FaIcon(FontAwesomeIcons.underline, size: 18.0)
+                                ],
+                              )),
+                              Tab(icon: FaIcon(FontAwesomeIcons.paintbrush, size: 18.0)),
+                              Tab(icon: FaIcon(FontAwesomeIcons.textHeight, size: 18.0)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      body: TabBarView(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 150.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
                               ),
-                              icon: Text(CoreStoreIcons.trees[index]),
+                              itemCount: listFontFamiliesParsed.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                      CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black),
+                                  icon: Center(
+                                    child: Text(
+                                      'Hi Task',
+                                      style: listFontFamiliesParsed[index],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                        itemCount: CoreStoreIcons.trees.length));
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 150.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
+                              ),
+                              itemCount: CoreStoreFonts.fontStyles.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                      CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black),
+                                  icon: Center(
+                                    child: Text(
+                                      CoreStoreFonts.fontStyles[index].name,
+                                      style: CoreStoreFonts.parseTextStyleFromCoreFontStyle(coreFontStyle: CoreStoreFonts.fontStyles[index]),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 150.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
+                              ),
+                              itemCount: CoreStoreFonts.fontColors.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                      CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black,
+                                    kitBackgroundColorOption: CoreStoreFonts.fontColors[index].color
+                                  ),
+                                  icon: Container(),
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 150.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
+                              ),
+                              itemCount: CoreStoreFonts.fontSizes.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                      CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black),
+                                  icon: Center(
+                                    child: Text(
+                                      CoreStoreFonts.fontSizes[index].name,
+                                      style: TextStyle(fontSize: CoreStoreFonts.fontSizes[index].size),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               }),
           coreButtonStyle: CoreButtonStyle.options(
               coreFixedSizeButton: CoreFixedSizeButton.squareIcon4060,
@@ -205,7 +407,184 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
           icon: const FaIcon(FontAwesomeIcons.image, size: 18.0),
         ),
         CoreElevatedButton.iconOnly(
-          onPressed: () {},
+          onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              builder: (BuildContext context) {
+                return CoreStandardBottomSheet(
+                  coreStandardBottomHeight: CoreStandardBottomHeight.half,
+
+                  child: DefaultTabController(
+                    length: 3,
+                    child: Scaffold(
+                      appBar: PreferredSize(
+                        preferredSize: Size.fromHeight(kToolbarHeight),
+
+                        /// Đặt kích thước tùy chỉnh cho AppBar
+                        child: AppBar(
+                          automaticallyImplyLeading: false, // Ẩn nút back
+                          title: null,
+
+                          /// Ẩn tiêu đề
+                          elevation: 0,
+
+                          /// Loại bỏ độ đổ bóng
+                          bottom: TabBar(
+                            tabs: [
+                              Tab(icon: Text(CoreStoreIcons.emoji_001)),
+                              Tab(icon: Text(CoreStoreIcons.emoji_260)),
+                              Tab(icon: Icon(Icons.directions_car)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      body: TabBarView(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 60.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
+                              ),
+                              itemCount: CoreStoreIcons.emojis.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+                                    if (_titleFocusNodeHasFocus) {
+                                      setState(() {
+                                        final updatedText =
+                                            titleController.text +
+                                                CoreStoreIcons.emojis[index]
+                                                    .toString();
+
+                                        titleController.value =
+                                            titleController.value.copyWith(
+                                          text: updatedText,
+                                          selection: TextSelection.collapsed(
+                                              offset: updatedText.length),
+                                        );
+                                      });
+                                    } else if (_detailContentFocusNodeHasFocus) {
+                                      setState(() {
+                                        final updatedText =
+                                            descriptionController.text +
+                                                CoreStoreIcons.emojis[index]
+                                                    .toString();
+
+                                        descriptionController.value =
+                                            descriptionController.value
+                                                .copyWith(
+                                          text: updatedText,
+                                          selection: TextSelection.collapsed(
+                                              offset: updatedText.length),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                          CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black),
+                                  icon: Center(
+                                    child: Text(
+                                      CoreStoreIcons.emojis[index],
+                                      style: const TextStyle(fontSize: 18.0),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: GridView.builder(
+                              padding: const EdgeInsets.fromLTRB(
+                                  4.0, 4.0, 4.0, 80.0),
+                              gridDelegate:
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 60.0,
+
+                                /// Kích thước tối đa của một cột
+                                crossAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các cột
+                                mainAxisSpacing: 10.0,
+
+                                /// Khoảng cách giữa các hàng
+                              ),
+                              itemCount: CoreStoreIcons.natureAndAnimals.length,
+                              itemBuilder: (context, index) {
+                                return CoreElevatedButton.iconOnly(
+                                  onPressed: () {
+                                    if (_titleFocusNodeHasFocus) {
+                                      setState(() {
+                                        final updatedText =
+                                            titleController.text +
+                                                CoreStoreIcons.natureAndAnimals[index]
+                                                    .toString();
+
+                                        titleController.value =
+                                            titleController.value.copyWith(
+                                              text: updatedText,
+                                              selection: TextSelection.collapsed(
+                                                  offset: updatedText.length),
+                                            );
+                                      });
+                                    } else if (_detailContentFocusNodeHasFocus) {
+                                      setState(() {
+                                        final updatedText =
+                                            descriptionController.text +
+                                                CoreStoreIcons.natureAndAnimals[index]
+                                                    .toString();
+
+                                        descriptionController.value =
+                                            descriptionController.value
+                                                .copyWith(
+                                              text: updatedText,
+                                              selection: TextSelection.collapsed(
+                                                  offset: updatedText.length),
+                                            );
+                                      });
+                                    }
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreFixedSizeButton:
+                                      CoreFixedSizeButton.squareIcon4060,
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.turtles,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption: Colors.black),
+                                  icon: Center(
+                                    child: Text(
+                                      CoreStoreIcons.natureAndAnimals[index],
+                                      style: const TextStyle(fontSize: 18.0),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Icon(Icons.directions_car, size: 350),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
           coreButtonStyle: CoreButtonStyle.options(
               coreFixedSizeButton: CoreFixedSizeButton.squareIcon4060,
               coreStyle: CoreStyle.outlined,
@@ -262,7 +641,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                   return null;
                 },
               ),
-              CoreTextFormField(
+              CoreMultilineFormField(
                 focusNode: _detailContentFocusNode,
                 onChanged: (value) => {
                   // descriptionController.text = value

@@ -1,5 +1,8 @@
 class CoreStoreIcons {
-  static List<String> trees = [
+
+  static List<String> activeIcons = [...emojis, ...natureAndAnimals];
+
+  static List<String> emojis = [
     emoji_001,
     emoji_002,
     emoji_003,
@@ -10,11 +13,396 @@ class CoreStoreIcons {
     emoji_008,
     emoji_009,
     emoji_010,
+    emoji_011,
+    emoji_012,
+    emoji_013,
+    emoji_014,
+    emoji_015,
+    emoji_016,
+    emoji_017,
+    emoji_018,
+    emoji_019,
     emoji_020,
-    emoji_021,
+    // emoji_021, /// !!!
     emoji_022,
-    emoji_023
+    emoji_023,
+    emoji_024,
+    emoji_025,
+    emoji_026,
+    emoji_027,
+    emoji_028,
+    emoji_029,
+    emoji_030,
+    emoji_031,
+    emoji_032,
+    emoji_033,
+    emoji_034,
+    emoji_035,
+    emoji_036,
+    emoji_037,
+    emoji_038,
+    emoji_039,
+    emoji_040,
+    emoji_041,
+    emoji_042,
+    emoji_043,
+    emoji_044,
+    emoji_045,
+    emoji_046,
+    emoji_047,
+    emoji_048,
+    emoji_049,
+    emoji_050,
+    emoji_051,
+    emoji_052,
+    emoji_053,
+    emoji_054,
+    emoji_055,
+    emoji_056,
+    emoji_057,
+    emoji_058,
+    emoji_059,
+    emoji_060,
+    emoji_061,
+    emoji_062,
+    emoji_063,
+    emoji_064,
+    emoji_065,
+    emoji_066,
+    emoji_067,
+    // emoji_068, /// !!!
+    emoji_069,
+    emoji_070,
+    emoji_071,
+    emoji_072,
+    emoji_073,
+    emoji_074,
+    emoji_075,
+    emoji_076,
+    emoji_077,
+    emoji_078,
+    emoji_079,
+    emoji_080,
+    emoji_081,
+    emoji_082,
+    emoji_083,
+    emoji_084,
+    emoji_085,
+    emoji_086,
+    emoji_087,
+    // emoji_088, /// !!!
+    // emoji_089, /// !!!
+    emoji_090,
+    emoji_091,
+    emoji_092,
+    emoji_093,
+    emoji_094,
+    emoji_095,
+    emoji_096,
+    emoji_097,
+    emoji_098,
+    // emoji_099, /// !!!
+    emoji_100,
+    emoji_101,
+    emoji_102,
+    emoji_103,
+    emoji_104,
+    emoji_105,
+    emoji_106,
+    emoji_107,
+    emoji_108,
+    emoji_109,
+    emoji_110,
+    emoji_111,
+    emoji_112,
+    emoji_113,
+    emoji_114,
+    emoji_115,
+    emoji_116,
+    emoji_117,
+    emoji_118,
+    emoji_119,
+    emoji_120,
+    emoji_121,
+    emoji_122,
+    emoji_123,
+    emoji_124,
+    emoji_125,
+    emoji_126,
+    emoji_127,
+    emoji_128,
+    emoji_129,
+    emoji_130,
+    emoji_131,
+    emoji_132,
+    emoji_133,
+    emoji_134,
+    emoji_135,
+    emoji_136,
+    emoji_137,
+    emoji_138,
+    emoji_139,
+    emoji_140,
+    emoji_141,
+    emoji_142,
+    emoji_143,
+    emoji_144,
+    emoji_145,
+    emoji_146,
+    emoji_147,
+    emoji_148,
+    emoji_149,
+    emoji_150,
+    emoji_151,
+    emoji_152,
+    emoji_153,
+    emoji_154,
+    emoji_155,
+    // emoji_156, /// !!!
+    emoji_157,
+    // emoji_158, /// !!!
+    emoji_159,
+    emoji_160,
+    emoji_161,
+    emoji_162,
+    emoji_163,
+    emoji_164,
+    emoji_165,
+    emoji_166,
+    emoji_167,
+    emoji_168,
+    emoji_169,
+    emoji_170,
+    emoji_171,
+    emoji_172,
+    emoji_173,
+    emoji_174,
+    emoji_175,
+    emoji_176,
+    // emoji_177, /// !!!
+    emoji_178,
+    emoji_179,
+    emoji_180,
+    emoji_181,
+    emoji_182,
+    emoji_183,
+    emoji_184,
+    emoji_185,
+    emoji_186,
+    emoji_187,
+    emoji_188,
+    emoji_189
   ];
+
+  static List<String> natureAndAnimals = [
+    emoji_190,
+    emoji_191,
+    emoji_192,
+    emoji_193,
+    emoji_194,
+    emoji_195,
+    emoji_196,
+    emoji_197,
+    emoji_198,
+    emoji_199,
+    emoji_201,
+    emoji_202,
+    emoji_203,
+    emoji_204,
+    emoji_205,
+    emoji_206,
+    emoji_207,
+    emoji_208,
+    // emoji_209, /// !!!
+    emoji_210,
+    emoji_211,
+    emoji_212,
+    emoji_213,
+    emoji_214,
+    // emoji_215, /// !!!
+    // emoji_216, /// !!!
+    emoji_217,
+    emoji_218,
+    emoji_219,
+    emoji_220,
+    emoji_221,
+    emoji_222,
+    emoji_223,
+    emoji_224,
+    emoji_225,
+    emoji_226,
+    emoji_227,
+    emoji_228,
+    emoji_229,
+    emoji_230,
+    emoji_231,
+    emoji_232,
+    emoji_233,
+    emoji_234,
+    emoji_235,
+    emoji_236,
+    emoji_237,
+    emoji_238,
+    emoji_239,
+    emoji_240,
+    emoji_241,
+    emoji_242,
+    emoji_243,
+    emoji_244,
+    emoji_245,
+    emoji_246,
+    emoji_247,
+    emoji_248,
+    emoji_249,
+    emoji_250,
+    emoji_251,
+    emoji_252,
+    emoji_253,
+    emoji_254,
+    emoji_255,
+    emoji_256,
+    emoji_257,
+    emoji_258,
+    emoji_259,
+    emoji_260,
+    emoji_261,
+    emoji_262,
+    emoji_263,
+    emoji_264,
+    emoji_265,
+    emoji_266,
+    emoji_267,
+    emoji_268,
+    emoji_269,
+    emoji_270,
+    emoji_271,
+    emoji_272,
+    emoji_273,
+    emoji_274,
+    emoji_275,
+    emoji_276,
+    emoji_277,
+    emoji_278,
+    emoji_279,
+    emoji_280,
+    emoji_281,
+    emoji_282,
+    // emoji_283, /// !!!
+    emoji_284,
+    emoji_285,
+    emoji_286,
+    emoji_287,
+    emoji_288,
+    emoji_289,
+    emoji_290,
+    emoji_291,
+    emoji_292,
+    emoji_293,
+    emoji_294,
+    emoji_295,
+    emoji_296,
+    emoji_297,
+    emoji_298,
+    emoji_299,
+    emoji_300,
+    emoji_301,
+    emoji_302,
+    emoji_303,
+    emoji_304,
+    emoji_305,
+    emoji_306,
+    emoji_307,
+    emoji_308,
+    emoji_309,
+    emoji_310,
+    // emoji_311, /// !!!
+    emoji_312,
+    emoji_313,
+    emoji_314,
+    emoji_315,
+    emoji_316,
+    emoji_317,
+    emoji_318,
+    emoji_319,
+    emoji_320,
+    emoji_321,
+    emoji_322,
+    // emoji_323, /// !!!
+    emoji_324,
+    emoji_325,
+    emoji_326,
+    emoji_327,
+    emoji_328,
+    emoji_329,
+    emoji_330,
+    emoji_331,
+    // emoji_332, /// !!!
+    emoji_333,
+    emoji_334,
+    emoji_335,
+    emoji_336,
+    emoji_337,
+    emoji_338,
+    emoji_339,
+    emoji_340,
+    emoji_341,
+    // emoji_342, /// !!!
+    emoji_343,
+    emoji_344,
+    emoji_345,
+    emoji_346,
+    emoji_347,
+    emoji_348,
+    emoji_349,
+    emoji_350,
+    emoji_351,
+    emoji_352,
+    emoji_353,
+    emoji_354,
+    emoji_355,
+    emoji_356,
+    emoji_357,
+    emoji_358,
+    // emoji_359, /// !!!
+    emoji_360,
+    emoji_361,
+    emoji_362,
+    emoji_363,
+    emoji_364,
+    emoji_365,
+    // emoji_366, /// !!!
+    emoji_367,
+    emoji_368,
+    emoji_369,
+    emoji_370,
+    emoji_371,
+    emoji_372,
+    emoji_373,
+    emoji_374,
+    emoji_375,
+    emoji_376,
+    emoji_377,
+    emoji_378,
+    emoji_379,
+    emoji_380,
+    emoji_381,
+    emoji_382,
+    emoji_383,
+    emoji_384,
+    emoji_385,
+    emoji_386,
+    // emoji_387, /// !!!
+    emoji_388,
+    // emoji_389, /// !!!
+    // emoji_390, /// !!!
+    emoji_391,
+    emoji_392,
+    emoji_393,
+    emoji_394,
+    // emoji_395, /// !!!
+    emoji_396,
+    emoji_397
+    ];
 
   // Mặt cười
 
@@ -40,7 +428,7 @@ class CoreStoreIcons {
   static String emoji_019 = '🙃';
 
   static String emoji_020 = '🙂';
-  static String emoji_021 = '🥲';
+  // static String emoji_021 = '😥';
   static String emoji_022 = '☺️';
   static String emoji_023 = '😊';
   static String emoji_024 = '😏';
@@ -91,7 +479,7 @@ class CoreStoreIcons {
   static String emoji_065 = '😥';
   static String emoji_066 = '😓';
   static String emoji_067 = '😞';
-  static String emoji_068 = '😮‍💨';
+  // static String emoji_068 = '😮‍💨';
   static String emoji_069 = '😖';
 
   static String emoji_070 = '😣';
@@ -113,8 +501,8 @@ class CoreStoreIcons {
   static String emoji_085 = '🤒';
   static String emoji_086 = '🤕';
   static String emoji_087 = '🥴';
-  static String emoji_088 = '😶‍🌫️';
-  static String emoji_089 = '😵‍💫';
+  // static String emoji_088 = '😶‍🌫️';
+  // static String emoji_089 = '😵‍💫';
 
   static String emoji_090 = '😵';
   static String emoji_091 = '🥵';
@@ -125,7 +513,7 @@ class CoreStoreIcons {
   static String emoji_096 = '🤑';
   static String emoji_097 = '😎';
   static String emoji_098 = '🤓';
-  static String emoji_099 = '🥸';
+  static String emoji_099 = ''; /// !!!
 
   static String emoji_100 = '🤥';
   static String emoji_101 = '🤡';
@@ -188,9 +576,9 @@ class CoreStoreIcons {
   static String emoji_153 = '💌';
   static String emoji_154 = '💟';
   static String emoji_155 = '❣️';
-  static String emoji_156 = '❤️‍🩹';
+  // static String emoji_156 = '❤️‍🩹';
   static String emoji_157 = '💔';
-  static String emoji_158 = '❤️‍🔥';
+  // static String emoji_158 = '❤️‍🔥';
   static String emoji_159 = '💪';
 
   static String emoji_160 = '👍';
@@ -211,7 +599,7 @@ class CoreStoreIcons {
   static String emoji_174 = '👋';
   static String emoji_175 = '🤏';
   static String emoji_176 = '👌';
-  static String emoji_177 = '🤌';
+  static String emoji_177 = ''; /// !!!
   static String emoji_178 = '✌️';
   static String emoji_179 = '🤘';
 
@@ -247,15 +635,15 @@ class CoreStoreIcons {
   static String emoji_206 = '🍃';
   static String emoji_207 = '☘️';
   static String emoji_208 = '🍀';
-  static String emoji_209 = '🪴';
+  // static String emoji_209 = '🪴';
 
   static String emoji_210 = '🌵';
   static String emoji_211 = '🌴';
   static String emoji_212 = '🌳';
   static String emoji_213 = '🌲';
   static String emoji_214 = '🏞️';
-  static String emoji_215 = '🪵';
-  static String emoji_216 = '🪨';
+  // static String emoji_215 = '🪵';
+  // static String emoji_216 = '🪨';
   static String emoji_217 = '🌊';
   static String emoji_218 = '🌬️';
   static String emoji_219 = '🌀';
@@ -329,7 +717,7 @@ class CoreStoreIcons {
   static String emoji_280 = '🐶';
   static String emoji_281 = '🐺';
   static String emoji_282 = '🐻';
-  static String emoji_283 = '🐻‍❄️';
+  // static String emoji_283 = '🐻‍❄️';
   static String emoji_284 = '🐨';
   static String emoji_285 = '🐼';
   static String emoji_286 = '🐹';
@@ -360,7 +748,7 @@ class CoreStoreIcons {
   static String emoji_309 = '🐇';
 
   static String emoji_310 = '🐈';
-  static String emoji_311 = '🐈‍⬛';
+  // static String emoji_311 = '🐈‍⬛';
   static String emoji_312 = '🐩';
   static String emoji_313 = '🐕';
   static String emoji_314 = '🦮';
@@ -373,7 +761,7 @@ class CoreStoreIcons {
   static String emoji_320 = '🐄';
   static String emoji_321 = '🐂';
   static String emoji_322 = '🐃';
-  static String emoji_323 = '🦬';
+  // static String emoji_323 = '🦬';
   static String emoji_324 = '🐏';
   static String emoji_325 = '🐑';
   static String emoji_326 = '🐐';
@@ -383,7 +771,7 @@ class CoreStoreIcons {
 
   static String emoji_330 = '🦘';
   static String emoji_331 = '🐘';
-  static String emoji_332 = '🦣';
+  // static String emoji_332 = '🦣';
   static String emoji_333 = '🦏';
   static String emoji_334 = '🦛';
   static String emoji_335 = '🦒';
@@ -394,7 +782,7 @@ class CoreStoreIcons {
 
   static String emoji_340 = '🐫';
   static String emoji_341 = '🐿️';
-  static String emoji_342 = '🦫';
+  // static String emoji_342 = '🦫';
   static String emoji_343 = '🦨';
   static String emoji_344 = '🦡';
   static String emoji_345 = '🦔';
@@ -412,7 +800,7 @@ class CoreStoreIcons {
   static String emoji_356 = '🦅';
   static String emoji_357 = '🦜';
   static String emoji_358 = '🕊️';
-  static String emoji_359 = '🦤';
+  // static String emoji_359 = '🦤';
 
   static String emoji_360 = '🦢';
   static String emoji_361 = '🦩';
@@ -420,7 +808,7 @@ class CoreStoreIcons {
   static String emoji_363 = '🦃';
   static String emoji_364 = '🦆';
   static String emoji_365 = '🐧';
-  static String emoji_366 = '🦭';
+  // static String emoji_366 = '🦭';
   static String emoji_367 = '🦈';
   static String emoji_368 = '🐬';
   static String emoji_369 = '🐋';
@@ -443,16 +831,16 @@ class CoreStoreIcons {
   static String emoji_384 = '🐌';
   static String emoji_385 = '🐜';
   static String emoji_386 = '🦗';
-  static String emoji_387 = '🪲';
+  // static String emoji_387 = '🪲';
   static String emoji_388 = '🦟';
-  static String emoji_389 = '🪳';
+  // static String emoji_389 = '🪳';
 
-  static String emoji_390 = '🪰';
+  // static String emoji_390 = '🪰';
   static String emoji_391 = '🐝';
   static String emoji_392 = '🐞';
   static String emoji_393 = '🦋';
   static String emoji_394 = '🐛';
-  static String emoji_395 = '🪱';
+  // static String emoji_395 = '🪱';
   static String emoji_396 = '🦠';
   static String emoji_397 = '🐾';
   static String emoji_398 = '';

@@ -652,5 +652,4 @@ CoreButtonStyle.link({
 
   this.kitRadius = 0,
 });
-
 }
