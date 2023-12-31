@@ -1,5 +1,6 @@
 class CoreStoreIcons {
 
+  static dynamic base64Img = '';
   static List<String> activeIcons = [...emojis, ...natureAndAnimals];
 
   static List<String> emojis = [

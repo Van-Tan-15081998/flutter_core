@@ -16,6 +16,8 @@ import 'package:flutter_core_v3/core/components/form/CoreTextFormField.dart';
 import 'package:flutter_core_v3/core/components/form/CoreTextRowFormField.dart';
 import 'package:flutter_core_v3/core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 
+import 'app/screens/features/demo/expandable/expandable_home_screen.dart';
+import 'app/screens/features/demo/flutter_quill/flutter_quill_home_screen.dart';
 import 'app/screens/features/demo/get/GetHome.dart';
 import 'app/screens/features/demo/get/example/bindings/SampleBind.dart';
 import 'app/screens/features/demo/get/example/models/MyTranslations.dart';
@@ -33,6 +35,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:get/get.dart';
 
+import 'main_test.dart';
+
 void main() {
   runApp(GetMaterialApp(
     theme: ThemeData(
@@ -45,45 +49,20 @@ void main() {
       GetPage(
           name: '/home',
           page: () => const HomeScreen(title: 'Hi Tasks'),
-          binding: NoteBinding()),
+          ),
       GetPage(
           name: '/note-list',
-          page: () => const NoteListScreen(),
-          binding: NoteBinding()
+          page: () => const NoteListScreen()
       ),
       GetPage(
           name: '/note-add',
           page: () => const NoteAddScreen(actionMode: ActionModeEnum.create),
-          binding: NoteBinding()
       )
     ],
   ));
-  // runApp(GetMaterialApp(home: GetHome()));
 
-  // runApp(GetMaterialApp(
-  //   // It is not mandatory to use named routes, but dynamic urls are interesting.
-  //   initialRoute: '/home',
-  //   defaultTransition: Transition.native,
-  //   translations: MyTranslations(),
-  //   locale: Locale('pt', 'BR'),
-  //   getPages: [
-  //     //Simple GetPage
-  //     GetPage(name: '/home', page: () => First()),
-  //     // GetPage with custom transitions and bindings
-  //     GetPage(
-  //       name: '/second',
-  //       page: () => Second(),
-  //       customTransition: SizeTransitions(),
-  //       binding: SampleBind(),
-  //     ),
-  //     // GetPage with default transitions
-  //     GetPage(
-  //       name: '/third',
-  //       transition: Transition.cupertino,
-  //       page: () => Third(),
-  //     ),
-  //   ],
-  // ));
+
+  // runApp(MyApp1());
 }
 
 class MyApp1 extends StatelessWidget {
@@ -96,7 +75,8 @@ class MyApp1 extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const NotesScreen(),
+      // home: const FlutterQuillHomeScreen(),
+      home: ExpandableHomeScreen(),
     );
   }
 }

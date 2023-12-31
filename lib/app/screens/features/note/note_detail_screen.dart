@@ -28,18 +28,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       onUndo: () {},
       isShowGeneralActionButton: true,
       isShowOptionActionButton: true,
-      bottomActionBar: [
+      optionActionContent: Container(),
+      bottomActionBar: const [
+        Row()
+      ],
+      bottomActionBarScrollable: const [
         Row(
-            // children: [
-            //   Flexible(
-            //       flex: 1, child: Container(color: Colors.red.shade100)),
-            //   Flexible(
-            //       flex: 1,
-            //       child: Container(
-            //         color: Colors.red.shade200,
-            //       )),
-            // ],
-            )
+        )
       ],
       child: Padding(
         padding: const EdgeInsets.all(0),

@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
 
-    NoteController controller = Get.find();
+    NoteController controller = NoteController() ;
     controller.initData();
 
     return Scaffold(

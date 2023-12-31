@@ -4,17 +4,25 @@ import 'package:flutter_core_v3/app/services/database/database_provider.dart';
 import 'package:flutter_core_v3/core/state_management/controller/CoreGetController.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/state_management/dispatch_events/dispatch_listener_event.dart';
 import '../../../../../main.dart';
 import '../../../home/home_screen.dart';
 import '../models/note_model.dart';
 import '../note_add_screen.dart';
 import '../note_list_screen.dart';
 
-class NoteController extends CoreGetController {
-  RxList<NoteModel> notes = <NoteModel>[].obs;
+class NoteController  {
+  List<NoteModel> notes = <NoteModel>[];
 
   Future<void> initData() async {
-    notes.value = (await DatabaseProvider.getAllNotes())!;
+
+    List<NoteModel>? notesFromDB = await DatabaseProvider.getAllNotes();
+
+    if(notesFromDB != null) {
+      notes = notesFromDB;
+
+      DispatchListenerEvent.dispatch('DISPATCH_GET_ALL_NOTES_FROM_DB', notes);
+    }
   }
 
   Future<bool> onCreateNote(NoteModel note) async {
@@ -26,6 +34,8 @@ class NoteController extends CoreGetController {
 
       if(createdNote is NoteModel) {
         notes.insert(0, createdNote);
+
+        DispatchListenerEvent.dispatch('DISPATCH_ADD_NEW_NOTE_TO_LIST', createdNote);
 
         Get.back();
       }

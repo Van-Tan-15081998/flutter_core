@@ -39,7 +39,7 @@ class DatabaseProvider {
     );
   }
 
-  static Future<RxList<NoteModel>?> getAllNotes() async {
+  static Future<List<NoteModel>?> getAllNotes() async {
     final db = await _getDB();
 
     // final List<Map<String, dynamic>> maps = await db.query("notes");
@@ -49,7 +49,7 @@ class DatabaseProvider {
       return null;
     }
 
-    return RxList.generate(maps.length, (index) => NoteModel.fromJson(maps[index]));
+    return List.generate(maps.length, (index) => NoteModel.fromJson(maps[index]));
   }
 
   static Future<NoteModel?> getNoteById(int id) async {

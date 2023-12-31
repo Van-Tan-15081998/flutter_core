@@ -12,7 +12,13 @@ class CoreStandardBottomSheet extends StatefulWidget {
 
   CoreStandardBottomHeight? coreStandardBottomHeight;
 
-  CoreStandardBottomSheet({super.key, required this.child, this.coreStandardBottomHeight});
+  bool? isShowGeneralActionButton = true;
+
+  CoreStandardBottomSheet(
+      {super.key,
+      required this.child,
+      this.coreStandardBottomHeight,
+      this.isShowGeneralActionButton});
 
   @override
   State<CoreStandardBottomSheet> createState() =>
@@ -38,9 +44,7 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
                       confirmTitle: const Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Are you sure?')
-                        ],
+                        children: [Text('Are you sure?')],
                       ),
                       initialData: false,
                       onChanged: (value) => result = value,
@@ -58,16 +62,17 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
     double maxHeight = 0.7;
 
     switch (coreStandardBottomHeight) {
-      case CoreStandardBottomHeight.half :
+      case CoreStandardBottomHeight.half:
         maxHeight = 0.5;
         break;
       case CoreStandardBottomHeight.twoThird:
         maxHeight = 0.66666666666;
         break;
 
-      default: {
-        //statements;
-      }
+      default:
+        {
+          //statements;
+        }
     }
 
     return maxHeight;
@@ -75,10 +80,12 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    widget.isShowGeneralActionButton = widget.isShowGeneralActionButton ?? true;
+
     return Wrap(children: [
       Container(
-          padding: EdgeInsets.fromLTRB(0, 26, 0, 0),
-          decoration: BoxDecoration(
+          padding: const EdgeInsets.fromLTRB(0, 26, 0, 0),
+          decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20.0), // Bo tròn góc trên bên trái
@@ -86,75 +93,50 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
             ),
           ),
           constraints: BoxConstraints(
-            maxHeight:  MediaQuery.of(context).size.height *
-                _getMaxHeight(widget.coreStandardBottomHeight), // Chiều cao tối đa của modal sheet
+            maxHeight: MediaQuery.of(context).size.height *
+                _getMaxHeight(widget
+                    .coreStandardBottomHeight), // Chiều cao tối đa của modal sheet
           ),
           child: Scaffold(
-
               body: widget.child,
-              floatingActionButton: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CoreElevatedButton.icon(
-                    icon: Icon(Icons.cancel),
-                    label: const Text('Cancel'),
-                    onPressed: () async {
-                      if (await confirmFunction()) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    coreButtonStyle: CoreButtonStyle.options(
-                        coreStyle: CoreStyle.filled,
-                        coreColor: CoreColor.secondary,
-                        coreRadius: CoreRadius.radius_6,
-                        kitForegroundColorOption: Colors.black,
-                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  CoreElevatedButton.icon(
-                    icon: Icon(Icons.save),
-                    label: const Text('Save'),
-                    onPressed: () {},
-                    coreButtonStyle: CoreButtonStyle.options(
-                        coreStyle: CoreStyle.filled,
-                        coreColor: CoreColor.success,
-                        coreRadius: CoreRadius.radius_6,
-                        kitForegroundColorOption: Colors.black,
-                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-                  )
-                ],
-              )))
+              floatingActionButton: widget.isShowGeneralActionButton!
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        CoreElevatedButton.icon(
+                          icon: const Icon(Icons.cancel),
+                          label: const Text('Cancel'),
+                          onPressed: () async {
+                            if (await confirmFunction()) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          coreButtonStyle: CoreButtonStyle.options(
+                              coreStyle: CoreStyle.filled,
+                              coreColor: CoreColor.secondary,
+                              coreRadius: CoreRadius.radius_6,
+                              kitForegroundColorOption: Colors.black,
+                              coreFixedSizeButton:
+                                  CoreFixedSizeButton.medium_40),
+                        ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        CoreElevatedButton.icon(
+                          icon: const Icon(Icons.save),
+                          label: const Text('Save'),
+                          onPressed: () {},
+                          coreButtonStyle: CoreButtonStyle.options(
+                              coreStyle: CoreStyle.filled,
+                              coreColor: CoreColor.success,
+                              coreRadius: CoreRadius.radius_6,
+                              kitForegroundColorOption: Colors.black,
+                              coreFixedSizeButton:
+                                  CoreFixedSizeButton.medium_40),
+                        )
+                      ],
+                    )
+                  : Container()))
     ]);
-
-    return Wrap(
-      children: [
-        Container(
-          padding: EdgeInsets.all(16.0),
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height *
-                0.7, // Chiều cao tối đa của modal sheet
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Modal Bottom Sheet'),
-              SizedBox(height: 16.0),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Your Input'),
-              ),
-              SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Close'),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
