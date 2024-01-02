@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_core_v3/app/screens/features/note/models/note_model.dart';
 import 'package:flutter_core_v3/core/stores/icons/CoreStoreIcons.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
@@ -14,6 +14,7 @@ import 'controllers/note_controller.dart';
 import 'widgets/functions/note_functions.dart';
 
 enum ActionModeEnum { create, update, delete }
+
 enum CurrentFocusNodeEnum { none, title, detailContent }
 
 class NoteAddScreen extends StatefulWidget {
@@ -67,26 +68,22 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
   bool _detailContentFocusNodeHasFocus = false;
 
   bool isQuillControllerSelectionUnchecked = false;
-  CurrentFocusNodeEnum _CurrentFocusNodeEnum = CurrentFocusNodeEnum.none;
+  CurrentFocusNodeEnum _currentFocusNodeEnum = CurrentFocusNodeEnum.none;
 
   double optionActionContent = 0.0;
 
-  final fontFamilies = {
-    'Sans Serif': 'sans-serif',
-    'Serif': 'serif',
-    'Monospace': 'monospace',
-    'Ibarra Real Nova': 'ibarra-real-nova',
-    'SquarePeg': 'square-peg',
-    'Nunito': 'nunito',
-    'Pacifico': 'pacifico',
-    'Roboto Mono': 'roboto-mono',
-  };
+  double _detailContentContainerHeight = 300.0;
 
-  final fontSizes = {
-    'Small': 'small',
-    'Large': 'large',
-    'Huge': 'huge',
-  };
+  final _detailContentKeyForScroll = GlobalKey();
+  Future _scrollToDetailContent() async {
+    final context = _detailContentKeyForScroll.currentContext;
+
+    await Scrollable.ensureVisible(
+      context!,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
 
   openOptionActionContent() {
     setState(() {
@@ -140,11 +137,11 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
         document: _detailContentDocument,
         selection: _detailContentTextSelection);
 
-    /// Listen Focus And Hide Dialog SetText and SetEmoji
+    // Listen Focus And Hide Dialog SetText and SetEmoji
     _titleFocusNode.addListener(() {
       if (_titleFocusNode.hasFocus) {
         setState(() {
-          _CurrentFocusNodeEnum = CurrentFocusNodeEnum.title;
+          _currentFocusNodeEnum = CurrentFocusNodeEnum.title;
           closeOptionActionContent();
           _titleQuillController.ignoreFocusOnTextChange = false;
 
@@ -158,9 +155,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     _detailContentFocusNode.addListener(() {
       if (_detailContentFocusNode.hasFocus) {
         setState(() {
-          // _controllerScrollController.
-
-          _CurrentFocusNodeEnum = CurrentFocusNodeEnum.detailContent;
+          _detailContentContainerHeight = 200.0;
+          _currentFocusNodeEnum = CurrentFocusNodeEnum.detailContent;
           closeOptionActionContent();
           _detailContentQuillController.ignoreFocusOnTextChange = false;
 
@@ -169,7 +165,13 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
           isShowDialogSetText = false;
           isShowDialogSetEmoji = false;
         });
-      } else {}
+
+        _scrollToDetailContent();
+      } else {
+        setState(() {
+          // _detailContentContainerHeight = 300.0;
+        });
+      }
     });
 
     List<FocusNode> focusNodeInsidePage = [
@@ -207,188 +209,18 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
   }
 
   bool isShowOptionActionContent() {
-    if (isShowDialogSetText || isShowDialogSetEmoji) {
+    if (isShowDialogSetEmoji) {
       return true;
     }
     return false;
   }
 
   Widget buildOptionActionContent(BuildContext context) {
-    List listFontFamiliesParsed = CoreStoreFonts.listFontFamiliesParsed();
-
-    if (isShowDialogSetText) {
-      return Container(
-        padding: const EdgeInsets.all(4.0),
-        constraints: const BoxConstraints(maxHeight: 300.0),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.black,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(6.0)),
-        child: DefaultTabController(
-          length: 5,
-          child: Scaffold(
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight),
-
-              /// Đặt kích thước tùy chỉnh cho AppBar
-              child: AppBar(
-                automaticallyImplyLeading: false, // Ẩn nút back
-                title: null,
-
-                /// Ẩn tiêu đề
-                elevation: 0,
-
-                /// Loại bỏ độ đổ bóng
-                bottom: const TabBar(
-                  tabs: [
-                    Tab(icon: FaIcon(FontAwesomeIcons.font, size: 18.0)),
-                    Tab(
-                        icon: Row(
-                      children: [
-                        FaIcon(FontAwesomeIcons.bold, size: 18.0),
-                      ],
-                    )),
-                    Tab(icon: FaIcon(FontAwesomeIcons.paintbrush, size: 18.0)),
-                    Tab(icon: FaIcon(FontAwesomeIcons.textHeight, size: 18.0)),
-                    Tab(icon: FaIcon(FontAwesomeIcons.gears, size: 18.0)),
-                  ],
-                ),
-              ),
-            ),
-            body: TabBarView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 150.0,
-
-                      /// Kích thước tối đa của một cột
-                      crossAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các cột
-                      mainAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các hàng
-                    ),
-                    itemCount: listFontFamiliesParsed.length,
-                    itemBuilder: (context, index) {
-                      return CoreElevatedButton.iconOnly(
-                        onPressed: () {},
-                        coreButtonStyle: CoreButtonStyle.options(
-                            coreFixedSizeButton:
-                                CoreFixedSizeButton.squareIcon4060,
-                            coreStyle: CoreStyle.outlined,
-                            coreColor: CoreColor.turtles,
-                            coreRadius: CoreRadius.radius_6,
-                            kitForegroundColorOption: Colors.black),
-                        icon: Center(
-                          child: Text(
-                            'Hi Task',
-                            style: listFontFamiliesParsed[index],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 150.0,
-
-                      /// Kích thước tối đa của một cột
-                      crossAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các cột
-                      mainAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các hàng
-                    ),
-                    itemCount: CoreStoreFonts.fontStyles.length,
-                    itemBuilder: (context, index) {
-                      return CoreElevatedButton.iconOnly(
-                        onPressed: () {},
-                        coreButtonStyle: CoreButtonStyle.options(
-                            coreFixedSizeButton:
-                                CoreFixedSizeButton.squareIcon4060,
-                            coreStyle: CoreStyle.outlined,
-                            coreColor: CoreColor.turtles,
-                            coreRadius: CoreRadius.radius_6,
-                            kitForegroundColorOption: Colors.black),
-                        icon: Center(
-                          child: Text(
-                            CoreStoreFonts.fontStyles[index].name,
-                            style:
-                                CoreStoreFonts.parseTextStyleFromCoreFontStyle(
-                                    coreFontStyle:
-                                        CoreStoreFonts.fontStyles[index]),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 150.0,
-
-                      /// Kích thước tối đa của một cột
-                      crossAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các cột
-                      mainAxisSpacing: 10.0,
-
-                      /// Khoảng cách giữa các hàng
-                    ),
-                    itemCount: CoreStoreFonts.fontColors.length,
-                    itemBuilder: (context, index) {
-                      return CoreElevatedButton.iconOnly(
-                        onPressed: () {},
-                        coreButtonStyle: CoreButtonStyle.options(
-                            coreFixedSizeButton:
-                                CoreFixedSizeButton.squareIcon4060,
-                            coreStyle: CoreStyle.outlined,
-                            coreColor: CoreColor.turtles,
-                            coreRadius: CoreRadius.radius_6,
-                            kitForegroundColorOption: Colors.black,
-                            kitBackgroundColorOption:
-                                CoreStoreFonts.fontColors[index].color),
-                        icon: Container(),
-                      );
-                    },
-                  ),
-                ),
-                Container(),
-                Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: flutter_quill.QuillToolbar.basic(
-                      controller: _detailContentQuillController),
-                )
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     if (isShowDialogSetEmoji) {
       return Container(
           margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
           padding: const EdgeInsets.all(4.0),
-          constraints: BoxConstraints(maxHeight: 300.0),
+          constraints: const BoxConstraints(maxHeight: 300.0),
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
@@ -400,7 +232,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
             length: 3,
             child: Scaffold(
               appBar: PreferredSize(
-                preferredSize: Size.fromHeight(kToolbarHeight),
+                preferredSize: const Size.fromHeight(kToolbarHeight),
 
                 /// Đặt kích thước tùy chỉnh cho AppBar
                 child: AppBar(
@@ -672,7 +504,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
         child: flutter_quill.QuillIconButton(
           size: 24.0 * flutter_quill.kIconButtonFactor,
           onPressed: () {
-           _detailContentQuillController.undo();
+            _detailContentQuillController.undo();
           },
           icon: const Icon(
             Icons.undo_outlined,
@@ -822,76 +654,297 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
   }
 
   /// Scroll Toolbar
-
-  _buildFontFamilyOnToolbar() {
+  _buildSmallSizeOnToolbar() {
     if (_titleFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              border: Border.all(width: 1.0)),
-          child: flutter_quill.QuillFontFamilyButton(
-              rawItemsMap: fontFamilies,
-              controller: _titleQuillController,
-              attribute: flutter_quill.Attribute.font,
-              iconSize: 24),
+        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'small';
+            flutter_quill.Style selectionStyle =
+                _titleQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Small',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
+          ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
         ),
       );
     } else if (_detailContentFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              border: Border.all(width: 1.0)),
-          child: flutter_quill.QuillFontFamilyButton(
-            rawItemsMap: fontFamilies,
-            controller: _detailContentQuillController,
-            attribute: flutter_quill.Attribute.font,
-            iconSize: 24,
+        padding: const EdgeInsets.fromLTRB(0.0, 0, 2.0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'small';
+            flutter_quill.Style selectionStyle =
+                _detailContentQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Small',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
           ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
         ),
       );
     }
     return Container();
   }
 
-  _buildTextSizeOnToolbar() {
+  _buildLargeSizeOnToolbar() {
     if (_titleFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              border: Border.all(width: 1.0)),
-          child: flutter_quill.QuillFontSizeButton(
-              rawItemsMap: fontSizes,
-              controller: _titleQuillController,
-              attribute: flutter_quill.Attribute.size,
-              iconSize: 24),
+        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'large';
+            flutter_quill.Style selectionStyle =
+                _titleQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Large',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
+          ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
         ),
       );
     } else if (_detailContentFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-              border: Border.all(width: 1.0)),
-          child: flutter_quill.QuillFontSizeButton(
-              rawItemsMap: fontSizes,
-              controller: _detailContentQuillController,
-              attribute: flutter_quill.Attribute.size,
-              iconSize: 24),
+        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'large';
+            flutter_quill.Style selectionStyle =
+                _detailContentQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Large',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
+          ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
         ),
       );
     }
     return Container();
+  }
+
+  _buildHugeSizeOnToolbar() {
+    if (_titleFocusNode.hasFocus) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'huge';
+            flutter_quill.Style selectionStyle =
+                _titleQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _titleQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Huge',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
+          ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
+        ),
+      );
+    } else if (_detailContentFocusNode.hasFocus) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 4.0),
+        child: flutter_quill.QuillIconButton(
+          size: 24.0 * flutter_quill.kIconButtonFactor,
+          onPressed: () {
+            String newValue = 'huge';
+            flutter_quill.Style selectionStyle =
+                _detailContentQuillController.getSelectionStyle();
+            final attribute = selectionStyle.attributes['size'];
+            if (attribute == null) {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            } else {
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue('size', null));
+              _detailContentQuillController.formatSelection(
+                  flutter_quill.Attribute.fromKeyValue(
+                      'size', newValue == '0' ? null : getFontSize(newValue)));
+            }
+          },
+          icon: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.format_size,
+                size: 20,
+              ),
+              Text(
+                'Huge',
+                style: TextStyle(fontSize: 10),
+              )
+            ],
+          ),
+          highlightElevation: 0,
+          hoverElevation: 0,
+          fillColor: Colors.white,
+          borderRadius: 2,
+        ),
+      );
+    }
+    return Container();
+  }
+
+  bool selectionHavingFontSizeAttribute(
+      flutter_quill.Style selectionStyle, String attributeValue) {
+    final attribute = selectionStyle.attributes['size'];
+    if (attribute == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  dynamic getFontSize(dynamic sizeValue) {
+    if (sizeValue is String &&
+        ['small', 'normal', 'large', 'huge'].contains(sizeValue)) {
+      return sizeValue;
+    }
+
+    if (sizeValue is double) {
+      return sizeValue;
+    }
+
+    if (sizeValue is int) {
+      return sizeValue.toDouble();
+    }
+
+    assert(sizeValue is String);
+    final fontSize = double.tryParse(sizeValue);
+    if (fontSize == null) {
+      throw 'Invalid size $sizeValue';
+    }
+    return fontSize;
   }
 
   _buildTextColorOnToolbar() {
@@ -1029,7 +1082,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
   _buildNumberListOnToolbar() {
     if (_titleFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 4.0, 0, 8.0),
+        padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
         child: flutter_quill.ToggleStyleButton(
             icon: Icons.format_list_numbered,
             controller: _titleQuillController,
@@ -1038,7 +1091,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
       );
     } else if (_detailContentFocusNode.hasFocus) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 4.0, 0, 8.0),
+        padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
         child: flutter_quill.ToggleStyleButton(
             icon: Icons.format_list_numbered,
             controller: _detailContentQuillController,
@@ -1169,10 +1222,11 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
           setState(() {
             isShowDialogSetEmoji = false;
 
-            if (_CurrentFocusNodeEnum == CurrentFocusNodeEnum.title) {
+            if (_currentFocusNodeEnum == CurrentFocusNodeEnum.title) {
               // _titleFocusNode.requestFocus();
               FocusScope.of(context).requestFocus(_titleFocusNode);
-            } else if (_CurrentFocusNodeEnum == CurrentFocusNodeEnum.detailContent) {
+            } else if (_currentFocusNodeEnum ==
+                CurrentFocusNodeEnum.detailContent) {
               // _detailContentFocusNode.requestFocus();
               FocusScope.of(context).requestFocus(_detailContentFocusNode);
             } else {
@@ -1191,6 +1245,14 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     return Container();
   }
 
+  onBack() {
+    if (_titleFocusNode.hasFocus) {
+      _titleFocusNode.unfocus();
+    } else if (_detailContentFocusNode.hasFocus) {
+      _detailContentFocusNode.unfocus();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     NoteController controller = NoteController();
@@ -1201,6 +1263,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
       title: widget.note == null ? 'Add a note' : 'Edit note',
       isConfirmToClose: true,
       focusNodes: [_titleFocusNode, _detailContentFocusNode],
+      actions: AppBarActionButtonEnum.save,
       isShowGeneralActionButton: false,
       optionActionContent: buildOptionActionContent(context),
       onSubmit: () async {
@@ -1217,13 +1280,15 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
             return;
           }
 
-          final NoteModel model = NoteModel(
-              title: title, description: description, id: widget.note?.id);
           if (widget.note == null &&
               widget.actionMode == ActionModeEnum.create) {
+            final NoteModel model = NoteModel(
+                title: title, description: description, createdAt: DateTime.now().millisecondsSinceEpoch, id: widget.note?.id);
             if (await controller.onCreateNote(model)) {}
           } else if (widget.note != null &&
               widget.actionMode == ActionModeEnum.update) {
+            final NoteModel model = NoteModel(
+                title: title, description: description,  createdAt:  widget.note?.createdAt, updatedAt: DateTime.now().millisecondsSinceEpoch, id: widget.note?.id);
             var result = await controller.onUpdateNote(model);
           }
         }
@@ -1234,6 +1299,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
       onUndo: () {
         // _quillToolbarController.undo();
       },
+      onBack: () {},
       bottomActionBar: [
         Column(
           children: [
@@ -1253,8 +1319,6 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
         ),
       ],
       bottomActionBarScrollable: [
-        _buildFontFamilyOnToolbar(),
-        _buildTextSizeOnToolbar(),
         _buildTextColorOnToolbar(),
         _buildTextBackgroundColorOnToolbar(),
         _buildLeftAlignmentSelectOnToolbar(),
@@ -1265,13 +1329,17 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
         _buildIndentIncreaseOnToolbar(),
         _buildIndentDecreaseOnToolbar(),
         _buildListOnToolbar(),
-        _buildNumberListOnToolbar()
+        _buildNumberListOnToolbar(),
+        _buildSmallSizeOnToolbar(),
+        _buildLargeSizeOnToolbar(),
+        _buildHugeSizeOnToolbar(),
       ],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Form(
           key: _formKey,
           onWillPop: () async {
+            onBack();
             if (await CoreHelperWidget.confirmFunction(context)) {
               return true;
             }
@@ -1323,6 +1391,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
+                      key: _detailContentKeyForScroll,
                       'Content:',
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic, fontSize: 16),
@@ -1341,8 +1410,9 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                     decoration: const BoxDecoration(
                         color: Colors.yellow,
                         borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    constraints: const BoxConstraints(
-                        minHeight: 150.0, maxHeight: 200.0),
+                    constraints: BoxConstraints(
+                        minHeight: 150.0,
+                        maxHeight: _detailContentContainerHeight),
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.all(6.0),
                     child: flutter_quill.QuillEditor(
@@ -1359,7 +1429,7 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                 ),
                 const SizedBox(height: 15),
                 const SizedBox(
-                  height: 200,
+                  height: 500,
                 )
               ],
             ),

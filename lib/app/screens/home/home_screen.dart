@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
+import '../../../core/state_management/dispatch_events/dispatch_listener_event.dart';
 import '../features/note/controllers/note_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,10 +19,9 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-enum NavigationBarEnum {masterHome, masterSearch, masterAdd, masterDrawer}
+enum NavigationBarEnum { masterHome, masterSearch, masterAdd, masterDrawer }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   NavigationBarEnum _navigationIndex = NavigationBarEnum.masterHome;
@@ -36,26 +36,24 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
   }
 
   @override
   Widget build(BuildContext context) {
-
-    NoteController controller = NoteController() ;
+    NoteController controller = NoteController();
     controller.initData();
 
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          backgroundColor: const Color(0xff28a745),
-          title: Text(
-            widget.title,
-            style: GoogleFonts.montserrat(
-                fontStyle: FontStyle.italic, fontSize: 30),
-          ),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: const Color(0xff28a745),
+        title: Text(
+          widget.title,
+          style:
+              GoogleFonts.montserrat(fontStyle: FontStyle.italic, fontSize: 30),
         ),
-        body: NoteListScreen(),
+      ),
+      body: const NoteListScreen(),
       bottomNavigationBar: CoreBottomNavigationBar(
         child: IconTheme(
           data: const IconThemeData(color: Colors.white),
@@ -67,11 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   _onChangeNavigation(NavigationBarEnum.masterHome);
                 },
                 coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: _navigationIndex == NavigationBarEnum.masterHome ? CoreStyle.filled : CoreStyle.outlined,
+                    coreStyle: _navigationIndex == NavigationBarEnum.masterHome
+                        ? CoreStyle.filled
+                        : CoreStyle.outlined,
                     coreColor: CoreColor.success,
-                    coreRadius: CoreRadius.radius_24,
+                    coreRadius: CoreRadius.radius_6,
                     kitForegroundColorOption: Colors.black),
-                child: const Icon(Icons.home),
+                child: const Icon(
+                  Icons.home,
+                  size: 25.0,
+                ),
               ),
               const SizedBox(width: 5),
               CoreElevatedButton(
@@ -79,30 +82,54 @@ class _HomeScreenState extends State<HomeScreen> {
                   _onChangeNavigation(NavigationBarEnum.masterSearch);
                 },
                 coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: _navigationIndex == NavigationBarEnum.masterSearch ? CoreStyle.filled : CoreStyle.outlined,
+                    coreStyle:
+                        _navigationIndex == NavigationBarEnum.masterSearch
+                            ? CoreStyle.filled
+                            : CoreStyle.outlined,
                     coreColor: CoreColor.success,
-                    coreRadius: CoreRadius.radius_24,
+                    coreRadius: CoreRadius.radius_6,
                     kitForegroundColorOption: Colors.black),
-                child: const Icon(Icons.search),
+                child: const Icon(
+                  Icons.search,
+                  size: 25.0,
+                ),
               ),
               const SizedBox(width: 5),
               CoreElevatedButton(
-                onPressed: (){
+                onPressed: () {
                   _onChangeNavigation(NavigationBarEnum.masterAdd);
 
-                  Get.to(const NoteAddScreen(actionMode: ActionModeEnum.create));
-                  // showDialog<String>(
-                  //     context: context,
-                  //     builder: (BuildContext context) => const NoteAddScreen(actionMode: ActionModeEnum.create,)
-                  // );
-                  // Get.toNamed('/note-add');
+                  Get.to(
+                      const NoteAddScreen(actionMode: ActionModeEnum.create));
                 },
                 coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: _navigationIndex == NavigationBarEnum.masterAdd ? CoreStyle.filled : CoreStyle.outlined,
+                    coreStyle: _navigationIndex == NavigationBarEnum.masterAdd
+                        ? CoreStyle.filled
+                        : CoreStyle.outlined,
                     coreColor: CoreColor.success,
-                    coreRadius: CoreRadius.radius_24,
+                    coreRadius: CoreRadius.radius_6,
                     kitForegroundColorOption: Colors.black),
-                child: const Icon(Icons.add),
+                child: const Icon(
+                  Icons.add,
+                  size: 25.0,
+                ),
+              ),
+              const SizedBox(width: 5),
+              CoreElevatedButton(
+                onPressed: () {
+                  DispatchListenerEvent.dispatch('DISPATCH_GET_RELOAD_NOTE_LIST', null);
+                },
+                coreButtonStyle: CoreButtonStyle.options(
+                    coreStyle: _navigationIndex == NavigationBarEnum.masterAdd
+                        ? CoreStyle.filled
+                        : CoreStyle.outlined,
+                    coreColor: CoreColor.success,
+                    coreRadius: CoreRadius.radius_6,
+                    kitForegroundColorOption: Colors.black),
+                child: const Icon(
+                  Icons.refresh,
+                  size: 25.0,
+                ),
               ),
               const SizedBox(width: 5),
               const Spacer(),
@@ -111,11 +138,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   _onChangeNavigation(NavigationBarEnum.masterDrawer);
                 },
                 coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: _navigationIndex == NavigationBarEnum.masterDrawer ? CoreStyle.filled : CoreStyle.outlined,
+                    coreStyle:
+                        _navigationIndex == NavigationBarEnum.masterDrawer
+                            ? CoreStyle.filled
+                            : CoreStyle.outlined,
                     coreColor: CoreColor.success,
-                    coreRadius: CoreRadius.radius_24,
+                    coreRadius: CoreRadius.radius_6,
                     kitForegroundColorOption: Colors.black),
-                child: const Icon(Icons.menu),
+                child: const Icon(
+                  Icons.menu,
+                  size: 25.0,
+                ),
               ),
             ],
           ),

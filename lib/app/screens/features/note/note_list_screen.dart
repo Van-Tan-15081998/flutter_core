@@ -34,6 +34,12 @@ class _NoteListScreenState extends State<NoteListScreen> {
     DispatchListenerEvent.listener(
     "DISPATCH_ADD_NEW_NOTE_TO_LIST", onAddNewNoteToList, "DISPATCH_ADD_NEW_NOTE_TO_LIST");
 
+    DispatchListenerEvent.listener(
+        "DISPATCH_GET_RELOAD_NOTE_LIST", onGetReloadNoteList, "DISPATCH_GET_RELOAD_NOTE_LIST");
+
+    DispatchListenerEvent.listener(
+        "DISPATCH_RELOAD_NOTE_LIST", onReloadNoteList, "DISPATCH_RELOAD_NOTE_LIST");
+
     super.initState();
   }
 
@@ -47,6 +53,16 @@ class _NoteListScreenState extends State<NoteListScreen> {
    setState(() {
      notes.add(noteModel);
    });
+  }
+
+  onReloadNoteList(List<NoteModel> allNotes) {
+    setState(() {
+      notes = allNotes;
+    });
+  }
+
+  onGetReloadNoteList(data) {
+    controller.initData();
   }
 
   @override
