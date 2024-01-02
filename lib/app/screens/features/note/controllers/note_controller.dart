@@ -60,7 +60,7 @@ class NoteController  {
           // Get.to(NoteAddScreen(note: updatedNote, actionMode: ActionModeEnum.update));
 
           // return updatedNote;
-          Get.to(NoteDetailScreen(note: updatedNote));
+          Get.offAll(NoteDetailScreen(note: updatedNote));
         }
       }
     } catch (e) {

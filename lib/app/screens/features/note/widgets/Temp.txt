@@ -1,0 +1,238 @@
+    if (isShowDialogSetText) {
+      return Container(
+        padding: const EdgeInsets.all(4.0),
+        constraints: const BoxConstraints(maxHeight: 300.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black,
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(6.0)),
+        child: DefaultTabController(
+          length: 5,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+
+              /// Đặt kích thước tùy chỉnh cho AppBar
+              child: AppBar(
+                automaticallyImplyLeading: false, // Ẩn nút back
+                title: null,
+
+                /// Ẩn tiêu đề
+                elevation: 0,
+
+                /// Loại bỏ độ đổ bóng
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(icon: FaIcon(FontAwesomeIcons.font, size: 18.0)),
+                    Tab(
+                        icon: Row(
+                      children: [
+                        FaIcon(FontAwesomeIcons.bold, size: 18.0),
+                      ],
+                    )),
+                    Tab(icon: FaIcon(FontAwesomeIcons.paintbrush, size: 18.0)),
+                    Tab(icon: FaIcon(FontAwesomeIcons.textHeight, size: 18.0)),
+                    Tab(icon: FaIcon(FontAwesomeIcons.gears, size: 18.0)),
+                  ],
+                ),
+              ),
+            ),
+            body: TabBarView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 150.0,
+
+                      /// Kích thước tối đa của một cột
+                      crossAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các cột
+                      mainAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các hàng
+                    ),
+                    itemCount: listFontFamiliesParsed.length,
+                    itemBuilder: (context, index) {
+                      return CoreElevatedButton.iconOnly(
+                        onPressed: () {},
+                        coreButtonStyle: CoreButtonStyle.options(
+                            coreFixedSizeButton:
+                                CoreFixedSizeButton.squareIcon4060,
+                            coreStyle: CoreStyle.outlined,
+                            coreColor: CoreColor.turtles,
+                            coreRadius: CoreRadius.radius_6,
+                            kitForegroundColorOption: Colors.black),
+                        icon: Center(
+                          child: Text(
+                            'Hi Task',
+                            style: listFontFamiliesParsed[index],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 150.0,
+
+                      /// Kích thước tối đa của một cột
+                      crossAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các cột
+                      mainAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các hàng
+                    ),
+                    itemCount: CoreStoreFonts.fontStyles.length,
+                    itemBuilder: (context, index) {
+                      return CoreElevatedButton.iconOnly(
+                        onPressed: () {},
+                        coreButtonStyle: CoreButtonStyle.options(
+                            coreFixedSizeButton:
+                                CoreFixedSizeButton.squareIcon4060,
+                            coreStyle: CoreStyle.outlined,
+                            coreColor: CoreColor.turtles,
+                            coreRadius: CoreRadius.radius_6,
+                            kitForegroundColorOption: Colors.black),
+                        icon: Center(
+                          child: Text(
+                            CoreStoreFonts.fontStyles[index].name,
+                            style:
+                                CoreStoreFonts.parseTextStyleFromCoreFontStyle(
+                                    coreFontStyle:
+                                        CoreStoreFonts.fontStyles[index]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 150.0,
+
+                      /// Kích thước tối đa của một cột
+                      crossAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các cột
+                      mainAxisSpacing: 10.0,
+
+                      /// Khoảng cách giữa các hàng
+                    ),
+                    itemCount: CoreStoreFonts.fontColors.length,
+                    itemBuilder: (context, index) {
+                      return CoreElevatedButton.iconOnly(
+                        onPressed: () {},
+                        coreButtonStyle: CoreButtonStyle.options(
+                            coreFixedSizeButton:
+                                CoreFixedSizeButton.squareIcon4060,
+                            coreStyle: CoreStyle.outlined,
+                            coreColor: CoreColor.turtles,
+                            coreRadius: CoreRadius.radius_6,
+                            kitForegroundColorOption: Colors.black,
+                            kitBackgroundColorOption:
+                                CoreStoreFonts.fontColors[index].color),
+                        icon: Container(),
+                      );
+                    },
+                  ),
+                ),
+                Container(),
+                Padding(
+                  padding: const EdgeInsets.all(1.0),
+                  child: flutter_quill.QuillToolbar.basic(
+                      controller: _detailContentQuillController),
+                )
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+=======================================================
+  // _buildFontFamilyOnToolbar() {
+  //   if (_titleFocusNode.hasFocus) {
+  //     return Padding(
+  //       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 8.0),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+  //             border: Border.all(width: 1.0)),
+  //         child: flutter_quill.QuillFontFamilyButton(
+  //             rawItemsMap: fontFamilies,
+  //             controller: _titleQuillController,
+  //             attribute: flutter_quill.Attribute.font,
+  //             iconSize: 24),
+  //       ),
+  //     );
+  //   } else if (_detailContentFocusNode.hasFocus) {
+  //     return Padding(
+  //       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 8.0),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+  //             border: Border.all(width: 1.0)),
+  //         child: flutter_quill.QuillFontFamilyButton(
+  //           rawItemsMap: fontFamilies,
+  //           controller: _detailContentQuillController,
+  //           attribute: flutter_quill.Attribute.font,
+  //           iconSize: 24,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  //   return Container();
+  // }
+
+  // _buildTextSizeOnToolbar() {
+  //   if (_titleFocusNode.hasFocus) {
+  //     return Padding(
+  //       padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+  //             border: Border.all(width: 1.0)),
+  //         child: flutter_quill.QuillFontSizeButton(
+  //             rawItemsMap: fontSizes,
+  //             controller: _titleQuillController,
+  //             attribute: flutter_quill.Attribute.size,
+  //             iconSize: 24),
+  //       ),
+  //     );
+  //   } else if (_detailContentFocusNode.hasFocus) {
+  //     return Padding(
+  //       padding: const EdgeInsets.fromLTRB(0, 4.0, 4.0, 8.0),
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //             color: Colors.white,
+  //             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+  //             border: Border.all(width: 1.0)),
+  //         child: flutter_quill.QuillFontSizeButton(
+  //             rawItemsMap: fontSizes,
+  //             controller: _detailContentQuillController,
+  //             attribute: flutter_quill.Attribute.size,
+  //             iconSize: 24),
+  //       ),
+  //     );
+  //   }
+  //   return Container();
+  // }
