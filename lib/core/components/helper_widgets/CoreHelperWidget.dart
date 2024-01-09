@@ -46,4 +46,16 @@ class CoreHelperWidget {
 
     return result;
   }
+
+  static String getTimeString(int time) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
+
+    int year = dateTime.year;
+    int month = dateTime.month;
+    int day = dateTime.day;
+    int hour = dateTime.hour;
+    int minute = dateTime.minute;
+
+    return '$hour:$minute $day/$month/$year';
+  }
 }

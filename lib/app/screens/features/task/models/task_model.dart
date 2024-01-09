@@ -1,28 +1,27 @@
-import 'dart:convert';
-
-class NoteModel {
+class TaskModel {
   final int? id;
   final String title;
   final String description;
-  final String? labels; // label id list
+  final int? statusId;
+
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
 
-  const NoteModel(
+  const TaskModel(
       {required this.title,
       required this.description,
       required this.createdAt,
-      this.labels,
+      required this.statusId,
       this.updatedAt,
       this.deletedAt,
       this.id});
 
-  factory NoteModel.fromJson(Map<String, dynamic> json) => NoteModel(
+  factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      labels: json['labels'],
+      statusId: json['statusId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       deletedAt: json['deletedAt']);
@@ -31,7 +30,7 @@ class NoteModel {
         'id': id,
         'title': title,
         'description': description,
-        'labels': labels ,
+        'statusId': statusId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt

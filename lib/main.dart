@@ -15,7 +15,9 @@ import 'package:flutter_core_v3/core/components/form/CorePasswordFormField.dart'
 import 'package:flutter_core_v3/core/components/form/CoreTextFormField.dart';
 import 'package:flutter_core_v3/core/components/form/CoreTextRowFormField.dart';
 import 'package:flutter_core_v3/core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
+import 'package:provider/provider.dart';
 
+import 'app/library/enums/CommonEnums.dart';
 import 'app/screens/features/demo/expandable/expandable_home_screen.dart';
 import 'app/screens/features/demo/flutter_quill/flutter_quill_home_screen.dart';
 import 'app/screens/features/demo/get/GetHome.dart';
@@ -25,6 +27,7 @@ import 'app/screens/features/demo/get/example/models/SizeTransitions.dart';
 import 'app/screens/features/demo/get/example/views/First.dart';
 import 'app/screens/features/demo/get/example/views/Second.dart';
 import 'app/screens/features/demo/get/example/views/Third.dart';
+import 'app/screens/features/demo/provider/provider_home_screen.dart';
 import 'app/screens/features/note/bindings/note_binding.dart';
 import 'app/screens/features/note/note_add_screen.dart';
 import 'app/screens/features/note/note_list_screen.dart';
@@ -37,32 +40,30 @@ import 'package:get/get.dart';
 
 import 'main_test.dart';
 
+// void main() {
+//   runApp(MaterialApp(
+//       theme: ThemeData(
+//           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+//           useMaterial3: true,
+//           inputDecorationTheme: CoreFormStyle().theme()),
+//       debugShowCheckedModeBanner: false,
+//       // home: MyAppTest()));
+//       home: const HomeScreen(title: 'Hi Task')));
+//
+//   // runApp(MyApp1());
+// }
+
 void main() {
-  runApp(GetMaterialApp(
-    theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        inputDecorationTheme: CoreFormStyle().theme()),
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/home',
-    getPages: [
-      GetPage(
-          name: '/home',
-          page: () => const HomeScreen(title: 'Hi Tasks'),
-          ),
-      GetPage(
-          name: '/note-list',
-          page: () => const NoteListScreen()
-      ),
-      GetPage(
-          name: '/note-add',
-          page: () => const NoteAddScreen(actionMode: ActionModeEnum.create),
-      )
-    ],
-  ));
-
-
-  // runApp(MyApp1());
+  runApp(
+    /// Providers are above [MyApp] instead of inside it, so that tests
+    /// can use [MyApp] while mocking the providers
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Counter()),
+      ],
+      child: const MyAppProvider(),
+    ),
+  );
 }
 
 class MyApp1 extends StatelessWidget {

@@ -6,13 +6,23 @@ class CoreTextFormField extends StatefulWidget {
 
   final FocusNode focusNode;
   final Function onValidator;
+  final Icon icon;
+  final String label;
+  final String placeholder;
+  final String helper;
+  final int maxLength;
 
   const CoreTextFormField(
       {super.key,
       required this.onChanged,
       required this.controller,
         required this.focusNode,
-        required this.onValidator
+        required this.onValidator,
+        required this.icon,
+        required this.label,
+        required this.placeholder,
+        required this.helper,
+        required this.maxLength
       });
 
   @override
@@ -50,17 +60,18 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
             validator: (value) {
               return widget.onValidator(value);
             },
+            maxLength: widget.maxLength,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
-                helperText: 'Helper text',
-                hintText: 'Text Field',
+                helperText: widget.helper,
+                hintText: widget.placeholder,
                 label: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.access_alarm_outlined),
+                   widget.icon,
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('Labels can be a widget'),
+                      child: Text(widget.label),
                     )
                   ],
                 )),

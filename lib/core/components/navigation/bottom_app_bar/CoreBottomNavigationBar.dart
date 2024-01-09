@@ -3,8 +3,9 @@ import 'CoreBottomAppBar.dart';
 
 class CoreBottomNavigationBar extends StatefulWidget {
   Widget child;
+  Color backgroundColor;
 
-  CoreBottomNavigationBar({super.key, required this.child});
+  CoreBottomNavigationBar({super.key, required this.child, required this.backgroundColor});
 
   @override
   State<CoreBottomNavigationBar> createState() =>
@@ -24,7 +25,7 @@ class _CoreBottomNavigationBarState extends State<CoreBottomNavigationBar> {
           ),
         ),
         child: CoreBottomAppBar(
-          color: const Color(0xffffffff),
+          color: widget.backgroundColor,
           height: 60.0,
           padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
           notchMargin: 5.0,
