@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 
-class NoteFunctions {
+class TaskFunctions {
   static void addStringToQuillContent(
       {required flutter_quill.QuillController quillController,
-      required TextSelection selection,
-      required Object? object,
-      required String insertString}) {
+        required TextSelection selection,
+        required Object? object,
+        required String insertString}) {
 
     final currentSelection = quillController.selection;
     if (currentSelection.isValid) {

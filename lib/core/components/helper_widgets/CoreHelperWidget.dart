@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/library/common/styles/CommonStyles.dart';
 import '../containment/dialogs/CoreConfirmDialog.dart';
 
 class CoreHelperWidget {
@@ -19,7 +20,7 @@ class CoreHelperWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     mainAxisSize: MainAxisSize.min,
                     children: [CoreConfirmDialog(
-                      confirmTitle: const Text('Are you sure?'),
+                      confirmTitle: Text('Are you sure?', style: CommonStyles.labelTextStyle),
                       initialData: false,
                       onChanged: (value) => result = value,
                     ),]

@@ -2,6 +2,7 @@ class TaskModel {
   final int? id;
   final String title;
   final String description;
+  final String? labels; // label id list
   final int? statusId;
 
   final int? createdAt;
@@ -11,6 +12,7 @@ class TaskModel {
   const TaskModel(
       {required this.title,
       required this.description,
+      this.labels,
       required this.createdAt,
       required this.statusId,
       this.updatedAt,
@@ -21,6 +23,7 @@ class TaskModel {
       id: json['id'],
       title: json['title'],
       description: json['description'],
+      labels: json['labels'],
       statusId: json['statusId'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
@@ -30,6 +33,7 @@ class TaskModel {
         'id': id,
         'title': title,
         'description': description,
+        'labels': labels,
         'statusId': statusId,
         'createdAt': createdAt,
         'updatedAt': updatedAt,

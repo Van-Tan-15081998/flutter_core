@@ -2,28 +2,29 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
-
+import 'package:provider/provider.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../../core/components/form/CoreTextFormField.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/enums/CommonEnums.dart';
-import '../controllers/label_controller.dart';
+import '../databases/label_db_manager.dart';
 import '../models/label_model.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../providers/label_notifier.dart';
 
-class LabelAddScreen extends StatefulWidget {
+class LabelCreateScreen extends StatefulWidget {
   final LabelModel? label;
   final ActionModeEnum actionMode;
-  const LabelAddScreen({super.key, this.label, required this.actionMode});
+  const LabelCreateScreen({super.key, this.label, required this.actionMode});
 
   @override
-  State<LabelAddScreen> createState() => _LabelAddScreenState();
+  State<LabelCreateScreen> createState() => _LabelCreateScreenState();
 }
 
-class _LabelAddScreenState extends State<LabelAddScreen> {
+class _LabelCreateScreenState extends State<LabelCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   String _color = '';
@@ -52,12 +53,11 @@ class _LabelAddScreenState extends State<LabelAddScreen> {
 
   @override
   Widget build(BuildContext context) {
-    LabelController controller = LabelController(context: context);
+    final labelNotifier = Provider.of<LabelNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: widget.label == null ? 'Add a label' : 'Edit label',
+      title: widget.label == null ? 'Create label' : 'Edit label',
       isConfirmToClose: true,
-      focusNodes: null,
       actions: AppBarActionButtonEnum.save,
       isShowGeneralActionButton: false,
       optionActionContent: Container(),
@@ -70,8 +70,8 @@ class _LabelAddScreenState extends State<LabelAddScreen> {
                 color: _color,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.label?.id);
-            if (await controller.onCreateLabel(model)) {
-
+            if (await LabelDatabaseManager.create(model)) {
+              labelNotifier.refresh();
               CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.create, 'Label');
 
               Navigator.pop(context);
@@ -84,8 +84,8 @@ class _LabelAddScreenState extends State<LabelAddScreen> {
                 createdAt: widget.label?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.label?.id);
-            if (await controller.onUpdateLabel(model)) {
-
+            if (await LabelDatabaseManager.update(model)) {
+              labelNotifier.refresh();
               CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.update, 'Label');
               Navigator.pop(context);
             }
@@ -180,13 +180,14 @@ class _LabelAddScreenState extends State<LabelAddScreen> {
                           focusNode: myFocusNode,
                           onValidator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your title';
+                              return const Text('Please enter your title', style: TextStyle(color: Colors.redAccent));
                             }
                             return null;
                           },
                           maxLength: 30,
-                          icon: const Icon(Icons.edit),
+                          icon: const Icon(Icons.edit, color: Colors.white54),
                           label: 'Title',
+                          labelColor: Colors.white54,
                           placeholder: 'Enter you title',
                           helper: 'Please enter your title',
                         ),
@@ -246,12 +247,12 @@ class _LabelAddScreenState extends State<LabelAddScreen> {
                                 },
                                 coreButtonStyle: CoreButtonStyle.options(
                                     coreStyle: CoreStyle.outlined,
-                                    coreColor: CoreColor.success,
+                                    coreColor: CoreColor.dark,
                                     coreRadius: CoreRadius.radius_6,
                                     kitForegroundColorOption: Colors.black,
                                     coreFixedSizeButton:
                                         CoreFixedSizeButton.medium_40),
-                                child: const Text('Choose color'),
+                                child: Text('Choose color', style: CommonStyles.buttonTextStyle),
                               ),
                             ],
                           ),

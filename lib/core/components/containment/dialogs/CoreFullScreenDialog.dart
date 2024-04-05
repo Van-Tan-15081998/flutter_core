@@ -5,7 +5,9 @@ import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreButto
 import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreElevatedButton.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../app/library/common/styles/CommonStyles.dart';
 import '../../../../app/screens/home/home_screen.dart';
 import '../../helper_widgets/CoreHelperWidget.dart';
 
@@ -26,8 +28,6 @@ class CoreFullScreenDialog extends StatefulWidget {
   List<Widget> bottomActionBar;
   List<Widget> bottomActionBarScrollable;
 
-  List<FocusNode>? focusNodes = [];
-
   AppBarActionButtonEnum actions = AppBarActionButtonEnum.home;
 
   Function onSubmit;
@@ -43,7 +43,6 @@ class CoreFullScreenDialog extends StatefulWidget {
       this.isConfirmToClose,
       required this.bottomActionBar,
       required this.bottomActionBarScrollable,
-      this.focusNodes,
       required this.actions,
       required this.onSubmit,
       required this.onUndo,
@@ -77,23 +76,6 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
     );
   }
 
-  double _getBottomPadding() {
-    double bottomPadding = 2.0;
-
-    widget.focusNodes = widget.focusNodes ??
-        []; // Để tránh lỗi 'Null check operator used on a null value'
-
-    if (widget.focusNodes!.isNotEmpty) {
-      if (!CoreHelperWidget.isShowingKeyBoard(widget.focusNodes!)) {
-        bottomPadding = 24.0;
-      }
-    } else if (widget.focusNodes!.isEmpty) {
-      bottomPadding = 24.0;
-    }
-
-    return bottomPadding;
-  }
-
   Widget _buildAppBarActionButtons() {
     switch (widget.actions) {
       case AppBarActionButtonEnum.save:
@@ -102,13 +84,13 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
             child: CoreElevatedButton.icon(
               icon: const FaIcon(FontAwesomeIcons.floppyDisk, size: 18.0),
-              label: const Text('Save'),
+              label: Text('Save', style: CommonStyles.labelTextStyle),
               onPressed: () {
                 widget.onSubmit();
               },
               coreButtonStyle: CoreButtonStyle.options(
                   coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.success,
+                  coreColor: CoreColor.dark,
                   coreRadius: CoreRadius.radius_6,
                   kitForegroundColorOption: Colors.black,
                   coreFixedSizeButton: CoreFixedSizeButton.medium_40),
@@ -128,7 +110,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
               },
               coreButtonStyle: CoreButtonStyle.options(
                   coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.success,
+                  coreColor: CoreColor.dark,
                   coreRadius: CoreRadius.radius_6,
                   kitForegroundColorOption: Colors.black,
                   coreFixedSizeButton: CoreFixedSizeButton.medium_40),
@@ -153,18 +135,30 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title!),
+        title: Text(
+            widget.title!,
+          style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+        ),
         actions: [_buildAppBarActionButtons()],
+        backgroundColor: const Color(0xFF202124),
+        iconTheme: const IconThemeData(
+          color: Color(0xFF404040), // Set the color you desire
+        ),
       ),
       body: widget.child,
+      backgroundColor: const Color(0xFF202124),
       floatingActionButton: Padding(
-        padding: EdgeInsets.fromLTRB(8, 0, 8, _getBottomPadding()),
+        padding: const EdgeInsets.all(6.0),
         child: Container(
           padding: const EdgeInsets.fromLTRB(4, 1, 4, 0),
           width:
               screenWidth, // Đặt chiều rộng của container bằng chiều ngang của màn hình
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: const Color(0xFF404040),
             borderRadius: BorderRadius.circular(8.0), // Bo góc
           ),
           child: Column(
@@ -219,7 +213,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                           },
                           coreButtonStyle: CoreButtonStyle.options(
                               coreStyle: CoreStyle.filled,
-                              coreColor: CoreColor.secondary,
+                              coreColor: CoreColor.dark,
                               coreRadius: CoreRadius.radius_6,
                               kitForegroundColorOption: Colors.black,
                               coreFixedSizeButton:
@@ -228,13 +222,13 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                         CoreElevatedButton.icon(
                           icon: const FaIcon(FontAwesomeIcons.floppyDisk,
                               size: 18.0),
-                          label: const Text('Save'),
+                          label: Text('Save', style: CommonStyles.labelTextStyle),
                           onPressed: () {
                             widget.onSubmit();
                           },
                           coreButtonStyle: CoreButtonStyle.options(
                               coreStyle: CoreStyle.filled,
-                              coreColor: CoreColor.success,
+                              coreColor: CoreColor.dark,
                               coreRadius: CoreRadius.radius_6,
                               kitForegroundColorOption: Colors.black,
                               coreFixedSizeButton:

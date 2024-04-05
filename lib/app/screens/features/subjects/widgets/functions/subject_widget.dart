@@ -11,25 +11,27 @@ import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
-import '../../models/label_model.dart';
-import '../label_create_screen.dart';
+import '../../../note/models/note_condition_model.dart';
+import '../../../note/note_list_screen.dart';
+import '../../models/subject_model.dart';
+import '../subject_create_screen.dart';
 
-class LabelWidget extends StatefulWidget {
-  final LabelModel label;
+class SubjectWidget extends StatefulWidget {
+  final SubjectModel subject;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-  const LabelWidget(
+  const SubjectWidget(
       {Key? key,
-      required this.label,
+      required this.subject,
       required this.onTap,
       required this.onLongPress})
       : super(key: key);
 
   @override
-  State<LabelWidget> createState() => _LabelWidgetState();
+  State<SubjectWidget> createState() => _SubjectWidgetState();
 }
 
-class _LabelWidgetState extends State<LabelWidget> {
+class _SubjectWidgetState extends State<SubjectWidget> {
   @override
   void initState() {
     // TODO: implement initState
@@ -50,7 +52,7 @@ class _LabelWidgetState extends State<LabelWidget> {
 
   Widget onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.label.createdAt!)}';
+        'You wrote at ${getTimeString(widget.subject.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -89,14 +91,14 @@ class _LabelWidgetState extends State<LabelWidget> {
         child: ExpandableNotifier(
             child: Column(
           children: [
-            widget.label.updatedAt == null
+            widget.subject.updatedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(getTimeString(widget.label.createdAt!),
+                        Text(getTimeString(widget.subject.createdAt!),
                             style: const TextStyle(
                               fontSize: 13.0,
                               color: Colors.white54,
@@ -111,10 +113,10 @@ class _LabelWidgetState extends State<LabelWidget> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(Icons.edit,
-                            size: 13.0, color: Colors.black45),
-                        Text(getTimeString(widget.label.updatedAt!),
+                            size: 13.0, color: Colors.white54),
+                        Text(getTimeString(widget.subject.updatedAt!),
                             style: const TextStyle(
-                                fontSize: 13.0, color: Colors.black45))
+                                fontSize: 13.0, color: Colors.white54))
                       ],
                     ),
                   ),
@@ -145,7 +147,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                   child: DottedBorder(
                                       borderType: BorderType.RRect,
                                       radius: const Radius.circular(12),
-                                      color: widget.label.color.toColor(),
+                                      color: widget.subject.color.toColor(),
                                       child: ClipRRect(
                                         borderRadius: const BorderRadius.all(
                                             Radius.circular(12)),
@@ -157,15 +159,14 @@ class _LabelWidgetState extends State<LabelWidget> {
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  Icon(
-                                                      Icons
-                                                          .label_important_rounded,
-                                                      color: widget.label.color
+                                                  Icon(Icons.palette_rounded,
+                                                      color: widget
+                                                          .subject.color
                                                           .toColor()),
                                                   const SizedBox(width: 6.0),
                                                   Flexible(
                                                     child: Text(
-                                                        widget.label.title,
+                                                        widget.subject.title,
                                                         maxLines: 1,
                                                         overflow: TextOverflow
                                                             .ellipsis),
@@ -176,34 +177,56 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       )),
                                 ),
                               ),
-                              CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              LabelCreateScreen(
-                                                actionMode:
-                                                    ActionModeEnum.update,
-                                                label: widget.label,
-                                              )));
-                                },
-                                coreButtonStyle: CoreButtonStyle.options(
-                                    coreStyle: CoreStyle.outlined,
-                                    coreColor: CoreColor.dark,
-                                    coreRadius: CoreRadius.radius_6,
-                                    kitBackgroundColorOption: Colors.white70,
-                                    kitForegroundColorOption:
+                              Column(
+                                children: [
+                                  CoreElevatedButton.iconOnly(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SubjectCreateScreen(
+                                                    actionMode:
+                                                        ActionModeEnum.update,
+                                                    subject: widget.subject,
+                                                  )));
+                                    },
+                                    coreButtonStyle: CoreButtonStyle.options(
+                                        coreStyle: CoreStyle.outlined,
+                                        coreColor: CoreColor.dark,
+                                        coreRadius: CoreRadius.radius_6,
+                                        kitBackgroundColorOption:
+                                            Colors.white70,
+                                        kitForegroundColorOption:
+                                            const Color(0xFF404040),
+                                        coreFixedSizeButton:
+                                            CoreFixedSizeButton.medium_40),
+                                    icon: const Icon(Icons.edit_note_rounded),
+                                  ),
+                                  CoreElevatedButton.iconOnly(
+                                    onPressed: () {
+                                      NoteConditionModel noteConditionModel = NoteConditionModel();
+                                      noteConditionModel.subjectId = widget.subject.id;
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                      NoteListScreen(noteConditionModel: noteConditionModel)));
+                                    },
+                                    coreButtonStyle: CoreButtonStyle.options(
+                                        coreStyle: CoreStyle.outlined,
+                                        coreColor: CoreColor.dark,
+                                        coreRadius: CoreRadius.radius_6,
+                                        kitBackgroundColorOption:
+                                        Colors.white70,
+                                        kitForegroundColorOption:
                                         const Color(0xFF404040),
-                                    coreFixedSizeButton:
+                                        coreFixedSizeButton:
                                         CoreFixedSizeButton.medium_40),
-                                child: Text('Edit',
-                                    style: GoogleFonts.montserrat(
-                                        fontStyle: FontStyle.italic,
-                                        fontSize: 16,
-                                        color: const Color(0xFF404040),
-                                        fontWeight: FontWeight.w600)),
-                              ),
+                                    icon: const Icon(Icons.search_rounded),
+                                  ),
+                                ],
+                              )
                             ]),
                       ),
                     ),

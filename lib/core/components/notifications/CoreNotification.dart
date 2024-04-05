@@ -3,28 +3,26 @@ import 'package:flutter/material.dart';
 
 enum CoreNotificationStatus { success, error, warning }
 
-enum CoreNotificationAction { create, update, delete }
-
-// CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.create, '');
-// CoreNotification.show(context, CoreNotificationStatus.error, CoreNotificationAction.create, '');
+enum CoreNotificationAction { create, update, delete, restore }
 
 class CoreNotification {
   static show(BuildContext context, CoreNotificationStatus status,
       CoreNotificationAction action, String resourceName) {
-    final snackBar = buildContent(context, status, getNotificationContent(status, action, resourceName));
+    final snackBar = buildContent(
+        context, status, getNotificationContent(status, action, resourceName));
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   static SnackBar buildContent(BuildContext context,
       CoreNotificationStatus status, String contentString) {
-
     switch (status) {
       case CoreNotificationStatus.success:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.green[400],
           content: Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0,2.0),
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -38,7 +36,11 @@ class CoreNotification {
                           width: 50,
                           height: 50,
                           color: Colors.green[400],
-                          child: const Icon(Icons.done_rounded, color: Colors.white, size: 34.0,)),
+                          child: const Icon(
+                            Icons.done_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
                     )),
                 Expanded(
                   child: Padding(
@@ -47,10 +49,18 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Successfully', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 20.0)),
-                        Text(contentString,maxLines: 2,
+                        const Text('Successfully',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 20.0)),
+                        Text(contentString,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.white, fontSize: 15.0)),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                                fontSize: 15.0)),
                       ],
                     ),
                   ),
@@ -65,7 +75,7 @@ class CoreNotification {
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.red[400],
           content: Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0,2.0),
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -79,7 +89,11 @@ class CoreNotification {
                           width: 50,
                           height: 50,
                           color: Colors.red[400],
-                          child: const Icon(Icons.error_outline_rounded, color: Colors.white, size: 34.0,)),
+                          child: const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
                     )),
                 Expanded(
                   child: Padding(
@@ -88,10 +102,18 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Error', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 20.0)),
-                        Text(contentString,maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.white, fontSize: 15.0)),
+                        const Text('Error',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 20.0)),
+                        Text(contentString,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                                fontSize: 15.0)),
                       ],
                     ),
                   ),
@@ -106,7 +128,7 @@ class CoreNotification {
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.orange[400],
           content: Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0,2.0),
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -120,7 +142,11 @@ class CoreNotification {
                           width: 50,
                           height: 50,
                           color: Colors.orange[400],
-                          child: const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 34.0,)),
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
                     )),
                 Expanded(
                   child: Padding(
@@ -129,10 +155,18 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Error', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 20.0)),
-                        Text(contentString,maxLines: 2,
+                        const Text('Error',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 20.0)),
+                        Text(contentString,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.white, fontSize: 15.0)),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                                fontSize: 15.0)),
                       ],
                     ),
                   ),
@@ -147,7 +181,7 @@ class CoreNotification {
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.black,
           content: Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0,2.0),
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -161,7 +195,11 @@ class CoreNotification {
                           width: 50,
                           height: 50,
                           color: Colors.black,
-                          child: const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 34.0,)),
+                          child: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
                     )),
                 Expanded(
                   child: Padding(
@@ -170,10 +208,18 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Error', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white, fontSize: 20.0)),
-                        Text(contentString,maxLines: 2,
+                        const Text('Error',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                                fontSize: 20.0)),
+                        Text(contentString,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.w300, color: Colors.white, fontSize: 15.0)),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w300,
+                                color: Colors.white,
+                                fontSize: 15.0)),
                       ],
                     ),
                   ),
@@ -254,13 +300,16 @@ class CoreNotification {
     if (status == CoreNotificationStatus.success) {
       switch (action) {
         case CoreNotificationAction.create:
-          result = '$resourceName created  successfully';
+          result = '$resourceName created successfully';
           break;
         case CoreNotificationAction.update:
-          result = '$resourceName updated  successfully';
+          result = '$resourceName updated successfully';
           break;
         case CoreNotificationAction.delete:
-          result = '$resourceName deleted  successfully';
+          result = '$resourceName deleted successfully';
+          break;
+        case CoreNotificationAction.restore:
+          result = '$resourceName restored successfully';
           break;
         default:
           result = 'Default notification';
@@ -276,6 +325,9 @@ class CoreNotification {
           break;
         case CoreNotificationAction.delete:
           result = 'An error occurred while performing the delete';
+          break;
+        case CoreNotificationAction.restore:
+          result = 'An error occurred while performing the restore';
           break;
         default:
           result = 'Default notification';

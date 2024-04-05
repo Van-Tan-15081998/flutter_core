@@ -1,0 +1,6 @@
+Bảng product lưu type dạng json (long text)
+vd: id = 1 ; type = ["VF5", "VF6", "VF7"]
+
+SELECT * FROM products WHERE JSON_CONTAINS(products.type, '"VF5"');
+
+Câu truy vấn trên sẽ trả về  record có 'vf5' trong cột 'type'
