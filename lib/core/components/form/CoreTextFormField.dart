@@ -8,9 +8,10 @@ class CoreTextFormField extends StatefulWidget {
   final Function onValidator;
   final Icon icon;
   final String label;
+  final Color? labelColor;
   final String placeholder;
   final String helper;
-  final int maxLength;
+  final int? maxLength;
 
   const CoreTextFormField(
       {super.key,
@@ -20,6 +21,7 @@ class CoreTextFormField extends StatefulWidget {
         required this.onValidator,
         required this.icon,
         required this.label,
+        required this.labelColor,
         required this.placeholder,
         required this.helper,
         required this.maxLength
@@ -71,7 +73,7 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
                    widget.icon,
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(widget.label),
+                      child: Text(widget.label, style: TextStyle(color: widget.labelColor)),
                     )
                   ],
                 )),

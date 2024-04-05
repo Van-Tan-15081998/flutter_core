@@ -1,34 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
+import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../home/home_screen.dart';
-import '../models/label_model.dart';
+import '../databases/subject_db_manager.dart';
+import '../models/subject_condition_model.dart';
+import '../models/subject_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../providers/label_notifier.dart';
-import 'functions/label_widget.dart';
-import 'label_create_screen.dart';
+import '../providers/subject_notifier.dart';
+import 'functions/subject_widget.dart';
+import 'subject_create_screen.dart';
 
-class LabelListScreen extends StatefulWidget {
-  const LabelListScreen({super.key});
+class SubjectListScreen extends StatefulWidget {
+  final SubjectConditionModel? subjectConditionModel;
+  const SubjectListScreen({super.key, required this.subjectConditionModel});
 
   @override
-  State<LabelListScreen> createState() => _LabelListScreenState();
+  State<SubjectListScreen> createState() => _SubjectListScreenState();
 }
 
-class _LabelListScreenState extends State<LabelListScreen> {
-  List<LabelModel> labels = [];
+class _SubjectListScreenState extends State<SubjectListScreen> {
+  List<SubjectModel> subjects = [];
+
+  /// Pagination
+  static const _pageSize = 10;
+  final PagingController<int, SubjectModel> _pagingController =
+  PagingController(firstPageKey: 0);
+
+  CorePaginationModel corePaginationModel =
+  CorePaginationModel(currentPageIndex: 0, itemPerPage: _pageSize);
+  SubjectConditionModel subjectConditionModel = SubjectConditionModel();
+
+  Future<List<SubjectModel>> _fetchPage(int pageKey) async {
+    try {
+      List<SubjectModel>? result = [];
+      result = await SubjectDatabaseManager.onGetSubjectPagination(
+          corePaginationModel, subjectConditionModel);
+
+      if (result == null) {
+        return [];
+      }
+
+      return result;
+    } catch (error) {
+      // Handle error and return an empty list
+      _pagingController.error = error;
+      return [];
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    if (widget.subjectConditionModel != null) {
+      subjectConditionModel = widget.subjectConditionModel!;
+    }
+
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey).then((items) {
+        if (items.isNotEmpty) {
+          final isLastPage = items.length < _pageSize;
+          if (isLastPage) {
+            _pagingController.appendLastPage(items);
+          } else {
+            _pagingController.appendPage(items, pageKey + 1);
+            corePaginationModel.currentPageIndex++;
+          }
+        } else {
+          _pagingController.appendLastPage([]);
+        }
+      });
+    });
+
+    _pagingController.addStatusListener((status) {
+      if (status == PagingStatus.subsequentPageError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Something went wrong while fetching a new page.',
+            ),
+            action: SnackBarAction(
+              label: 'Retry',
+              onPressed: () => _pagingController.retryLastFailedRequest(),
+            ),
+          ),
+        );
+      }
+    });
   }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +139,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         ],
         backgroundColor: const Color(0xFF202124),
         title: Text(
-          'Labels',
+          'Subjects',
           style:
               GoogleFonts.montserrat( fontStyle: FontStyle.italic,
                   fontSize: 30,
@@ -75,35 +150,32 @@ class _LabelListScreenState extends State<LabelListScreen> {
           color: Color(0xFF404040), // Set the color you desire
         ),
       ),
-      body: ListView.builder(
-          itemBuilder: (context, index) => LabelWidget(
-                label: context.watch<LabelNotifier>().labels![index],
-                onTap: () async {},
-                onLongPress: () async {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text(
-                              'Are you sure you want to delete this note?'),
-                          actions: [
-                            ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all(Colors.red)),
-                              onPressed: () async {},
-                              child: const Text('Yes'),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('No'),
-                            ),
-                          ],
-                        );
-                      });
-                },
-              ),
-          itemCount: context.watch<LabelNotifier>().labels!.length),
+      body: PagedListView<int, SubjectModel>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<SubjectModel>(
+          animateTransitions: true,
+          transitionDuration: const Duration(milliseconds: 500),
+          itemBuilder: (context, item, index) => SubjectWidget(
+            subject: item,
+            onTap: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SubjectCreateScreen(
+                        subject: item,
+                        actionMode: ActionModeEnum.update,
+                      )));
+              setState(() {});
+            }, onLongPress: () {  },
+          ),
+          firstPageErrorIndicatorBuilder: (context) => const Center(
+            child: Text('Error loading data!'),
+          ),
+          noItemsFoundIndicatorBuilder: (context) => const Center(
+            child: Text('No items found.'),
+          ),
+        ),
+      ),
       bottomNavigationBar: CoreBottomNavigationBar(
         backgroundColor: const Color(0xFF202124),
         child: IconTheme(
@@ -151,7 +223,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const LabelCreateScreen(
+                        builder: (context) => const SubjectCreateScreen(
                             actionMode: ActionModeEnum.create)),
                   );
                 },

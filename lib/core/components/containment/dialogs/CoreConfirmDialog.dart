@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../../app/library/common/styles/CommonStyles.dart';
 import '../../actions/common_buttons/CoreButtonStyle.dart';
 import '../../actions/common_buttons/CoreElevatedButton.dart';
 
@@ -46,7 +47,7 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
             children: [
               CoreElevatedButton.icon(
                 icon: const FaIcon(FontAwesomeIcons.xmark, size: 18.0),
-                label: const Text('Cancel'),
+                label: Text('Cancel', style: CommonStyles.labelTextStyle),
                 onPressed: () {
                   widget.onChanged(true);
                   Navigator.pop(context);
@@ -61,7 +62,7 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
               const SizedBox(width: 5),
               CoreElevatedButton.icon(
                 icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
-                label: const Text('Yes, I\'m'),
+                label: Text('Yes, I\'m', style: CommonStyles.labelTextStyle),
                 onPressed: () {
                   widget.onChanged(false);
                   Navigator.pop(context);

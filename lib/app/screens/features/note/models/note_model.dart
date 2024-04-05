@@ -5,6 +5,8 @@ class NoteModel {
   final String title;
   final String description;
   final String? labels; // label id list
+  final int? subjectId;
+  final bool? isFavourite;
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
@@ -14,6 +16,8 @@ class NoteModel {
       required this.description,
       required this.createdAt,
       this.labels,
+      this.subjectId,
+      this.isFavourite,
       this.updatedAt,
       this.deletedAt,
       this.id});
@@ -23,6 +27,8 @@ class NoteModel {
       title: json['title'],
       description: json['description'],
       labels: json['labels'],
+      subjectId: json['subjectId'],
+      isFavourite: json['isFavourite'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       deletedAt: json['deletedAt']);
@@ -31,7 +37,9 @@ class NoteModel {
         'id': id,
         'title': title,
         'description': description,
-        'labels': labels ,
+        'labels': labels,
+        'subjectId': subjectId,
+        'isFavourite': isFavourite,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt

@@ -2,38 +2,38 @@ import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
-import 'package:flutter_core_v3/app/screens/features/label/controllers/label_controller.dart';
-import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_core_v3/app/screens/features/note/models/note_model.dart';
 import 'package:flutter_core_v3/core/stores/icons/CoreStoreIcons.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
+import 'package:provider/provider.dart';
 import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
-import '../../../../core/stores/fonts/CoreStoreFonts.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../label/models/label_model.dart';
-import 'controllers/note_controller.dart';
-import 'widgets/functions/note_functions.dart';
+import '../label/providers/label_notifier.dart';
+import 'models/task_model.dart';
+import 'providers/task_notifier.dart';
+import 'task_home_screen.dart';
+import 'widgets/functions/task_functions.dart';
 
 enum CurrentFocusNodeEnum { none, title, detailContent }
 
-class NoteAddScreen extends StatefulWidget {
-  final NoteModel? note;
+class TaskCreateScreen extends StatefulWidget {
+  final TaskModel? task;
 
   final ActionModeEnum actionMode;
 
-  const NoteAddScreen({super.key, this.note, required this.actionMode});
+  const TaskCreateScreen({super.key, this.task, required this.actionMode});
 
   @override
-  State<NoteAddScreen> createState() => _NoteAddScreenState();
+  State<TaskCreateScreen> createState() => _TaskCreateScreenState();
 }
 
-class _NoteAddScreenState extends State<NoteAddScreen> {
+class _TaskCreateScreenState extends State<TaskCreateScreen> {
   final ScrollController _controllerScrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
   List<FocusNode> focusNodeInsidePage = [];
@@ -77,11 +77,14 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
 
   List<LabelModel> labels = [];
   List<dynamic> selectedLabelIds = [];
-  List<LabelModel>? noteLabels = [];
+  List<LabelModel>? taskLabels = [];
 
   double optionActionContent = 0.0;
 
   double _detailContentContainerHeight = 300.0;
+
+  // bien nay de danh dau sau khi du load data de update da thuc hien xong, khong load lai lan nao nua khi rebuild giao dien (co setState)
+  bool dataLoaded = false;
 
   final _detailContentKeyForScroll = GlobalKey();
   Future _scrollToDetailContent() async {
@@ -111,17 +114,19 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     super.initState();
 
     /// If edit
-    if (widget.note is NoteModel) {
+    if (widget.task is TaskModel) {
 
       setState(() {
-        noteLabels =
-            labels.where((model) => selectedLabelIds.contains(model.id)).toList();
+        // taskLabels = context.watch<LabelNotifier>().labels!
+        //     .where((model) => selectedLabelIds.contains(model.id))
+        //     .toList();
       });
+
       /// Un focus all
 
-      if (widget.note!.title.isNotEmpty) {
+      if (widget.task!.title.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.title);
+        List<dynamic> deltaMap = jsonDecode(widget.task!.title);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
@@ -129,14 +134,13 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
         /// Set selection
       }
 
-      if (widget.note!.description.isNotEmpty) {
+      if (widget.task!.description.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.description);
+        List<dynamic> deltaMap = jsonDecode(widget.task!.description);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
       }
-
     } else {
       _detailContentAutoFocus = true;
     }
@@ -292,20 +296,20 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TaskFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
-                                    object: widget.note,
+                                    object: widget.task,
                                     insertString: CoreStoreIcons.emojis[index]
                                         .toString());
                               });
                             } else if (_detailContentFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TaskFunctions.addStringToQuillContent(
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
-                                    object: widget.note,
+                                    object: widget.task,
                                     insertString: CoreStoreIcons.emojis[index]
                                         .toString());
                               });
@@ -335,14 +339,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 60.0,
-
-                        /// Kích thước tối đa của một cột
                         crossAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các cột
                         mainAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các hàng
                       ),
                       itemCount: CoreStoreIcons.natureAndAnimals.length,
                       itemBuilder: (context, index) {
@@ -350,21 +348,21 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TaskFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
-                                    object: widget.note,
+                                    object: widget.task,
                                     insertString: CoreStoreIcons
                                         .natureAndAnimals[index]
                                         .toString());
                               });
                             } else if (_detailContentFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TaskFunctions.addStringToQuillContent(
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
-                                    object: widget.note,
+                                    object: widget.task,
                                     insertString: CoreStoreIcons
                                         .natureAndAnimals[index]
                                         .toString());
@@ -395,14 +393,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 60.0,
-
-                        /// Kích thước tối đa của một cột
                         crossAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các cột
                         mainAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các hàng
                       ),
                       itemCount: CoreStoreIcons.emojis.length,
                       itemBuilder: (context, index) {
@@ -412,11 +404,11 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                               setState(() {});
                             } else if (_detailContentFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TaskFunctions.addStringToQuillContent(
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
-                                    object: widget.note,
+                                    object: widget.task,
                                     insertString: CoreStoreIcons.emojis[index]
                                         .toString());
                               });
@@ -446,84 +438,83 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     }
 
     if (isShowDialogSetLabel) {
+      final labels =  context.watch<LabelNotifier>().labels!;
       return Container(
-          margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
-          padding: const EdgeInsets.all(4.0),
-          constraints: const BoxConstraints(maxHeight: 300.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: Colors.black, // Màu đường viền
-                width: 1.0, // Độ dày của đường viền
-              ),
-              borderRadius: BorderRadius.circular(6.0)),
-          child: ListView.builder(
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: GestureDetector(
-                  onTap: (){
-                    setState(() {
-                      if (selectedLabelIds.contains(labels[index].id!)) {
-                        selectedLabelIds.remove(labels[index].id!);
-                      } else {
-                        selectedLabelIds.add(labels[index].id!);
-                      }
-                        noteLabels =
-                            labels.where((model) => selectedLabelIds.contains(model.id)).toList();
-
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      selectedLabelIds.contains(labels[index].id!) ? const Icon(Icons.check_box_outlined, size: 26.0,) : const Icon(Icons.check_box_outline_blank_outlined, size: 26.0,),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: DottedBorder(
-                              borderType: BorderType.RRect,
-                              radius: const Radius.circular(12),
-                              color:
-                              labels[index].color.toColor(),
-                              child: ClipRRect(
-                                borderRadius:
-                                const BorderRadius.all(
-                                    Radius.circular(12)),
-                                child: Container(
-                                    color: Colors.white,
-                                    child: Padding(
-                                      padding:
-                                      const EdgeInsets.all(
-                                          6.0),
-                                      child: Row(
-                                        mainAxisSize:
-                                        MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                              Icons
-                                                  .label_important_rounded,
-                                              color: labels[
-                                              index]
-                                                  .color
-                                                  .toColor()),
-                                          Flexible(
-                                              child: Text(
-                                                  labels[index]
-                                                      .title,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                  TextOverflow
-                                                      .ellipsis)),
-                                        ],
-                                      ),
-                                    )),
-                              )),
+        margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
+        padding: const EdgeInsets.all(4.0),
+        constraints: const BoxConstraints(maxHeight: 300.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.black,
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(6.0)),
+        child: ListView.builder(
+            itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (selectedLabelIds.contains(labels[index].id!)) {
+                          selectedLabelIds.remove(labels[index].id!);
+                        } else {
+                          selectedLabelIds.add(labels[index].id!);
+                        }
+                        taskLabels = labels
+                            .where(
+                                (model) => selectedLabelIds.contains(model.id))
+                            .toList();
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        selectedLabelIds.contains(labels[index].id!)
+                            ? const Icon(
+                                Icons.check_box_outlined,
+                                size: 26.0,
+                              )
+                            : const Icon(
+                                Icons.check_box_outline_blank_outlined,
+                                size: 26.0,
+                              ),
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: DottedBorder(
+                                borderType: BorderType.RRect,
+                                radius: const Radius.circular(12),
+                                color: labels[index].color.toColor(),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(12)),
+                                  child: Container(
+                                      color: Colors.white,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.label_important_rounded,
+                                                color: labels[index]
+                                                    .color
+                                                    .toColor()),
+                                            Flexible(
+                                                child: Text(labels[index].title,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis)),
+                                          ],
+                                        ),
+                                      )),
+                                )),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              itemCount: labels.length),
+            itemCount: labels.length),
       );
     }
 
@@ -1371,27 +1362,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
     }
   }
 
-  getLabels(LabelController labelController) async {
-    if(labels.isEmpty) {
-      List<LabelModel>? labelList = await labelController.getAll();
-
-      if (labelList!.isNotEmpty) {
-        labels = labelList;
-
-        if (widget.note is NoteModel) {
-          List<dynamic> labelIds = jsonDecode(widget.note!.labels!);
-          selectedLabelIds = labelIds;
-          setState(() {
-            noteLabels =
-                labels.where((model) => labelIds.contains(model.id)).toList();
-          });
-        }
-      }
-    }
-  }
-
   _buildDialogSetLabel(BuildContext context) async {
-    return  showDialog<bool>(
+    return showDialog<bool>(
         context: context,
         builder: (context) => Form(
             onWillPop: () async {
@@ -1417,26 +1389,41 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                             itemBuilder: (context, index) => Padding(
                                   padding: const EdgeInsets.only(bottom: 12.0),
                                   child: GestureDetector(
-                                    onTap: (){
+                                    onTap: () {
                                       setState(() {
-                                        if (selectedLabelIds.contains(labels[index].id!)) {
-                                          selectedLabelIds.remove(labels[index].id!);
+                                        if (selectedLabelIds
+                                            .contains(labels[index].id!)) {
+                                          selectedLabelIds
+                                              .remove(labels[index].id!);
                                         } else {
-                                          selectedLabelIds.add(labels[index].id!);
+                                          selectedLabelIds
+                                              .add(labels[index].id!);
                                         }
                                       });
                                     },
                                     child: Row(
                                       children: [
-                                        selectedLabelIds.contains(labels[index].id!) ? const Icon(Icons.check_box_outlined, size: 26.0,) : const Icon(Icons.check_box_outline_blank_outlined, size: 26.0,),
+                                        selectedLabelIds
+                                                .contains(labels[index].id!)
+                                            ? const Icon(
+                                                Icons.check_box_outlined,
+                                                size: 26.0,
+                                              )
+                                            : const Icon(
+                                                Icons
+                                                    .check_box_outline_blank_outlined,
+                                                size: 26.0,
+                                              ),
                                         Flexible(
                                           child: Padding(
                                             padding: const EdgeInsets.all(2.0),
                                             child: DottedBorder(
                                                 borderType: BorderType.RRect,
-                                                radius: const Radius.circular(12),
-                                                color:
-                                                    labels[index].color.toColor(),
+                                                radius:
+                                                    const Radius.circular(12),
+                                                color: labels[index]
+                                                    .color
+                                                    .toColor(),
                                                 child: ClipRRect(
                                                   borderRadius:
                                                       const BorderRadius.all(
@@ -1445,8 +1432,8 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                                                       color: Colors.white,
                                                       child: Padding(
                                                         padding:
-                                                            const EdgeInsets.all(
-                                                                6.0),
+                                                            const EdgeInsets
+                                                                .all(6.0),
                                                         child: Row(
                                                           mainAxisSize:
                                                               MainAxisSize.min,
@@ -1481,315 +1468,333 @@ class _NoteAddScreenState extends State<NoteAddScreen> {
                     ]))));
   }
 
-  Widget _buildLabels() {
+  getLabels() async {
+    if (context.watch<LabelNotifier>().labels!.isNotEmpty && !dataLoaded) {
+      if (widget.task is TaskModel) {
+        List<dynamic> labelIds = jsonDecode(widget.task!.labels!);
+        selectedLabelIds = labelIds;
 
+        setState(() {
+          taskLabels =
+              context.watch<LabelNotifier>().labels!.where((model) => labelIds.contains(model.id)).toList();
+        });
+
+        dataLoaded = true;
+      }
+    }
+  }
+
+  Widget _buildLabels() {
     List<Widget> labelWidgets = [];
 
-   if (noteLabels!.isNotEmpty) {
-     for (var element in noteLabels!) {
-       labelWidgets.add(
-         Padding(
-           padding: const EdgeInsets.all(2.0),
-           child: DottedBorder(
-               borderType: BorderType.RRect,
-               radius: const Radius.circular(12),
-               color: element.color.toColor(),
-               child: ClipRRect(
-                 borderRadius: const BorderRadius.all(
-                     Radius.circular(12)),
-                 child: Container(
-                     color: Colors.white,
-                     child: Padding(
-                       padding: const EdgeInsets.all(6.0),
-                       child: Row(
-                         mainAxisSize: MainAxisSize.min,
-                         children: [
-                           Icon(
-                             Icons.label_important_rounded,
-                             color: element.color.toColor(),),
-                           Flexible(
-                             child: Text(element.title,
-                                 maxLines:1,
-                                 overflow: TextOverflow.ellipsis),
-                           ),
-                         ],
-                       ),
-                     )),
-               )),
-         ),
-       );
-     }
-   }
-    return  Padding(
+    if (taskLabels!.isNotEmpty) {
+      for (var element in taskLabels!) {
+        labelWidgets.add(
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: DottedBorder(
+                borderType: BorderType.RRect,
+                radius: const Radius.circular(12),
+                color: element.color.toColor(),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  child: Container(
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.label_important_rounded,
+                              color: element.color.toColor(),
+                            ),
+                            Flexible(
+                              child: Text(element.title,
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      )),
+                )),
+          ),
+        );
+      }
+    }
+    return Padding(
         padding: const EdgeInsets.all(4.0),
-        child:  Column(
+        child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: labelWidgets,
-        )
-    );
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
-    NoteController controller = NoteController();
-    LabelController labelController = LabelController(context: context);
-    getLabels(labelController);
+    final taskNotifier = Provider.of<TaskNotifier>(context);
+    getLabels();
 
-    return CoreFullScreenDialog(
-      title: widget.note == null ? 'Add a note' : 'Edit note',
-      isConfirmToClose: true,
-      focusNodes: [_titleFocusNode, _detailContentFocusNode],
-      actions: AppBarActionButtonEnum.save,
-      isShowGeneralActionButton: false,
-      optionActionContent: buildOptionActionContent(context),
-      onSubmit: () async {
-        if (_formKey.currentState!.validate()) {
-          _formKey.currentState!.save();
+    return MultiProvider(
+      providers: [ChangeNotifierProvider.value(value: TaskNotifier())],
+      child: CoreFullScreenDialog(
+        title: widget.task == null ? 'Add a task' : 'Edit task',
+        isConfirmToClose: true,
+        actions: AppBarActionButtonEnum.save,
+        isShowGeneralActionButton: false,
+        optionActionContent: buildOptionActionContent(context),
+        onSubmit: () async {
+          if (_formKey.currentState!.validate()) {
+            _formKey.currentState!.save();
 
-          final title =
-              jsonEncode(_titleQuillController.document.toDelta().toJson());
+            final title =
+                jsonEncode(_titleQuillController.document.toDelta().toJson());
 
-          final description = jsonEncode(
-              _detailContentQuillController.document.toDelta().toJson());
+            final description = jsonEncode(
+                _detailContentQuillController.document.toDelta().toJson());
 
-          final labels = jsonEncode(selectedLabelIds);
+            final labels = jsonEncode(selectedLabelIds);
 
-          if (title.isEmpty || description.isEmpty) {
-            return;
+            if (title.isEmpty || description.isEmpty) {
+              return;
+            }
+
+            if (widget.task == null &&
+                widget.actionMode == ActionModeEnum.create) {
+              final TaskModel model = TaskModel(
+                  title: title,
+                  description: description,
+                  labels: labels,
+                  createdAt: DateTime.now().millisecondsSinceEpoch,
+                  id: widget.task?.id,
+                  statusId: 1);
+              if (await taskNotifier.addTask(model)) {
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.create, 'Task');
+
+                // Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TaskHomeScreen()),
+                  (route) => false,
+                );
+              }
+            } else if (widget.task != null &&
+                widget.actionMode == ActionModeEnum.update) {
+              final TaskModel model = TaskModel(
+                  title: title,
+                  description: description,
+                  labels: labels,
+                  createdAt: widget.task?.createdAt,
+                  updatedAt: DateTime.now().millisecondsSinceEpoch,
+                  id: widget.task?.id,
+                  statusId: 1);
+              if (await taskNotifier.updateTask(model)) {
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.update, 'Task');
+
+                // Navigator.pop(context);
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TaskHomeScreen()),
+                  (route) => false,
+                );
+              }
+            }
           }
-
-          if (widget.note == null &&
-              widget.actionMode == ActionModeEnum.create) {
-            final NoteModel model = NoteModel(
-                title: title,
-                description: description,
-                labels: labels,
-                createdAt: DateTime.now().millisecondsSinceEpoch,
-                id: widget.note?.id);
-            if (await controller.onCreateNote(model)) {
-              CoreNotification.show(context, CoreNotificationStatus.success,
-                  CoreNotificationAction.create, 'Note');
-
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const NoteListScreen()),
-                    (route) => false,
-              );
-            }
-          } else if (widget.note != null &&
-              widget.actionMode == ActionModeEnum.update) {
-            final NoteModel model = NoteModel(
-                title: title,
-                description: description,
-                labels: labels,
-                createdAt: widget.note?.createdAt,
-                updatedAt: DateTime.now().millisecondsSinceEpoch,
-                id: widget.note?.id);
-            if (await controller.onUpdateNote(model)) {
-              CoreNotification.show(context, CoreNotificationStatus.success,
-                  CoreNotificationAction.update, 'Note');
-
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const NoteListScreen()),
-                    (route) => false,
-              );
-            }
-          }
-        }
-      },
-      onRedo: () {},
-      onUndo: () {},
-      onBack: () {},
-      bottomActionBar: [
-        Column(
-          children: [
-            Row(
-              children: [
-                _buildIconOnToolbar(),
-                _buildCheckboxButtonOnToolbar(),
-                _buildBoldTextOnToolbar(),
-                _buildItalicTextOnToolbar(),
-                _buildUnderlineTextOnToolbar(),
-                _buildUndoOnToolbar(),
-                _buildRedoOnToolbar(),
-                _buildCloseButtonSetEmojiOnToolbar(),
-                _buildCloseButtonSetLabelOnToolbar()
-              ],
-            ),
-          ],
-        ),
-      ],
-      bottomActionBarScrollable: [
-        _buildTextColorOnToolbar(),
-        _buildTextBackgroundColorOnToolbar(),
-        _buildLeftAlignmentSelectOnToolbar(),
-        _buildCenterAlignmentOnToolbar(),
-        _buildJustifyAlignmentOnToolbar(),
-        _buildRightAlignmentOnToolbar(),
-        _buildHeadingOnToolbar(),
-        _buildIndentIncreaseOnToolbar(),
-        _buildIndentDecreaseOnToolbar(),
-        _buildListOnToolbar(),
-        _buildNumberListOnToolbar(),
-        _buildSmallSizeOnToolbar(),
-        _buildLargeSizeOnToolbar(),
-        _buildHugeSizeOnToolbar(),
-      ],
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: _formKey,
-          onWillPop: () async {
-            onBack();
-            if (await CoreHelperWidget.confirmFunction(context)) {
-              return true;
-            }
-            return false;
-          },
-          child: SingleChildScrollView(
-            controller: _controllerScrollController,
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Title:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic, fontSize: 16),
-                    ),
-                  ],
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.blue,
-                        width: 1.0,
+        },
+        onRedo: () {},
+        onUndo: () {},
+        onBack: () {},
+        bottomActionBar: [
+          Column(
+            children: [
+              Row(
+                children: [
+                  _buildIconOnToolbar(),
+                  _buildCheckboxButtonOnToolbar(),
+                  _buildBoldTextOnToolbar(),
+                  _buildItalicTextOnToolbar(),
+                  _buildUnderlineTextOnToolbar(),
+                  _buildUndoOnToolbar(),
+                  _buildRedoOnToolbar(),
+                  _buildCloseButtonSetEmojiOnToolbar(),
+                  _buildCloseButtonSetLabelOnToolbar()
+                ],
+              ),
+            ],
+          ),
+        ],
+        bottomActionBarScrollable: [
+          _buildTextColorOnToolbar(),
+          _buildTextBackgroundColorOnToolbar(),
+          _buildLeftAlignmentSelectOnToolbar(),
+          _buildCenterAlignmentOnToolbar(),
+          _buildJustifyAlignmentOnToolbar(),
+          _buildRightAlignmentOnToolbar(),
+          _buildHeadingOnToolbar(),
+          _buildIndentIncreaseOnToolbar(),
+          _buildIndentDecreaseOnToolbar(),
+          _buildListOnToolbar(),
+          _buildNumberListOnToolbar(),
+          _buildSmallSizeOnToolbar(),
+          _buildLargeSizeOnToolbar(),
+          _buildHugeSizeOnToolbar(),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            key: _formKey,
+            onWillPop: () async {
+              onBack();
+              if (await CoreHelperWidget.confirmFunction(context)) {
+                return true;
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              controller: _controllerScrollController,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Title:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic, fontSize: 16),
                       ),
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(12.0))),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                        color: Colors.yellow,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    constraints: const BoxConstraints(maxHeight: 60.0),
-                    margin: const EdgeInsets.all(4.0),
-                    padding: const EdgeInsets.all(6.0),
-                    child: flutter_quill.QuillEditor(
-                      controller: _titleQuillController,
-                      readOnly: _titleReadOnly,
-                      autoFocus: _titleAutoFocus,
-                      expands: _titleExpands,
-                      focusNode: _titleFocusNode,
-                      padding: _titlePadding,
-                      scrollController: _titleScrollController,
-                      scrollable: _titleScrollable,
-                      placeholder: 'Tap to enter your title',
-                      customStyles: flutter_quill.DefaultStyles(
-                          placeHolder: flutter_quill.DefaultTextBlockStyle(
-                              const TextStyle(
-                                  fontSize: 16.0, color: Colors.grey),
-                              const flutter_quill.VerticalSpacing(1.0, 1.0),
-                              const flutter_quill.VerticalSpacing(1.0, 1.0),
-                              null)),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12.0))),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.yellow,
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      constraints: const BoxConstraints(maxHeight: 60.0),
+                      margin: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(6.0),
+                      child: flutter_quill.QuillEditor(
+                        controller: _titleQuillController,
+                        readOnly: _titleReadOnly,
+                        autoFocus: _titleAutoFocus,
+                        expands: _titleExpands,
+                        focusNode: _titleFocusNode,
+                        padding: _titlePadding,
+                        scrollController: _titleScrollController,
+                        scrollable: _titleScrollable,
+                        placeholder: 'Tap to enter your title',
+                        customStyles: flutter_quill.DefaultStyles(
+                            placeHolder: flutter_quill.DefaultTextBlockStyle(
+                                const TextStyle(
+                                    fontSize: 16.0, color: Colors.grey),
+                                const flutter_quill.VerticalSpacing(1.0, 1.0),
+                                const flutter_quill.VerticalSpacing(1.0, 1.0),
+                                null)),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 5.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      key: _detailContentKeyForScroll,
-                      'Content:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic, fontSize: 16),
-                    ),
-                  ],
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.blue,
-                        width: 1.0,
+                  const SizedBox(height: 5.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        key: _detailContentKeyForScroll,
+                        'Content:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic, fontSize: 16),
                       ),
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(12.0))),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                        color: Colors.yellow,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                    constraints: BoxConstraints(
-                        minHeight: 150.0,
-                        maxHeight: _detailContentContainerHeight),
-                    margin: const EdgeInsets.all(4.0),
-                    padding: const EdgeInsets.all(6.0),
-                    child: flutter_quill.QuillEditor(
-                      controller: _detailContentQuillController,
-                      readOnly: _detailContentReadOnly,
-                      autoFocus: _detailContentAutoFocus,
-                      expands: _detailContentExpands,
-                      focusNode: _detailContentFocusNode,
-                      padding: _detailContentPadding,
-                      scrollController: _detailContentScrollController,
-                      scrollable: _detailContentScrollable,
-                      placeholder: 'Tap to enter your content',
-                      customStyles: flutter_quill.DefaultStyles(
-                          placeHolder: flutter_quill.DefaultTextBlockStyle(
-                              const TextStyle(
-                                  fontSize: 16.0, color: Colors.grey),
-                              const flutter_quill.VerticalSpacing(1.0, 1.0),
-                              const flutter_quill.VerticalSpacing(1.0, 1.0),
-                              null)),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 1.0,
+                        ),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(12.0))),
+                    child: Container(
+                      decoration: const BoxDecoration(
+                          color: Colors.yellow,
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(10.0))),
+                      constraints: BoxConstraints(
+                          minHeight: 150.0,
+                          maxHeight: _detailContentContainerHeight),
+                      margin: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(6.0),
+                      child: flutter_quill.QuillEditor(
+                        controller: _detailContentQuillController,
+                        readOnly: _detailContentReadOnly,
+                        autoFocus: _detailContentAutoFocus,
+                        expands: _detailContentExpands,
+                        focusNode: _detailContentFocusNode,
+                        padding: _detailContentPadding,
+                        scrollController: _detailContentScrollController,
+                        scrollable: _detailContentScrollable,
+                        placeholder: 'Tap to enter your content',
+                        customStyles: flutter_quill.DefaultStyles(
+                            placeHolder: flutter_quill.DefaultTextBlockStyle(
+                                const TextStyle(
+                                    fontSize: 16.0, color: Colors.grey),
+                                const flutter_quill.VerticalSpacing(1.0, 1.0),
+                                const flutter_quill.VerticalSpacing(1.0, 1.0),
+                                null)),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Labels:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic, fontSize: 16),
-                    ),
-                  ],
-                ),
-                CoreElevatedButton.icon(
-                  icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
-                  label: const Text('Choose labels'),
-                  onPressed: () {
-                    // _buildDialogSetLabel(context);
-                    if (_titleFocusNode.hasFocus) {
-                      _titleFocusNode.unfocus();
-                    }
-                   if (_detailContentFocusNode.hasFocus) {
-                     _detailContentFocusNode.unfocus();
-                   }
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Labels:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                  CoreElevatedButton.icon(
+                    icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
+                    label: const Text('Choose labels'),
+                    onPressed: () {
+                      // _buildDialogSetLabel(context);
+                      if (_titleFocusNode.hasFocus) {
+                        _titleFocusNode.unfocus();
+                      }
+                      if (_detailContentFocusNode.hasFocus) {
+                        _detailContentFocusNode.unfocus();
+                      }
 
-                    setState(() {
-                      isShowDialogSetLabel = true;
-                    });
-                  },
-                  coreButtonStyle: CoreButtonStyle.options(
-                      coreStyle: CoreStyle.outlined,
-                      coreColor: CoreColor.success,
-                      coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black,
-                      coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-                ),
-                _buildLabels(),
-                const SizedBox(
-                  height: 500,
-                )
-              ],
+                      setState(() {
+                        isShowDialogSetLabel = true;
+                      });
+                    },
+                    coreButtonStyle: CoreButtonStyle.options(
+                        coreStyle: CoreStyle.outlined,
+                        coreColor: CoreColor.success,
+                        coreRadius: CoreRadius.radius_6,
+                        kitForegroundColorOption: Colors.black,
+                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                  ),
+                  _buildLabels(),
+                  const SizedBox(
+                    height: 500,
+                  )
+                ],
+              ),
             ),
           ),
         ),
