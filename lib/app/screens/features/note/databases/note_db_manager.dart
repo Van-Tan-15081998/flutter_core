@@ -5,7 +5,7 @@ import '../models/note_condition_model.dart';
 import '../models/note_model.dart';
 
 class NoteDatabaseManager {
-  static Future<List<NoteModel>?> initData() async {
+  static Future<List<NoteModel>?> all() async {
     List<NoteModel>? notes = await DatabaseProvider.getAllNotes();
 
     return notes;
@@ -46,7 +46,7 @@ class NoteDatabaseManager {
       int resultId = await DatabaseProvider.createNote(note);
 
       if (resultId != 0) {
-        NoteModel? createdModel = await onGetById(resultId);
+        NoteModel? createdModel = await getById(resultId);
 
         return createdModel;
       } else {
@@ -76,9 +76,39 @@ class NoteDatabaseManager {
       int result = await DatabaseProvider.updateNote(note);
 
       if (result != 0) {
-        NoteModel? updatedModel = await onGetById(note.id!);
+        NoteModel? updatedModel = await getById(note.id!);
 
         return updatedModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<bool> favourite(NoteModel note, int? isFavourite) async {
+    try {
+      NoteModel? favouriteModel;
+      favouriteModel = await _onFavourite(note, isFavourite);
+
+      if (favouriteModel != null) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  static  Future<NoteModel?> _onFavourite(NoteModel note, int? isFavourite) async {
+    try {
+      int result = await DatabaseProvider.favouriteNote(note, isFavourite);
+
+      if (result != 0) {
+        NoteModel? favouriteModel = await getById(note.id!);
+
+        return favouriteModel;
       } else {
         return null;
       }
@@ -106,7 +136,7 @@ class NoteDatabaseManager {
       int result = await DatabaseProvider.deleteNote(note, deleteTime);
 
       if (result != 0) {
-        NoteModel? deletedModel = await onGetById(note.id!);
+        NoteModel? deletedModel = await getById(note.id!);
 
         return deletedModel;
       } else {
@@ -136,7 +166,7 @@ class NoteDatabaseManager {
       int result = await DatabaseProvider.deleteForeverNote(note);
 
       if (result != 0) {
-        NoteModel? deletedModel = await onGetById(note.id!);
+        NoteModel? deletedModel = await getById(note.id!);
 
         return deletedModel;
       } else {
@@ -166,7 +196,7 @@ class NoteDatabaseManager {
       int result = await DatabaseProvider.restoreNote(note, restoreTime);
 
       if (result != 0) {
-        NoteModel? restoredModel = await onGetById(note.id!);
+        NoteModel? restoredModel = await getById(note.id!);
 
         return restoredModel;
       } else {
@@ -177,7 +207,7 @@ class NoteDatabaseManager {
     }
   }
 
-  static  Future<NoteModel?> onGetById(int id) async {
+  static  Future<NoteModel?> getById(int id) async {
     try {
       NoteModel? result = await DatabaseProvider.getNoteById(id);
 

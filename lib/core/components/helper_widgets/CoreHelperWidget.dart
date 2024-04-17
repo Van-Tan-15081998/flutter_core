@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/library/common/styles/CommonStyles.dart';
+import '../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 import '../containment/dialogs/CoreConfirmDialog.dart';
 
 class CoreHelperWidget {
   static Future<bool> confirmFunction(BuildContext context) async {
     bool result = false;
+    CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+    audio.playAudioOnOpenPopup();
+
     await showDialog<bool>(
         context: context,
         builder: (BuildContext context) => Form(
@@ -15,16 +19,14 @@ class CoreHelperWidget {
                 borderRadius:
                 BorderRadius.circular(10.0), // Điều chỉnh border radius ở đây
               ),
-              child: Container(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [CoreConfirmDialog(
-                      confirmTitle: Text('Are you sure?', style: CommonStyles.labelTextStyle),
-                      initialData: false,
-                      onChanged: (value) => result = value,
-                    ),]
-                ),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [CoreConfirmDialog(
+                    confirmTitle: Text('Are you sure?', style: CommonStyles.labelTextStyle),
+                    initialData: false,
+                    onChanged: (value) => result = value,
+                  ),]
               )),
         ));
 

@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/library/common/utils/CommonAudioOnPressButton.dart';
+
 class CoreTextFormField extends StatefulWidget {
   final ValueChanged<String> onChanged;
   final TextEditingController controller;
 
   final FocusNode focusNode;
-  final Function onValidator;
   final Icon icon;
   final String label;
   final Color? labelColor;
   final String placeholder;
   final String helper;
+  final String validateString;
   final int? maxLength;
+  final TextStyle? style;
 
   const CoreTextFormField(
       {super.key,
       required this.onChanged,
       required this.controller,
         required this.focusNode,
-        required this.onValidator,
         required this.icon,
         required this.label,
         required this.labelColor,
         required this.placeholder,
         required this.helper,
-        required this.maxLength
+        required this.validateString,
+        required this.maxLength,
+        required this.style
       });
 
   @override
@@ -54,13 +58,21 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextFormField(
+            style: widget.style,
             focusNode: widget.focusNode,
             controller: widget.controller,
             onChanged: (value) {
               widget.onChanged(value); // Gửi sự thay đổi tới trang cha
             },
             validator: (value) {
-              return widget.onValidator(value);
+              if (value == null || value.isEmpty) {
+
+                CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+                audio.playAudioOnMessage();
+
+                return widget.validateString;
+              }
+              return null;
             },
             maxLength: widget.maxLength,
             keyboardType: TextInputType.emailAddress,

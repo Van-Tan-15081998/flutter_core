@@ -8,6 +8,7 @@ class NoteConditionModel {
   String? searchText;
   bool? isDeleted;
   bool? recentlyUpdated;
+  bool? favourite;
 
   NoteConditionModel({
     this.title,
@@ -18,6 +19,7 @@ class NoteConditionModel {
     this.subjectId,
     this.searchText,
     this.isDeleted,
-    this.recentlyUpdated
+    this.recentlyUpdated,
+    this.favourite
   });
 }

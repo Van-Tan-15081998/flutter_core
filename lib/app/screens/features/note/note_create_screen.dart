@@ -1,26 +1,28 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_core_v3/app/screens/features/note/models/note_model.dart';
-import 'package:flutter_core_v3/core/stores/icons/CoreStoreIcons.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:provider/provider.dart';
 import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../core/stores/icons/CoreStoreIcons.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/enums/CommonEnums.dart';
+import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
-import '../label/providers/label_notifier.dart';
+import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
-import '../subjects/providers/subject_notifier.dart';
 import 'databases/note_db_manager.dart';
+import 'models/note_model.dart';
+import 'note_detail_screen.dart';
 import 'providers/note_notifier.dart';
 import 'widgets/functions/note_functions.dart';
 
@@ -28,10 +30,11 @@ enum CurrentFocusNodeEnum { none, title, detailContent }
 
 class NoteCreateScreen extends StatefulWidget {
   final NoteModel? note;
-
+  final SubjectModel? subject;
   final ActionModeEnum actionMode;
 
-  const NoteCreateScreen({super.key, this.note, required this.actionMode});
+  const NoteCreateScreen(
+      {super.key, this.note, required this.subject, required this.actionMode});
 
   @override
   State<NoteCreateScreen> createState() => _NoteCreateScreenState();
@@ -40,15 +43,13 @@ class NoteCreateScreen extends StatefulWidget {
 class _NoteCreateScreenState extends State<NoteCreateScreen> {
   final ScrollController _controllerScrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
-  List<FocusNode> focusNodeInsidePage = [];
-  final TextEditingController titleController = TextEditingController();
 
   bool isShowDialogSetLabel = false;
   bool isShowDialogSetEmoji = false;
 
-  SubjectModel? selectedSubject;
-
-  /// Title Setup
+  /*
+   Title's Parameters
+   */
   final TextSelection _titleTextSelection =
       const TextSelection(baseOffset: 0, extentOffset: 0);
   flutter_quill.Document _titleDocument = flutter_quill.Document();
@@ -63,7 +64,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   final bool _titleScrollable = true;
   bool _titleFocusNodeHasFocus = false;
 
-  /// Detail Content Setup
+  /*
+   Detail Content's Parameters
+   */
   final TextSelection _detailContentTextSelection =
       const TextSelection(baseOffset: 0, extentOffset: 0);
   flutter_quill.Document _detailContentDocument = flutter_quill.Document();
@@ -81,16 +84,22 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   bool isQuillControllerSelectionUnchecked = false;
   CurrentFocusNodeEnum _currentFocusNodeEnum = CurrentFocusNodeEnum.none;
 
-  List<LabelModel> labels = [];
-  List<dynamic> selectedLabelIds = [];
-  List<LabelModel>? noteLabels = [];
-
   double optionActionContent = 0.0;
 
   double _detailContentContainerHeight = 300.0;
 
+  late StreamController<List<SubjectModel>?> _subjectStreamController;
+  late Stream<List<SubjectModel>?> _subjectStream;
+
+  List<LabelModel>? selectedNoteLabels = [];
+  List<LabelModel>? labelList = [];
+  List<SubjectModel>? subjectList = [];
+  SubjectModel? selectedSubject;
+  List<dynamic> selectedLabelIds = [];
+
   // bien nay de danh dau sau khi du load data de update da thuc hien xong, khong load lai lan nao nua khi rebuild giao dien (co setState)
-  bool dataLoaded = false;
+  bool selectedLabelDataLoaded = false;
+  bool selectedSubjectDataLoaded = false;
 
   final _detailContentKeyForScroll = GlobalKey();
   Future _scrollToDetailContent() async {
@@ -115,20 +124,65 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     });
   }
 
+  /*
+  Get Labels From DB
+   */
+  Future<List<LabelModel>?> _fetchLabels() async {
+    List<LabelModel>? labels = await LabelDatabaseManager.all();
+
+    return labels;
+  }
+
+  /*
+  Get Subjects From DB
+   */
+  Future<List<SubjectModel>?> _fetchSubjects() async {
+    List<SubjectModel>? subjects = await SubjectDatabaseManager.all();
+
+    return subjects;
+  }
+
   @override
   void initState() {
     super.initState();
 
+    _subjectStreamController = StreamController<List<SubjectModel>?>();
+    _subjectStream = _subjectStreamController.stream;
+    _subjectStreamController.add(subjectList);
+
+    // Fetch Labels and Subjects
+    _fetchLabels().then((labels) {
+      if (labels != null && labels.isNotEmpty) {
+        setState(() {
+          labelList = labels;
+        });
+        _setSelectedLabels();
+      }
+    });
+    _fetchSubjects().then((subjects) {
+      if (subjects != null && subjects.isNotEmpty) {
+        setState(() {
+          /*
+          Limit the subject list for choose
+           */
+          if (widget.subject != null && subjects.isNotEmpty) {
+            List<SubjectModel>? mySubjects = subjects
+                .where((element) => element.id == widget.subject!.id)
+                .toList();
+            if (mySubjects.isNotEmpty) {
+              subjectList!.add(mySubjects.first);
+            }
+          } else if (widget.subject == null) {
+            subjectList = subjects;
+          }
+        });
+
+        _subjectStreamController.add(subjectList);
+      }
+    });
+
     /// If edit
     if (widget.note is NoteModel) {
-      setState(() {
-        // noteLabels = context.watch<LabelNotifier>().labels!
-        //     .where((model) => selectedLabelIds.contains(model.id))
-        //     .toList();
-      });
-
-      /// Un focus all
-
       if (widget.note!.title.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.note!.title);
@@ -193,16 +247,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         _scrollToDetailContent();
       } else {
         print('unfocus');
-        setState(() {
-          // _detailContentContainerHeight = 300.0;
-        });
       }
     });
-
-    List<FocusNode> focusNodeInsidePage = [
-      _titleFocusNode,
-      _detailContentFocusNode
-    ];
   }
 
   isBold(flutter_quill.QuillController quillController) {
@@ -240,6 +286,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     return false;
   }
 
+  @override
+  void dispose() {
+    _subjectStreamController.close();
+    super.dispose();
+  }
+
   Widget buildOptionActionContent(BuildContext context) {
     if (isShowDialogSetEmoji) {
       return Container(
@@ -272,7 +324,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                     tabs: [
                       Tab(icon: Text(CoreStoreIcons.emoji_001)),
                       Tab(icon: Text(CoreStoreIcons.emoji_260)),
-                      const Tab(icon: Icon(Icons.directions_car)),
                     ],
                   ),
                 ),
@@ -304,7 +355,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                                 NoteFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
-                                    object: widget.note,
                                     insertString: CoreStoreIcons.emojis[index]
                                         .toString());
                               });
@@ -314,7 +364,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
-                                    object: widget.note,
                                     insertString: CoreStoreIcons.emojis[index]
                                         .toString());
                               });
@@ -362,7 +411,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                                 NoteFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
-                                    object: widget.note,
                                     insertString: CoreStoreIcons
                                         .natureAndAnimals[index]
                                         .toString());
@@ -373,7 +421,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
-                                    object: widget.note,
                                     insertString: CoreStoreIcons
                                         .natureAndAnimals[index]
                                         .toString());
@@ -397,57 +444,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       },
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 60.0,
-
-                        /// Kích thước tối đa của một cột
-                        crossAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các cột
-                        mainAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các hàng
-                      ),
-                      itemCount: CoreStoreIcons.emojis.length,
-                      itemBuilder: (context, index) {
-                        return CoreElevatedButton.iconOnly(
-                          onPressed: () {
-                            if (_titleFocusNodeHasFocus) {
-                              setState(() {});
-                            } else if (_detailContentFocusNodeHasFocus) {
-                              setState(() {
-                                NoteFunctions.addStringToQuillContent(
-                                    quillController:
-                                        _detailContentQuillController,
-                                    selection: _detailContentTextSelection,
-                                    object: widget.note,
-                                    insertString: CoreStoreIcons.emojis[index]
-                                        .toString());
-                              });
-                            }
-                          },
-                          coreButtonStyle: CoreButtonStyle.options(
-                              coreFixedSizeButton:
-                                  CoreFixedSizeButton.squareIcon4060,
-                              coreStyle: CoreStyle.outlined,
-                              coreColor: CoreColor.turtles,
-                              coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black),
-                          icon: Center(
-                            child: Text(
-                              CoreStoreIcons.emojis[index],
-                              style: const TextStyle(fontSize: 18.0),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -455,84 +451,88 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     }
 
     if (isShowDialogSetLabel) {
-      final labels = context.watch<LabelNotifier>().labels!;
-      return Container(
-        margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
-        padding: const EdgeInsets.all(4.0),
-        constraints: const BoxConstraints(maxHeight: 300.0),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(
-              color: Colors.black, // Màu đường viền
-              width: 1.0, // Độ dày của đường viền
-            ),
-            borderRadius: BorderRadius.circular(6.0)),
-        child: ListView.builder(
-            itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (selectedLabelIds.contains(labels[index].id!)) {
-                          selectedLabelIds.remove(labels[index].id!);
-                        } else {
-                          selectedLabelIds.add(labels[index].id!);
-                        }
-                        noteLabels = labels
-                            .where(
-                                (model) => selectedLabelIds.contains(model.id))
-                            .toList();
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        selectedLabelIds.contains(labels[index].id!)
-                            ? const Icon(
-                                Icons.check_box_outlined,
-                                size: 26.0,
-                              )
-                            : const Icon(
-                                Icons.check_box_outline_blank_outlined,
-                                size: 26.0,
-                              ),
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                radius: const Radius.circular(12),
-                                color: labels[index].color.toColor(),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                  child: Container(
-                                      color: Colors.white,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(6.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.label_important_rounded,
-                                                color: labels[index]
-                                                    .color
-                                                    .toColor()),
-                                            Flexible(
-                                                child: Text(labels[index].title,
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis)),
-                                          ],
-                                        ),
-                                      )),
-                                )),
+      if (labelList != null && labelList!.isNotEmpty) {
+        return Container(
+          margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
+          padding: const EdgeInsets.all(4.0),
+          constraints: const BoxConstraints(maxHeight: 300.0),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.black, // Màu đường viền
+                width: 1.0, // Độ dày của đường viền
+              ),
+              borderRadius: BorderRadius.circular(6.0)),
+          child: ListView.builder(
+              itemBuilder: (context, index) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (selectedLabelIds
+                              .contains(labelList![index].id!)) {
+                            selectedLabelIds.remove(labelList![index].id!);
+                          } else {
+                            selectedLabelIds.add(labelList![index].id!);
+                          }
+                          selectedNoteLabels = labelList!
+                              .where((model) =>
+                                  selectedLabelIds.contains(model.id))
+                              .toList();
+                        });
+                      },
+                      child: Row(
+                        children: [
+                          selectedLabelIds.contains(labelList![index].id!)
+                              ? const Icon(
+                                  Icons.check_box_outlined,
+                                  size: 26.0,
+                                )
+                              : const Icon(
+                                  Icons.check_box_outline_blank_outlined,
+                                  size: 26.0,
+                                ),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: DottedBorder(
+                                  borderType: BorderType.RRect,
+                                  radius: const Radius.circular(12),
+                                  color: labelList![index].color.toColor(),
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    child: Container(
+                                        color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                  Icons.label_important_rounded,
+                                                  color: labelList![index]
+                                                      .color
+                                                      .toColor()),
+                                              Flexible(
+                                                  child: Text(
+                                                      labelList![index].title,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis)),
+                                            ],
+                                          ),
+                                        )),
+                                  )),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-            itemCount: labels.length),
-      );
+              itemCount: labelList!.length),
+        );
+      }
     }
 
     return Container();
@@ -760,298 +760,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   }
 
   /// Scroll Toolbar
-  _buildSmallSizeOnToolbar() {
-    if (_titleFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'small';
-            flutter_quill.Style selectionStyle =
-                _titleQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Small',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    } else if (_detailContentFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 0, 2.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'small';
-            flutter_quill.Style selectionStyle =
-                _detailContentQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Small',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    }
-    return Container();
-  }
-
-  _buildLargeSizeOnToolbar() {
-    if (_titleFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'large';
-            flutter_quill.Style selectionStyle =
-                _titleQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Large',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    } else if (_detailContentFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 2.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'large';
-            flutter_quill.Style selectionStyle =
-                _detailContentQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Large',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    }
-    return Container();
-  }
-
-  _buildHugeSizeOnToolbar() {
-    if (_titleFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'huge';
-            flutter_quill.Style selectionStyle =
-                _titleQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _titleQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Huge',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    } else if (_detailContentFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 0, 0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            String newValue = 'huge';
-            flutter_quill.Style selectionStyle =
-                _detailContentQuillController.getSelectionStyle();
-            final attribute = selectionStyle.attributes['size'];
-            if (attribute == null) {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            } else {
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue('size', null));
-              _detailContentQuillController.formatSelection(
-                  flutter_quill.Attribute.fromKeyValue(
-                      'size', newValue == '0' ? null : getFontSize(newValue)));
-            }
-          },
-          icon: const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_size,
-                size: 20,
-              ),
-              Text(
-                'Huge',
-                style: TextStyle(fontSize: 10),
-              )
-            ],
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    }
-    return Container();
-  }
-
-  bool selectionHavingFontSizeAttribute(
-      flutter_quill.Style selectionStyle, String attributeValue) {
-    final attribute = selectionStyle.attributes['size'];
-    if (attribute == null) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  dynamic getFontSize(dynamic sizeValue) {
-    if (sizeValue is String &&
-        ['small', 'normal', 'large', 'huge'].contains(sizeValue)) {
-      return sizeValue;
-    }
-
-    if (sizeValue is double) {
-      return sizeValue;
-    }
-
-    if (sizeValue is int) {
-      return sizeValue.toDouble();
-    }
-
-    assert(sizeValue is String);
-    final fontSize = double.tryParse(sizeValue);
-    if (fontSize == null) {
-      throw 'Invalid size $sizeValue';
-    }
-    return fontSize;
-  }
 
   _buildTextColorOnToolbar() {
     if (_titleFocusNode.hasFocus) {
@@ -1371,7 +1079,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     return Container();
   }
 
-  onBack() {
+  _onBack() {
     if (_titleFocusNode.hasFocus) {
       _titleFocusNode.unfocus();
     } else if (_detailContentFocusNode.hasFocus) {
@@ -1379,49 +1087,57 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     }
   }
 
-  getLabels() async {
-    if (context.watch<LabelNotifier>().labels!.isNotEmpty && !dataLoaded) {
-      if (widget.note is NoteModel) {
+  _setSelectedLabels() async {
+    if (labelList != null &&
+        labelList!.isNotEmpty &&
+        !selectedLabelDataLoaded) {
+      if (widget.note != null) {
         List<dynamic> labelIds = jsonDecode(widget.note!.labels!);
         selectedLabelIds = labelIds;
         setState(() {
-          noteLabels = context
-              .watch<LabelNotifier>()
-              .labels!
-              .where((model) => labelIds.contains(model.id))
-              .toList();
+          selectedNoteLabels =
+              labelList!.where((model) => labelIds.contains(model.id)).toList();
+          selectedLabelDataLoaded = true;
         });
       }
     }
   }
 
-  getNoteSubject() {
-    List<SubjectModel>? subjects = [];
-
+  _setSelectedSubject() {
+    /*
+    Update note
+     */
     if (widget.note?.subjectId != null) {
-      if (context.watch<SubjectNotifier>().subjects!.isNotEmpty &&
-          !dataLoaded) {
-        subjects = context
-            .watch<SubjectNotifier>()
-            .subjects!
+      List<SubjectModel>? subjects;
+
+      if (subjectList != null &&
+          subjectList!.isNotEmpty &&
+          !selectedSubjectDataLoaded) {
+        subjects = subjectList!
             .where((model) => widget.note!.subjectId == model.id)
             .toList();
 
         if (subjects.isNotEmpty) {
-          setState(() {
-            print(subjects!.first.title);
-            selectedSubject = subjects?.first;
-          });
+          selectedSubject = subjects.first;
+
+          selectedSubjectDataLoaded = true;
         }
       }
+    }
+
+    /*
+    Create note for subject
+     */
+    if (widget.subject != null && subjectList!.isNotEmpty) {
+      selectedSubject = subjectList!.first;
     }
   }
 
   Widget _buildLabels() {
     List<Widget> labelWidgets = [];
 
-    if (noteLabels!.isNotEmpty) {
-      for (var element in noteLabels!) {
+    if (selectedNoteLabels!.isNotEmpty) {
+      for (var element in selectedNoteLabels!) {
         labelWidgets.add(
           Padding(
             padding: const EdgeInsets.all(2.0),
@@ -1464,19 +1180,32 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         ));
   }
 
+  Future<bool> _onCreateNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.create(note);
+  }
+
+  Future<bool> _onUpdateNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.update(note);
+  }
+
+  Future<NoteModel?> _onGetUpdatedNote(
+      BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.getById(note.id!);
+  }
+
   @override
   Widget build(BuildContext context) {
     final noteNotifier = Provider.of<NoteNotifier>(context);
-    getLabels();
-    getNoteSubject();
-    dataLoaded = true;
 
     return CoreFullScreenDialog(
-      title: widget.note == null ? 'Create Note' : 'Edit Note',
+      isShowOptionActionButton: true,
+      title: widget.note == null ? 'Create' : 'Update',
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
+      isShowBottomActionButton: true,
       isShowGeneralActionButton: false,
       optionActionContent: buildOptionActionContent(context),
+      onGoHome: () {},
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
           _formKey.currentState!.save();
@@ -1487,11 +1216,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           final description = jsonEncode(
               _detailContentQuillController.document.toDelta().toJson());
 
-          final labels = jsonEncode(selectedLabelIds);
-
-          if (title.isEmpty || description.isEmpty) {
+          if (_detailContentQuillController.document.isEmpty()) {
+            CoreNotification.showMessage(context,
+                CoreNotificationStatus.warning, 'Please enter your content!');
             return;
           }
+
+          final labels = jsonEncode(selectedLabelIds);
 
           if (widget.note == null &&
               widget.actionMode == ActionModeEnum.create) {
@@ -1502,21 +1233,26 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 subjectId: selectedSubject?.id,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.note?.id);
-            if (await NoteDatabaseManager.create(model)) {
-              noteNotifier.onCountAll();
 
-              CoreNotification.show(context, CoreNotificationStatus.success,
-                  CoreNotificationAction.create, 'Note');
+            _onCreateNote(context, model).then((result) {
+              if (result) {
+                noteNotifier.onCountAll();
 
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        const NoteListScreen(noteConditionModel: null)),
-                (route) => false,
-              );
-            }
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.create, 'Note');
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          const NoteListScreen(noteConditionModel: null)),
+                  (route) => false,
+                );
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.create, 'Note');
+              }
+            });
           } else if (widget.note != null &&
               widget.actionMode == ActionModeEnum.update) {
             final NoteModel model = NoteModel(
@@ -1524,28 +1260,48 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 description: description,
                 labels: labels,
                 subjectId: selectedSubject?.id,
+                isFavourite: widget.note?.isFavourite,
                 createdAt: widget.note?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.note?.id);
-            if (await NoteDatabaseManager.update(model)) {
-              CoreNotification.show(context, CoreNotificationStatus.success,
-                  CoreNotificationAction.update, 'Note');
 
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        const NoteListScreen(noteConditionModel: null)),
-                (route) => false,
-              );
-            }
+            _onUpdateNote(context, model).then((result) {
+              if (result) {
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.update, 'Note');
+
+                // Navigator.pushAndRemoveUntil(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) =>
+                //           const NoteListScreen(noteConditionModel: null)),
+                //   (route) => false,
+                // );
+
+                _onGetUpdatedNote(context, model).then((result) {
+                  if (result != null) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NoteDetailScreen(
+                                  note: result,
+                                  labels: selectedNoteLabels,
+                                  subject: selectedSubject,
+                                )),
+                        (route) => false);
+                  }
+                });
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.update, 'Note');
+              }
+            });
           }
         }
       },
-      onRedo: () {},
-      onUndo: () {},
-      onBack: () {},
+      onRedo: null,
+      onUndo: null,
+      onBack: null,
       bottomActionBar: [
         Column(
           children: [
@@ -1577,16 +1333,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         _buildIndentDecreaseOnToolbar(),
         _buildListOnToolbar(),
         _buildNumberListOnToolbar(),
-        _buildSmallSizeOnToolbar(),
-        _buildLargeSizeOnToolbar(),
-        _buildHugeSizeOnToolbar(),
       ],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Form(
           key: _formKey,
           onWillPop: () async {
-            onBack();
+            _onBack();
             if (await CoreHelperWidget.confirmFunction(context)) {
               return true;
             }
@@ -1707,94 +1460,63 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                     ),
                   ],
                 ),
-                // DropdownMenu<SubjectModel>(
-                //   menuStyle: MenuStyle(
-                //     backgroundColor: MaterialStateProperty.resolveWith((states) {
-                //       return Colors.white; //your desired selected background color
-                //     }),
-                //
-                //   ),
-                //   initialSelection: context.watch<SubjectNotifier>().subjects!.first,
-                //   onSelected: (SubjectModel? value) {
-                //     // This is called when the user selects an item.
-                //     setState(() {
-                //       _selectedSubjectId = value!.id;
-                //     });
-                //   },
-                //   inputDecorationTheme: const InputDecorationTheme(
-                //     fillColor: Colors.white,
-                //
-                //   ),
-                //   dropdownMenuEntries: context.watch<SubjectNotifier>().subjects!.map<DropdownMenuEntry<SubjectModel>>((SubjectModel value) {
-                //     return DropdownMenuEntry<SubjectModel>(
-                //         value: value,
-                //         label: value.title,
-                //     );
-                //   }).toList(),
-                // ),
+                StreamBuilder<List<SubjectModel>?>(
+                    stream: _subjectStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData &&
+                          snapshot.data != null &&
+                          snapshot.data!.isNotEmpty) {
+                        _setSelectedSubject();
 
-                // DropdownButton(
-                //   style: TextStyle(color: Colors.black12),
-                //   isExpanded: true,
-                //   value: context.watch<SubjectNotifier>().subjects!.first,
-                //   onChanged: (newValue) {
-                //     setState(() {
-                //       _selectedSubjectId = newValue!.id;
-                //     });
-                //   },
-                //   items: context.watch<SubjectNotifier>().subjects!.map((item) {
-                //     return DropdownMenuItem(
-                //       value: item,
-                //       child: Text(item.title, overflow: TextOverflow.ellipsis, maxLines: 1),
-                //     );
-                //   }).toList(),
-                // ),
-
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: DropdownButtonFormField(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Color(0xff343a40), width: 2),
-                                borderRadius: BorderRadius.circular(8.0),
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField(
+                                    isExpanded: true,
+                                    decoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Color(0xff343a40), width: 2),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Color(0xff343a40), width: 2),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    value: selectedSubject,
+                                    onChanged: (SubjectModel? newValue) {
+                                      setState(() {
+                                        selectedSubject = newValue;
+                                      });
+                                    },
+                                    items: snapshot.data!.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item.title,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1),
+                                      );
+                                    }).toList()),
                               ),
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Color(0xff343a40), width: 2),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                            ),
-                            dropdownColor: Colors.white,
-                            value: selectedSubject,
-                            onChanged: (SubjectModel? newValue) {
-                              setState(() {
-                                selectedSubject = newValue;
-                                print(selectedSubject!.title.toString());
-                              });
-                            },
-                            items: context
-                                .watch<SubjectNotifier>()
-                                .subjects!
-                                .map((item) {
-                              return DropdownMenuItem(
-                                value: item,
-                                child: Text(item.title,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1),
-                              );
-                            }).toList()),
-                      ),
-                    ],
-                  ),
-                ),
-
+                            ],
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return const Text('No subjects found',
+                            style: TextStyle(color: Colors.white54));
+                      }
+                    }),
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,

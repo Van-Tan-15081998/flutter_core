@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreButtonStyle.dart';
 
+import '../../../../app/library/common/utils/CommonAudioOnPressButton.dart';
+
 class CoreElevatedButton extends ElevatedButton {
 
   ButtonStyle? style;
@@ -42,7 +44,14 @@ class CoreElevatedButton extends ElevatedButton {
   ),
         super(
         key: key,
-        onPressed: onPressed,
+        onPressed: () {
+          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+          audio.playAudioOnPress().then((value) {
+            if(value) {
+              onPressed!();
+            }
+          });
+        },
         onLongPress: onLongPress,
         onHover: onHover,
         onFocusChange: onFocusChange,
@@ -92,7 +101,14 @@ class CoreElevatedButton extends ElevatedButton {
           side: BorderSide(color: coreButtonStyle.kitBorderColor ?? kitBorderColor)))),
         super(
         key: key,
-        onPressed: onPressed,
+        onPressed: () {
+          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+          audio.playAudioOnPress().then((value) {
+            if(value) {
+              onPressed!();
+            }
+          });
+        },
         onLongPress: onLongPress,
         onHover: onHover,
         onFocusChange: onFocusChange,
@@ -164,7 +180,14 @@ class CoreElevatedButton extends ElevatedButton {
           side: BorderSide(color: coreButtonStyle.kitBorderColor ?? kitBorderColor)))),
         super(
         key: key,
-        onPressed: onPressed,
+        onPressed: () {
+          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+          audio.playAudioOnPress().then((value) {
+            if(value) {
+              onPressed!();
+            }
+          });
+        },
         onLongPress: onLongPress,
         onHover: onHover,
         onFocusChange: onFocusChange,
