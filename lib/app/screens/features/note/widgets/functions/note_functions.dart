@@ -5,9 +5,7 @@ class NoteFunctions {
   static void addStringToQuillContent(
       {required flutter_quill.QuillController quillController,
       required TextSelection selection,
-      required Object? object,
       required String insertString}) {
-
     final currentSelection = quillController.selection;
     if (currentSelection.isValid) {
       final index = quillController.selection.baseOffset;

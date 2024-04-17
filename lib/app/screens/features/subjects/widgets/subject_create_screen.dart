@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -15,12 +16,18 @@ import '../../../../library/enums/CommonEnums.dart';
 import '../databases/subject_db_manager.dart';
 import '../models/subject_model.dart';
 import '../providers/subject_notifier.dart';
+import 'subject_detail_screen.dart';
 import 'subject_list_screen.dart';
 
 class SubjectCreateScreen extends StatefulWidget {
   final SubjectModel? subject;
+  final SubjectModel? parentSubject;
   final ActionModeEnum actionMode;
-  const SubjectCreateScreen({super.key, this.subject, required this.actionMode});
+  const SubjectCreateScreen(
+      {super.key,
+      this.subject,
+      required this.parentSubject,
+      required this.actionMode});
 
   @override
   State<SubjectCreateScreen> createState() => _SubjectCreateScreenState();
@@ -31,21 +38,63 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
   String _title = '';
   String _color = '';
 
+  bool selectedSubjectDataLoaded = false;
+
   Color defaultColor = Colors.black;
   final ScrollController _controllerScrollController = ScrollController();
 
   final myController = TextEditingController();
   final myFocusNode = FocusNode();
 
+  late StreamController<List<SubjectModel>?> _subjectStreamController;
+  late Stream<List<SubjectModel>?> _subjectStream;
+  List<SubjectModel>? subjectList = [];
+  SubjectModel? selectedSubject;
+
+  /*
+  Get Subjects From DB
+   */
+  Future<List<SubjectModel>?> _fetchSubjects() async {
+    List<SubjectModel>? subjects = await SubjectDatabaseManager.all();
+
+    return subjects;
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    _subjectStreamController = StreamController<List<SubjectModel>?>();
+    _subjectStream = _subjectStreamController.stream;
+    _subjectStreamController.add(subjectList);
+
+    _fetchSubjects().then((subjects) {
+      if (subjects != null && subjects.isNotEmpty) {
+        setState(() {
+          /*
+          Limit the subject list for choose
+           */
+          if (widget.parentSubject != null && subjects.isNotEmpty) {
+            List<SubjectModel>? mySubjects = subjects
+                .where((element) => element.id == widget.parentSubject!.id)
+                .toList();
+            if (mySubjects.isNotEmpty) {
+              subjectList!.add(mySubjects.first);
+            }
+          } else if (widget.parentSubject == null) {
+            subjectList = subjects;
+          }
+        });
+
+        _subjectStreamController.add(subjectList);
+      }
+    });
+
     myFocusNode.requestFocus();
 
     // Update mode
-    if(widget.subject is SubjectModel) {
+    if (widget.subject is SubjectModel) {
       myController.text = widget.subject!.title;
       _title = widget.subject!.title;
       if (widget.subject!.color.isNotEmpty) {
@@ -55,16 +104,76 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
     }
   }
 
+  onBack() {
+    if (myFocusNode.hasFocus) {
+      myFocusNode.unfocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    _subjectStreamController.close();
+    super.dispose();
+  }
+
+  Future<bool> _onCreateSubject(
+      BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.create(subject);
+  }
+
+  Future<bool> _onUpdateSubject(
+      BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.update(subject);
+  }
+
+  Future<SubjectModel?> _onGetUpdatedSubject(
+      BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.getById(subject.id!);
+  }
+
+  _setSelectedSubject() {
+    /*
+    Update subject
+     */
+    if (widget.subject?.parentId != null) {
+      List<SubjectModel>? subjects;
+
+      if (subjectList != null &&
+          subjectList!.isNotEmpty &&
+          !selectedSubjectDataLoaded) {
+        subjects = subjectList!
+            .where((model) => widget.subject!.parentId == model.id)
+            .toList();
+
+        if (subjects.isNotEmpty) {
+          selectedSubject = subjects.first;
+
+          selectedSubjectDataLoaded = true;
+        }
+      }
+    }
+
+    /*
+    Create sub subject
+     */
+    if (widget.parentSubject != null && subjectList!.isNotEmpty) {
+      selectedSubject = subjectList!.first;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjectNotifier = Provider.of<SubjectNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: widget.subject == null ? 'Create Subject' : 'Edit Subject',
+      title: widget.subject == null ? 'Create' : 'Update',
+      isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
+      isShowBottomActionButton: false,
       isShowGeneralActionButton: false,
       optionActionContent: Container(),
+      onGoHome: () {},
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
           if (widget.subject == null &&
@@ -72,55 +181,73 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
             final SubjectModel model = SubjectModel(
                 title: _title,
                 color: _color,
+                parentId: selectedSubject?.id,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.subject?.id);
-            if (await SubjectDatabaseManager.create(model)) {
-              subjectNotifier.refresh();
-              subjectNotifier.onCountAll();
-              CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.create, 'Subject');
 
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const SubjectListScreen(subjectConditionModel: null,)),
-                    (route) => false,
-              );
-            }
+            _onCreateSubject(context, model).then((result) {
+              if (result) {
+                subjectNotifier.onCountAll();
+
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.create, 'Subject');
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SubjectListScreen(
+                            subjectConditionModel: null,
+                          )),
+                  (route) => false,
+                );
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.create, 'Subject');
+              }
+            });
           } else if (widget.subject != null &&
               widget.actionMode == ActionModeEnum.update) {
             final SubjectModel model = SubjectModel(
                 title: _title,
                 color: _color,
+                parentId: selectedSubject?.id,
                 createdAt: widget.subject?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.subject?.id);
-            if (await SubjectDatabaseManager.update(model)) {
-              subjectNotifier.refresh();
-              CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.update, 'Subject');
-              // Navigator.pop(context);
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const SubjectListScreen(subjectConditionModel: null,)),
-                    (route) => false,
-              );
-            }
+
+            _onUpdateSubject(context, model).then((result) {
+              if (result) {
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.update, 'Subject');
+
+                _onGetUpdatedSubject(context, model).then((result) {
+                  if (result != null) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SubjectDetailScreen(
+                                  subject: result,
+                                )),
+                        (route) => false);
+                  }
+                });
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.update, 'Subject');
+              }
+            });
           }
         }
       },
-      onRedo: () {
-
-      },
-      onUndo: () {
-
-      },
+      onRedo: () {},
+      onUndo: () {},
       onBack: () {},
       bottomActionBar: [Container()],
       bottomActionBarScrollable: [Container()],
       child: WillPopScope(
         onWillPop: () async {
+          onBack();
           if (await CoreHelperWidget.confirmFunction(context)) {
-
-            myFocusNode.unfocus();
             return true;
           }
           return false;
@@ -141,6 +268,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: DottedBorder(
+                      color: const Color(0xFF404040),
                       borderType: BorderType.RRect,
                       radius: const Radius.circular(12),
                       padding: const EdgeInsets.all(6),
@@ -165,11 +293,20 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                             Icon( Icons.palette_rounded, size: 26.0, color: _color.toColor()),
+                                            Icon(Icons.palette_rounded,
+                                                size: 26.0,
+                                                color: _color.toColor()),
                                             const SizedBox(width: 6.0),
-                                            Text(_title.isNotEmpty
-                                                ? _title
-                                                : 'Your subject'),
+                                            Flexible(
+                                              child: Text(
+                                                  _title.isNotEmpty
+                                                      ? _title
+                                                      : 'Your subject',
+                                                  style: const TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                          FontWeight.w400)),
+                                            ),
                                           ],
                                         ),
                                       )),
@@ -185,7 +322,20 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Title:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  color: Colors.white54),
+                            ),
+                          ],
+                        ),
                         CoreTextFormField(
+                          style: const TextStyle(color: Colors.white),
                           onChanged: (value) {
                             setState(() {
                               _title = value;
@@ -193,18 +343,26 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                           },
                           controller: myController,
                           focusNode: myFocusNode,
-                          onValidator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return const Text('Please enter your title', style: TextStyle(color: Colors.redAccent));
-                            }
-                            return null;
-                          },
-                          maxLength: 30,
+                          validateString: 'Please enter your title',
+                          maxLength: 60,
                           icon: const Icon(Icons.edit, color: Colors.white54),
                           label: 'Title',
                           labelColor: Colors.white54,
                           placeholder: 'Enter you title',
-                          helper: 'Please enter your title',
+                          helper: '',
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Color:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  color: Colors.white54),
+                            ),
+                          ],
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -243,7 +401,8 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                                         MainAxisSize.min,
                                                     children: [
                                                       MaterialPicker(
-                                                        pickerColor: defaultColor, //default color
+                                                        pickerColor:
+                                                            defaultColor, //default color
                                                         onColorChanged:
                                                             (Color color) {
                                                           setState(() {
@@ -267,11 +426,89 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                     kitForegroundColorOption: Colors.black,
                                     coreFixedSizeButton:
                                         CoreFixedSizeButton.medium_40),
-                                child: Text('Choose color', style: CommonStyles.buttonTextStyle),
+                                child: Text('Choose color',
+                                    style: CommonStyles.buttonTextStyle),
                               ),
                             ],
                           ),
                         ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Parent subject:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  color: Colors.white54),
+                            ),
+                          ],
+                        ),
+                        StreamBuilder<List<SubjectModel>?>(
+                            stream: _subjectStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData &&
+                                  snapshot.data != null &&
+                                  snapshot.data!.isNotEmpty) {
+                                _setSelectedSubject();
+
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: DropdownButtonFormField(
+                                            isExpanded: true,
+                                            decoration: InputDecoration(
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Color(0xff343a40),
+                                                    width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Color(0xff343a40),
+                                                    width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(8.0),
+                                              ),
+                                              filled: true,
+                                              fillColor: Colors.white,
+                                            ),
+                                            dropdownColor: Colors.white,
+                                            value: selectedSubject,
+                                            onChanged:
+                                                (SubjectModel? newValue) {
+                                              setState(() {
+                                                selectedSubject = newValue;
+                                              });
+                                            },
+                                            items: snapshot.data!.map((item) {
+                                              return DropdownMenuItem(
+                                                value: item,
+                                                child: Text(item.title,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    maxLines: 1),
+                                              );
+                                            }).toList()),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                return const Text(
+                                  'No subjects found',
+                                  style: TextStyle(color: Colors.white54),
+                                );
+                              }
+                            }),
+                        const SizedBox(height: 20.0),
                       ],
                     ),
                   ),

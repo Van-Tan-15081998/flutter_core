@@ -1,29 +1,29 @@
-import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
-
 import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../models/label_model.dart';
 import '../label_create_screen.dart';
+import '../label_detail_screen.dart';
 
 class LabelWidget extends StatefulWidget {
   final LabelModel label;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
-  const LabelWidget(
-      {Key? key,
-      required this.label,
-      required this.onTap,
-      required this.onLongPress})
-      : super(key: key);
+  final VoidCallback? onUpdate;
+  final VoidCallback? onDelete;
+  final VoidCallback? onDeleteForever;
+  final VoidCallback? onRestoreFromTrash;
+  const LabelWidget({
+    Key? key,
+    required this.label,
+    required this.onUpdate,
+    required this.onDelete,
+    required this.onDeleteForever,
+    required this.onRestoreFromTrash,
+  }) : super(key: key);
 
   @override
   State<LabelWidget> createState() => _LabelWidgetState();
@@ -67,21 +67,31 @@ class _LabelWidgetState extends State<LabelWidget> {
           SlidableAction(
             flex: 1,
             onPressed: (context) {
-              // Get.offAll(NoteDetailScreen(note: widget.note));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LabelDetailScreen(label: widget.label)));
             },
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF7BC043),
+            backgroundColor: const Color(0xFF202124),
+            foregroundColor: const Color(0xff17a2b8),
             icon: Icons.remove_red_eye_rounded,
             label: 'View',
           ),
-          SlidableAction(
-            flex: 1,
-            onPressed: (context) {},
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xffdc3545),
-            icon: Icons.delete,
-            label: 'Delete',
-          ),
+          widget.label.deletedAt == null
+              ? SlidableAction(
+                  flex: 1,
+                  onPressed: (context) {
+                    if (widget.onDelete != null) {
+                      widget.onDelete!();
+                    }
+                  },
+                  backgroundColor: const Color(0xFF202124),
+                  foregroundColor: const Color(0xffffb90f),
+                  icon: Icons.delete,
+                  label: 'Delete',
+                )
+              : Container()
         ],
       ),
       child: Padding(
@@ -89,7 +99,7 @@ class _LabelWidgetState extends State<LabelWidget> {
         child: ExpandableNotifier(
             child: Column(
           children: [
-            widget.label.updatedAt == null
+            widget.label.updatedAt == null && widget.label.deletedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                     child: Row(
@@ -104,20 +114,41 @@ class _LabelWidgetState extends State<LabelWidget> {
                       ],
                     ),
                   )
-                : Padding(
+                : Container(),
+            widget.label.updatedAt != null && widget.label.deletedAt == null
+                ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         const Icon(Icons.edit,
-                            size: 13.0, color: Colors.black45),
+                            size: 13.0, color: Colors.white54),
+                        const SizedBox(width: 5.0),
                         Text(getTimeString(widget.label.updatedAt!),
                             style: const TextStyle(
-                                fontSize: 13.0, color: Colors.black45))
+                                fontSize: 13.0, color: Colors.white54))
                       ],
                     ),
-                  ),
+                  )
+                : Container(),
+            widget.label.deletedAt != null
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Icon(Icons.delete_rounded,
+                            size: 13.0, color: Colors.white54),
+                        const SizedBox(width: 5.0),
+                        Text(getTimeString(widget.label.deletedAt!),
+                            style: const TextStyle(
+                                fontSize: 13.0, color: Colors.white54))
+                      ],
+                    ),
+                  )
+                : Container(),
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius:
@@ -165,10 +196,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                                   const SizedBox(width: 6.0),
                                                   Flexible(
                                                     child: Text(
-                                                        widget.label.title,
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow
-                                                            .ellipsis),
+                                                        widget.label.title),
                                                   ),
                                                 ],
                                               ),
@@ -176,34 +204,64 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       )),
                                 ),
                               ),
-                              CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              LabelCreateScreen(
-                                                actionMode:
-                                                    ActionModeEnum.update,
-                                                label: widget.label,
-                                              )));
-                                },
-                                coreButtonStyle: CoreButtonStyle.options(
-                                    coreStyle: CoreStyle.outlined,
-                                    coreColor: CoreColor.dark,
-                                    coreRadius: CoreRadius.radius_6,
-                                    kitBackgroundColorOption: Colors.white70,
-                                    kitForegroundColorOption:
-                                        const Color(0xFF404040),
-                                    coreFixedSizeButton:
-                                        CoreFixedSizeButton.medium_40),
-                                child: Text('Edit',
-                                    style: GoogleFonts.montserrat(
-                                        fontStyle: FontStyle.italic,
-                                        fontSize: 16,
-                                        color: const Color(0xFF404040),
-                                        fontWeight: FontWeight.w600)),
-                              ),
+                              widget.label.deletedAt == null
+                                  ? Tooltip(
+                                      message: 'Update',
+                                      child: CoreElevatedButton.iconOnly(
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      LabelCreateScreen(
+                                                        actionMode:
+                                                            ActionModeEnum
+                                                                .update,
+                                                        label: widget.label,
+                                                      )));
+                                        },
+                                        coreButtonStyle: CoreButtonStyle.dark(
+                                            kitRadius: 6.0),
+                                        icon:
+                                            const Icon(Icons.edit_note_rounded),
+                                      ),
+                                    )
+                                  : Column(children: [
+                                      Tooltip(
+                                        message: 'Restore',
+                                        child: CoreElevatedButton.iconOnly(
+                                          onPressed: () {
+                                            if (widget.onRestoreFromTrash !=
+                                                null) {
+                                              widget.onRestoreFromTrash!();
+                                            }
+                                          },
+                                          coreButtonStyle: CoreButtonStyle.info(
+                                              kitRadius: 6.0),
+                                          icon: const Icon(
+                                              Icons.restore_from_trash_rounded,
+                                              size: 26.0),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2.0),
+                                      Tooltip(
+                                        message: 'Delete forever',
+                                        child: CoreElevatedButton.iconOnly(
+                                          onPressed: () {
+                                            if (widget.onDeleteForever !=
+                                                null) {
+                                              widget.onDeleteForever!();
+                                            }
+                                          },
+                                          coreButtonStyle:
+                                              CoreButtonStyle.danger(
+                                                  kitRadius: 6.0),
+                                          icon: const Icon(
+                                              Icons.delete_forever_rounded,
+                                              size: 26.0),
+                                        ),
+                                      ),
+                                    ])
                             ]),
                       ),
                     ),

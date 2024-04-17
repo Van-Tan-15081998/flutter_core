@@ -12,7 +12,6 @@ class NoteNotifier with ChangeNotifier {
   int _countAllNotes = 0;
   int get countAllNotes => _countAllNotes;
   NoteNotifier() {
-    // getAll();
     onCountAll();
   }
 
@@ -20,58 +19,6 @@ class NoteNotifier with ChangeNotifier {
       _countAllNotes = await NoteDatabaseManager.onCountAll();
       notifyListeners();
   }
-
-  // Future<bool> addNote(NoteModel note) async {
-  //   try {
-  //     NoteModel? noteAddToDatabase;
-  //     noteAddToDatabase = await addNoteToDatabase(note);
-  //
-  //     if (noteAddToDatabase != null) {
-  //       _notes.insert(0, noteAddToDatabase);
-  //       notifyListeners();
-  //       return true;
-  //     }
-  //   } catch (e) {
-  //     return false;
-  //   }
-  //   return false;
-  // }
-  //
-  // Future<NoteModel?> addNoteToDatabase(NoteModel note) async {
-  //   NoteModel? noteAddToDatabase;
-  //   noteAddToDatabase = await NoteDatabaseManager.onCreate(note);
-  //   return noteAddToDatabase;
-  // }
-
-  // Future<bool> updateNote(NoteModel note) async {
-  //   try {
-  //     NoteModel? noteUpdateToDatabase;
-  //     noteUpdateToDatabase = await updateNoteToDatabase(note);
-  //
-  //     if (noteUpdateToDatabase != null) {
-  //       int updateId = noteUpdateToDatabase.id!;
-  //       bool isIdExists = _notes.any((item) => item.id == updateId);
-  //       if (isIdExists) {
-  //         for (int i = 0; i < _notes.length; i++) {
-  //           if (_notes[i].id == updateId) {
-  //             _notes[i] = noteUpdateToDatabase;
-  //             notifyListeners();
-  //           }
-  //         }
-  //       }
-  //       return true;
-  //     }
-  //   } catch (e) {
-  //     return false;
-  //   }
-  //   return false;
-  // }
-  //
-  // Future<NoteModel?> updateNoteToDatabase(NoteModel note) async {
-  //   NoteModel? noteAddToDatabase;
-  //   noteAddToDatabase = await NoteDatabaseManager.onUpdate(note);
-  //   return noteAddToDatabase;
-  // }
 
   bool deleteNote(NoteModel note) {
     try {
@@ -96,7 +43,7 @@ class NoteNotifier with ChangeNotifier {
 
   Future<List<NoteModel>?> getAll() async {
     List<NoteModel>? result = [];
-    result = await NoteDatabaseManager.initData();
+    result = await NoteDatabaseManager.all();
 
     if (result != null) {
       _notes = result;
@@ -112,7 +59,6 @@ class NoteNotifier with ChangeNotifier {
     if (result != null) {
       _notes = result;
       return _notes;
-      // notifyListeners();
     }
     return null;
   }

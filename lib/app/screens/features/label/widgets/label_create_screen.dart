@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
@@ -14,6 +15,8 @@ import '../../../../library/enums/CommonEnums.dart';
 import '../databases/label_db_manager.dart';
 import '../models/label_model.dart';
 import '../providers/label_notifier.dart';
+import 'label_detail_screen.dart';
+import 'label_list_screen.dart';
 
 class LabelCreateScreen extends StatefulWidget {
   final LabelModel? label;
@@ -35,13 +38,32 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
   final myController = TextEditingController();
   final myFocusNode = FocusNode();
 
+  Future<bool> _onCreateLabel(BuildContext context, LabelModel label) async {
+    return await LabelDatabaseManager.create(label);
+  }
+
+  Future<bool> _onUpdateLabel(BuildContext context, LabelModel label) async {
+    return await LabelDatabaseManager.update(label);
+  }
+
+  Future<LabelModel?> _onGetUpdatedLabel(
+      BuildContext context, LabelModel label) async {
+    return await LabelDatabaseManager.getById(label.id!);
+  }
+
+  onBack() {
+    if (myFocusNode.hasFocus) {
+      myFocusNode.unfocus();
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
     // Update mode
-    if(widget.label is LabelModel) {
+    if (widget.label is LabelModel) {
       myController.text = widget.label!.title;
       _title = widget.label!.title;
       if (widget.label!.color.isNotEmpty) {
@@ -49,6 +71,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
         _color = widget.label!.color;
       }
     }
+
+    myFocusNode.requestFocus();
   }
 
   @override
@@ -56,11 +80,14 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
     final labelNotifier = Provider.of<LabelNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: widget.label == null ? 'Create label' : 'Edit label',
+      title: widget.label == null ? 'Create' : 'Update',
+      isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
+      isShowBottomActionButton: false,
       isShowGeneralActionButton: false,
       optionActionContent: Container(),
+      onGoHome: () {},
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
           if (widget.label == null &&
@@ -70,12 +97,27 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                 color: _color,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.label?.id);
-            if (await LabelDatabaseManager.create(model)) {
-              labelNotifier.refresh();
-              CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.create, 'Label');
 
-              Navigator.pop(context);
-            }
+            _onCreateLabel(context, model).then((result) {
+              if (result) {
+                labelNotifier.onCountAll();
+
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.create, 'Label');
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const LabelListScreen(
+                            labelConditionModel: null,
+                          )),
+                  (route) => false,
+                );
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.create, 'Label');
+              }
+            });
           } else if (widget.label != null &&
               widget.actionMode == ActionModeEnum.update) {
             final LabelModel model = LabelModel(
@@ -84,28 +126,40 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                 createdAt: widget.label?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.label?.id);
-            if (await LabelDatabaseManager.update(model)) {
-              labelNotifier.refresh();
-              CoreNotification.show(context, CoreNotificationStatus.success, CoreNotificationAction.update, 'Label');
-              Navigator.pop(context);
-            }
+
+            _onUpdateLabel(context, model).then((result) {
+              if (result) {
+                CoreNotification.show(context, CoreNotificationStatus.success,
+                    CoreNotificationAction.update, 'Label');
+
+                _onGetUpdatedLabel(context, model).then((result) {
+                  if (result != null) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LabelDetailScreen(
+                                  label: result,
+                                )),
+                        (route) => false);
+                  }
+                });
+              } else {
+                CoreNotification.show(context, CoreNotificationStatus.error,
+                    CoreNotificationAction.update, 'Label');
+              }
+            });
           }
         }
       },
-      onRedo: () {
-
-      },
-      onUndo: () {
-
-      },
-      onBack: () {},
+      onRedo: null,
+      onUndo: null,
+      onBack: null,
       bottomActionBar: [Container()],
       bottomActionBarScrollable: [Container()],
       child: WillPopScope(
         onWillPop: () async {
+          onBack();
           if (await CoreHelperWidget.confirmFunction(context)) {
-
-            myFocusNode.unfocus();
             return true;
           }
           return false;
@@ -152,9 +206,11 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                           children: [
                                             Icon(Icons.label_important_rounded,
                                                 color: _color.toColor()),
-                                            Text(_title.isNotEmpty
-                                                ? _title
-                                                : 'Your label'),
+                                            Flexible(
+                                              child: Text(_title.isNotEmpty
+                                                  ? _title
+                                                  : 'Your label'),
+                                            ),
                                           ],
                                         ),
                                       )),
@@ -170,7 +226,20 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Title:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  color: Colors.white54),
+                            ),
+                          ],
+                        ),
                         CoreTextFormField(
+                          style: const TextStyle(color: Colors.white),
                           onChanged: (value) {
                             setState(() {
                               _title = value;
@@ -178,18 +247,26 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                           },
                           controller: myController,
                           focusNode: myFocusNode,
-                          onValidator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return const Text('Please enter your title', style: TextStyle(color: Colors.redAccent));
-                            }
-                            return null;
-                          },
+                          validateString: 'Please enter your title',
                           maxLength: 30,
                           icon: const Icon(Icons.edit, color: Colors.white54),
                           label: 'Title',
                           labelColor: Colors.white54,
                           placeholder: 'Enter you title',
-                          helper: 'Please enter your title',
+                          helper: '',
+                        ),
+                        const SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Color:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  color: Colors.white54),
+                            ),
+                          ],
                         ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -228,7 +305,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                                         MainAxisSize.min,
                                                     children: [
                                                       MaterialPicker(
-                                                        pickerColor: defaultColor, //default color
+                                                        pickerColor:
+                                                            defaultColor, //default color
                                                         onColorChanged:
                                                             (Color color) {
                                                           setState(() {
@@ -252,7 +330,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                     kitForegroundColorOption: Colors.black,
                                     coreFixedSizeButton:
                                         CoreFixedSizeButton.medium_40),
-                                child: Text('Choose color', style: CommonStyles.buttonTextStyle),
+                                child: Text('Choose color',
+                                    style: CommonStyles.buttonTextStyle),
                               ),
                             ],
                           ),

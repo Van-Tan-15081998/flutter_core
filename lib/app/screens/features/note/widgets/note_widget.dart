@@ -6,36 +6,41 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:provider/provider.dart';
+import 'package:animate_do/animate_do.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../library/common/styles/CommonStyles.dart';
+import '../../../setting/providers/setting_notifier.dart';
 import '../../label/models/label_model.dart';
 import '../../subjects/models/subject_condition_model.dart';
 import '../../subjects/models/subject_model.dart';
 import '../../subjects/widgets/subject_list_screen.dart';
 import '../models/note_model.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../note_detail_screen.dart';
 
 class NoteWidget extends StatefulWidget {
+  final int? index;
   final NoteModel note;
   final List<LabelModel>? labels;
   final SubjectModel? subject;
-  final VoidCallback onTap;
+  final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
   final VoidCallback? onDeleteForever;
   final VoidCallback? onRestoreFromTrash;
+  final VoidCallback? onFavourite;
   const NoteWidget(
       {Key? key,
+      required this.index,
       required this.note,
       required this.subject,
       required this.labels,
-      required this.onTap,
+      required this.onUpdate,
       required this.onDelete,
       required this.onDeleteForever,
-      required this.onRestoreFromTrash})
+      required this.onRestoreFromTrash,
+      required this.onFavourite})
       : super(key: key);
 
   @override
@@ -170,61 +175,64 @@ class _NoteWidgetState extends State<NoteWidget> {
   }
 
   Widget _buildLabels() {
-    List<Widget> labelWidgets = [];
+    if (widget.labels != null && widget.labels!.isNotEmpty) {
+      List<Widget> labelWidgets = [];
 
-    for (var element in widget.labels!) {
-      labelWidgets.add(
-        Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: DottedBorder(
-              borderType: BorderType.RRect,
-              radius: const Radius.circular(12),
-              color: element.color.toColor(),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-                child: Container(
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.label_important_rounded,
-                            color: element.color.toColor(),
-                          ),
-                          Flexible(
-                            child: Text(element.title,
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
-                          ),
-                        ],
-                      ),
-                    )),
-              )),
-        ),
-      );
-    }
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Flexible(
-          child: Container(
-            decoration: const BoxDecoration(
-              shape: BoxShape.rectangle,
-            ),
-            child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: labelWidgets,
-                  ),
+      for (var element in widget.labels!) {
+        labelWidgets.add(
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: DottedBorder(
+                borderType: BorderType.RRect,
+                radius: const Radius.circular(12),
+                color: element.color.toColor(),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  child: Container(
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.label_important_rounded,
+                              color: element.color.toColor(),
+                            ),
+                            Flexible(
+                              child: Text(element.title,
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ),
+                          ],
+                        ),
+                      )),
                 )),
           ),
-        ),
-      ],
-    );
+        );
+      }
+      return Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Flexible(
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.rectangle,
+              ),
+              child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: labelWidgets,
+                    ),
+                  )),
+            ),
+          ),
+        ],
+      );
+    }
+    return Container();
   }
 
   Widget _buildSubject() {
@@ -301,6 +309,8 @@ class _NoteWidgetState extends State<NoteWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final settingNotifier = Provider.of<SettingNotifier>(context);
+
     setDocuments();
     return Slidable(
       key: const ValueKey(0),
@@ -313,18 +323,28 @@ class _NoteWidgetState extends State<NoteWidget> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          NoteDetailScreen(
-                              note: widget.note,
-                              labels: widget.labels,
-                              subject: widget.subject
-                          )));
+                      builder: (context) => NoteDetailScreen(
+                          note: widget.note,
+                          labels: widget.labels,
+                          subject: widget.subject)));
             },
             backgroundColor: const Color(0xFF202124),
-            foregroundColor: const Color(0xFF7BC043),
+            foregroundColor: const Color(0xff17a2b8),
             icon: Icons.remove_red_eye_rounded,
-            label: 'View',
           ),
+          widget.note.deletedAt == null
+              ? SlidableAction(
+                  flex: 1,
+                  onPressed: (context) {
+                    if (widget.onFavourite != null) {
+                      widget.onFavourite!();
+                    }
+                  },
+                  backgroundColor: const Color(0xFF202124),
+                  foregroundColor: const Color(0xffdc3545),
+                  icon: Icons.favorite,
+                )
+              : Container(),
           widget.note.deletedAt == null
               ? SlidableAction(
                   flex: 1,
@@ -334,9 +354,8 @@ class _NoteWidgetState extends State<NoteWidget> {
                     }
                   },
                   backgroundColor: const Color(0xFF202124),
-                  foregroundColor: const Color(0xffdc3545),
+                  foregroundColor: const Color(0xffffb90f),
                   icon: Icons.delete,
-                  label: 'Delete',
                 )
               : Container()
         ],
@@ -344,220 +363,291 @@ class _NoteWidgetState extends State<NoteWidget> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
         child: ExpandableNotifier(
+            initialExpanded: settingNotifier.isExpandedNoteContent ?? false,
             child: Column(
-          children: [
-            widget.note.updatedAt == null && widget.note.deletedAt == null
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(getTimeString(widget.note.createdAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54)),
-                      ],
-                    ),
-                  )
-                : Container(),
-            widget.note.updatedAt != null && widget.note.deletedAt == null
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.edit,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.note.updatedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
-                    ),
-                  )
-                : Container(),
-            widget.note.deletedAt != null
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.delete_rounded,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.note.deletedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
-                    ),
-                  )
-                : Container(),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    // height: 150,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.lightGreen,
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
+              children: [
+                widget.note.updatedAt == null && widget.note.deletedAt == null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
                         child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            mainAxisSize: MainAxisSize.max,
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(widget.index.toString(),
+                                style: CommonStyles.labelTextStyle),
+                            Row(
+                              children: [
+                                Text(getTimeString(widget.note.createdAt!),
+                                    style: const TextStyle(
+                                        fontSize: 13.0, color: Colors.white54)),
+                                const SizedBox(width: 4.0),
+                                widget.note.isFavourite != null
+                                    ? BounceInDown(
+                                  duration: const Duration(milliseconds: 500),
+                                      child: const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0),
+                                    )
+                                    : Container(),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    : Container(),
+                widget.note.updatedAt != null && widget.note.deletedAt == null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(widget.index.toString(),
+                                style: CommonStyles.labelTextStyle),
+                            Row(
+                              children: [
+                                const Icon(Icons.edit,
+                                    size: 13.0, color: Colors.white54),
+                                const SizedBox(width: 5.0),
+                                Text(getTimeString(widget.note.updatedAt!),
+                                    style: const TextStyle(
+                                        fontSize: 13.0, color: Colors.white54)),
+                                const SizedBox(width: 4.0),
+                                widget.note.isFavourite != null
+                                    ? BounceInDown(
+                                  duration: const Duration(milliseconds: 500),
+                                      child: const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0),
+                                    )
+                                    : Container(),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    : Container(),
+                widget.note.deletedAt != null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(widget.index.toString(),
+                                style: CommonStyles.labelTextStyle),
+                            Row(
+                              children: [
+                                const Icon(Icons.delete_rounded,
+                                    size: 13.0, color: Colors.white54),
+                                const SizedBox(width: 5.0),
+                                Text(getTimeString(widget.note.deletedAt!),
+                                    style: const TextStyle(
+                                        fontSize: 13.0, color: Colors.white54)),
+                                const SizedBox(width: 4.0),
+                                widget.note.isFavourite != null
+                                    ? BounceInDown(
+                                  duration: const Duration(milliseconds: 500),
+                                      child: const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0),
+                                    )
+                                    : Container(),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    : Container(),
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        5.0), // Đây là giá trị bo góc ở đây
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        // height: 150,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: widget.subject != null &&
+                                    settingNotifier
+                                        .isSetColorAccordingSubjectColor!
+                                ? widget.subject!.color.toColor()
+                                : Colors.lightGreen,
+                            shape: BoxShape.rectangle,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          115.0,
+                                      child: checkTitleEmpty()
+                                          ? flutter_quill.QuillEditor(
+                                              controller: _titleQuillController,
+                                              readOnly:
+                                                  true, // true for view only mode
+                                              autoFocus: false,
+                                              expands: false,
+                                              focusNode: _focusNode,
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      10.0, 10.0, 10.0, 10.0),
+                                              scrollController:
+                                                  _scrollController,
+                                              scrollable: false,
+                                              showCursor: false)
+                                          : onGetTitle()),
+                                  widget.note.deletedAt == null
+                                      ? Tooltip(
+                                    message: 'Update',
+                                        child: CoreElevatedButton.iconOnly(
+                                            onPressed: () {
+                                              if (widget.onUpdate != null) {
+                                                widget.onUpdate!();
+                                              }
+                                            },
+                                            coreButtonStyle: CoreButtonStyle.dark(
+                                                kitRadius: 6.0),
+                                            icon: const Icon(
+                                                Icons.edit_note_rounded,
+                                                size: 26.0),
+                                          ),
+                                      )
+                                      : Column(children: [
+                                          Tooltip(
+                                            message: 'Restore',
+                                            child: CoreElevatedButton.iconOnly(
+                                              onPressed: () {
+                                                if (widget.onRestoreFromTrash !=
+                                                    null) {
+                                                  widget.onRestoreFromTrash!();
+                                                }
+                                              },
+                                              coreButtonStyle:
+                                                  CoreButtonStyle.info(
+                                                      kitRadius: 6.0),
+                                              icon: const Icon(
+                                                  Icons
+                                                      .restore_from_trash_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2.0),
+                                          Tooltip(
+                                            message: 'Delete forever',
+                                            child: CoreElevatedButton.iconOnly(
+                                              onPressed: () {
+                                                if (widget.onDeleteForever !=
+                                                    null) {
+                                                  widget.onDeleteForever!();
+                                                }
+                                              },
+                                              coreButtonStyle:
+                                                  CoreButtonStyle.danger(
+                                                      kitRadius: 6.0),
+                                              icon: const Icon(
+                                                  Icons.delete_forever_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          ),
+                                        ])
+                                ]),
+                          ),
+                        ),
+                      ),
+                      _buildSubject(),
+                      _buildLabels(),
+                      ScrollOnExpand(
+                        scrollOnExpand: true,
+                        scrollOnCollapse: false,
+                        child: ExpandablePanel(
+                          theme: const ExpandableThemeData(
+                            headerAlignment:
+                                ExpandablePanelHeaderAlignment.center,
+                            tapBodyToCollapse: true,
+                          ),
+                          header: Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Row(
+                                children: [
+                                  Text("[id:${widget.note.id!}] ",
+                                      style: const TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45)),
+                                  const Text("Content",
+                                      style: TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45)),
+                                ],
+                              )),
+                          collapsed: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width - 115.0,
-                                  child: checkTitleEmpty()
-                                      ? flutter_quill.QuillEditor(
-                                          controller: _titleQuillController,
-                                          readOnly:
-                                              true, // true for view only mode
-                                          autoFocus: false,
-                                          expands: false,
-                                          focusNode: _focusNode,
-                                          padding: const EdgeInsets.fromLTRB(
-                                              10.0, 10.0, 10.0, 10.0),
-                                          scrollController: _scrollController,
-                                          scrollable: false,
-                                          showCursor: false)
-                                      : onGetTitle()),
-                              widget.note.deletedAt == null
-                                  ? CoreElevatedButton.iconOnly(
-                                      onPressed: () {
-                                        widget.onTap();
-                                      },
-                                      coreButtonStyle:
-                                          CoreButtonStyle.dark(kitRadius: 6.0),
-                                      icon: const Icon(Icons.edit_note_rounded,
-                                          size: 26.0),
-                                    )
-                                  : Column(children: [
-                                      CoreElevatedButton.iconOnly(
-                                        onPressed: () {
-                                          if (widget.onRestoreFromTrash !=
-                                              null) {
-                                            widget.onRestoreFromTrash!();
-                                          }
-                                        },
-                                        coreButtonStyle: CoreButtonStyle.info(
-                                            kitRadius: 6.0),
-                                        icon: const Icon(
-                                            Icons.restore_from_trash_rounded,
-                                            size: 26.0),
-                                      ),
-                                      const SizedBox(height: 2.0),
-                                      CoreElevatedButton.iconOnly(
-                                        onPressed: () {
-                                          if (widget.onDeleteForever != null) {
-                                            widget.onDeleteForever!();
-                                          }
-                                        },
-                                        coreButtonStyle: CoreButtonStyle.danger(
-                                            kitRadius: 6.0),
-                                        icon: const Icon(
-                                            Icons.delete_forever_rounded,
-                                            size: 26.0),
-                                      ),
-                                    ])
-                            ]),
-                      ),
-                    ),
-                  ),
-                  _buildSubject(),
-                  _buildLabels(),
-                  ScrollOnExpand(
-                    scrollOnExpand: true,
-                    scrollOnCollapse: false,
-                    child: ExpandablePanel(
-                      theme: const ExpandableThemeData(
-                        headerAlignment: ExpandablePanelHeaderAlignment.center,
-                        tapBodyToCollapse: true,
-                      ),
-                      header: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              Text("[${widget.note.id!}] ",
-                                  style: const TextStyle(
-                                      fontSize: 13.0, color: Colors.black45)),
-                              const Text("Content",
-                                  style: TextStyle(
-                                      fontSize: 13.0, color: Colors.black45)),
-                            ],
-                          )),
-                      collapsed: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 35,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.rectangle,
-                                boxShadow: [],
+                                height: 35,
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.rectangle,
+                                    boxShadow: [],
+                                  ),
+                                  child: flutter_quill.QuillEditor(
+                                      controller:
+                                          _subDescriptionQuillController,
+                                      readOnly: true, // true for view only mode
+                                      autoFocus: false,
+                                      expands: false,
+                                      focusNode: _focusNode,
+                                      padding: const EdgeInsets.all(4.0),
+                                      scrollController: _scrollController,
+                                      scrollable: false,
+                                      showCursor: false),
+                                ),
                               ),
-                              child: flutter_quill.QuillEditor(
-                                  controller: _subDescriptionQuillController,
+                              Text(
+                                '...',
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          expanded: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              flutter_quill.QuillEditor(
+                                  controller: _descriptionQuillController,
                                   readOnly: true, // true for view only mode
                                   autoFocus: false,
                                   expands: false,
                                   focusNode: _focusNode,
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(4.0),
                                   scrollController: _scrollController,
                                   scrollable: false,
                                   showCursor: false),
-                            ),
+                            ],
                           ),
-                          Text(
-                            '...',
-                            style: GoogleFonts.montserrat(
-                                fontStyle: FontStyle.italic, fontSize: 14),
-                          ),
-                        ],
+                          builder: (_, collapsed, expanded) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 10, right: 10, bottom: 10),
+                              child: Expandable(
+                                collapsed: collapsed,
+                                expanded: expanded,
+                                theme: const ExpandableThemeData(
+                                    crossFadePoint: 0),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                      expanded: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          flutter_quill.QuillEditor(
-                              controller: _descriptionQuillController,
-                              readOnly: true, // true for view only mode
-                              autoFocus: false,
-                              expands: false,
-                              focusNode: _focusNode,
-                              padding: const EdgeInsets.all(10.0),
-                              scrollController: _scrollController,
-                              scrollable: false,
-                              showCursor: false),
-                        ],
-                      ),
-                      builder: (_, collapsed, expanded) {
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 10, right: 10, bottom: 10),
-                          child: Expandable(
-                            collapsed: collapsed,
-                            expanded: expanded,
-                            theme: const ExpandableThemeData(crossFadePoint: 0),
-                          ),
-                        );
-                      },
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ],
-        )),
+                ),
+              ],
+            )),
       ),
     );
   }

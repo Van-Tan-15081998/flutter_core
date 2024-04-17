@@ -6,12 +6,12 @@ class NoteModel {
   final String description;
   final String? labels; // label id list
   final int? subjectId;
-  final bool? isFavourite;
+  int? isFavourite;
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
 
-  const NoteModel(
+  NoteModel(
       {required this.title,
       required this.description,
       required this.createdAt,

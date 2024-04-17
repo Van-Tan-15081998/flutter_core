@@ -13,4 +13,10 @@ class CommonStyles {
       fontSize: 16,
       color: const Color(0xFF404040),
       fontWeight: FontWeight.w600);
+
+  static TextStyle settingLabelTextStyle = GoogleFonts.montserrat(
+      fontStyle: FontStyle.normal,
+      fontSize: 16,
+      color: const Color(0xFF404040),
+      fontWeight: FontWeight.w500);
 }

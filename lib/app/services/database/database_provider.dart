@@ -1,12 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../../../core/common/pagination/models/CorePaginationModel.dart';
+import '../../screens/features/label/models/label_condition_model.dart';
 import '../../screens/features/label/models/label_model.dart';
 import '../../screens/features/note/models/note_condition_model.dart';
 import '../../screens/features/note/models/note_model.dart';
 import '../../screens/features/subjects/models/subject_condition_model.dart';
 import '../../screens/features/subjects/models/subject_model.dart';
-import '../../screens/features/task/models/task_model.dart';
 
 class DatabaseProvider {
   static const int _version = 1;
@@ -18,9 +18,7 @@ class DatabaseProvider {
       await db.execute(
           "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE tasks(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, statusId INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
-      await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, parentId INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
           "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
     }, version: _version);
@@ -52,10 +50,17 @@ class DatabaseProvider {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> deleteNote(NoteModel note,  int deleteTime) async {
+  static Future<int> favouriteNote(NoteModel note, int? isFavourite) async {
     final db = await _getDB();
-    return await db.update("notes",
-        {'deletedAt': deleteTime},
+    return await db.update("notes", {'isFavourite': isFavourite},
+        where: 'id = ?',
+        whereArgs: [note.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteNote(NoteModel note, int deleteTime) async {
+    final db = await _getDB();
+    return await db.update("notes", {'deletedAt': deleteTime},
         where: 'id = ?',
         whereArgs: [note.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -71,10 +76,10 @@ class DatabaseProvider {
     );
   }
 
-  static Future<int> restoreNote(NoteModel note,  int restoreTime) async {
+  static Future<int> restoreNote(NoteModel note, int restoreTime) async {
     final db = await _getDB();
-    return await db.update("notes",
-        {'deletedAt': null, 'updatedAt': restoreTime},
+    return await db.update(
+        "notes", {'deletedAt': null, 'updatedAt': restoreTime},
         where: 'id = ?',
         whereArgs: [note.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -104,21 +109,15 @@ class DatabaseProvider {
         offset: corePaginationModel.currentPageIndex *
             corePaginationModel.itemPerPage,
         where:
-            ' ${noteConditionModel.isDeleted == null || noteConditionModel.isDeleted == false ?  "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
+            ' ${noteConditionModel.isDeleted == null || noteConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
             ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND createdAt >= ${noteConditionModel.createdAtStartOfDay} "
                 "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} " : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
+            ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
-        orderBy: noteConditionModel.recentlyUpdated != null ? "updatedAt DESC" : "id DESC");
-
-    // raw query
-    // final List<Map<String, dynamic>> maps = await db.rawQuery(
-    //     'SELECT notes.*, json_each(labels) AS label FROM notes, json_each(notes.labels) WHERE deletedAt IS NULL'
-    //     ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND createdAt >= ${noteConditionModel.createdAtStartOfDay} AND createdAt <= ${noteConditionModel.createdAtEndOfDay}" : ""}'
-    //     ' ${noteConditionModel.labelId != null ? " AND label.value = ${noteConditionModel.labelId}" : ""}'
-    //     ' ORDER BY id DESC'
-    //     ' LIMIT ${corePaginationModel.itemPerPage}'
-    //     ' OFFSET ${corePaginationModel.currentPageIndex * corePaginationModel.itemPerPage}');
+        orderBy: noteConditionModel.recentlyUpdated != null
+            ? "updatedAt DESC"
+            : "id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -144,6 +143,29 @@ class DatabaseProvider {
   }
 
   /// LABELS
+  static Future<List<LabelModel>?> getLabelPagination(
+      CorePaginationModel corePaginationModel,
+      LabelConditionModel labelConditionModel) async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps = await db.query("labels",
+        limit: corePaginationModel.itemPerPage,
+        offset: corePaginationModel.currentPageIndex *
+            corePaginationModel.itemPerPage,
+        where:
+            ' ${labelConditionModel.isDeleted == null || labelConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
+            ' ${labelConditionModel.id != null ? " AND id = ${labelConditionModel.id}" : ""}'
+            ' ${labelConditionModel.searchText != null && labelConditionModel.searchText!.isNotEmpty ? " AND title LIKE \'%${labelConditionModel.searchText}%\'" : ""}',
+        orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => LabelModel.fromJson(maps[index]));
+  }
+
   static Future<int> countAllLabels() async {
     final db = await _getDB();
     int? countAll = Sqflite.firstIntValue(await db
@@ -169,20 +191,38 @@ class DatabaseProvider {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> deleteLabel(LabelModel note) async {
+  static Future<int> deleteLabel(LabelModel label, int deleteTime) async {
     final db = await _getDB();
+    return await db.update("labels", {'deletedAt': deleteTime},
+        where: 'id = ?',
+        whereArgs: [label.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteForeverLabel(LabelModel label) async {
+    final db = await _getDB();
+
     return await db.delete(
       "labels",
       where: 'id = ?',
-      whereArgs: [note.id],
+      whereArgs: [label.id],
     );
+  }
+
+  static Future<int> restoreLabel(LabelModel label, int restoreTime) async {
+    final db = await _getDB();
+    return await db.update(
+        "labels", {'deletedAt': null, 'updatedAt': restoreTime},
+        where: 'id = ?',
+        whereArgs: [label.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<List<LabelModel>?> getAllLabels() async {
     final db = await _getDB();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query("labels", orderBy: "id DESC");
+    final List<Map<String, dynamic>> maps = await db.query("labels",
+        where: 'deletedAt IS NULL', orderBy: "id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -207,59 +247,6 @@ class DatabaseProvider {
     return LabelModel.fromJson(maps.first);
   }
 
-  /// TASKS
-  static Future<int> createTask(TaskModel task) async {
-    final db = await _getDB();
-    return await db.insert("tasks", task.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  static Future<int> updateTask(TaskModel task) async {
-    final db = await _getDB();
-    return await db.update("tasks", task.toJson(),
-        where: 'id = ?',
-        whereArgs: [task.id],
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
-  static Future<int> deleteTask(TaskModel task) async {
-    final db = await _getDB();
-    return await db.delete(
-      "tasks",
-      where: 'id = ?',
-      whereArgs: [task.id],
-    );
-  }
-
-  static Future<List<TaskModel>?> getAllTasks() async {
-    final db = await _getDB();
-
-    final List<Map<String, dynamic>> maps =
-        await db.query("tasks", orderBy: "id DESC");
-
-    if (maps.isEmpty) {
-      return null;
-    }
-
-    return List.generate(
-        maps.length, (index) => TaskModel.fromJson(maps[index]));
-  }
-
-  static Future<TaskModel?> getTaskById(int id) async {
-    final db = await _getDB();
-    final List<Map<String, dynamic>> maps = await db.query(
-      "tasks",
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-
-    if (maps.isEmpty) {
-      return null;
-    }
-
-    return TaskModel.fromJson(maps.first);
-  }
-
   /// SUBJECTS
   static Future<List<SubjectModel>?> getSubjectPagination(
       CorePaginationModel corePaginationModel,
@@ -270,9 +257,13 @@ class DatabaseProvider {
         limit: corePaginationModel.itemPerPage,
         offset: corePaginationModel.currentPageIndex *
             corePaginationModel.itemPerPage,
-        where: 'deletedAt IS NULL'
-        ' ${subjectConditionModel.id != null ? " AND id = ${subjectConditionModel.id}" : ""}',
-        orderBy: "id DESC");
+        where:
+            ' ${subjectConditionModel.isDeleted == null || subjectConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
+            ' ${subjectConditionModel.id != null ? " AND id = ${subjectConditionModel.id}" : ""}'
+            ' ${subjectConditionModel.isRootSubject != null ? " AND parentId IS NULL" : ""}'
+            ' ${subjectConditionModel.parentId != null ? " AND (parentId = ${subjectConditionModel.parentId} OR id = ${subjectConditionModel.parentId})" : ""}'
+            ' ${subjectConditionModel.searchText != null && subjectConditionModel.searchText!.isNotEmpty ? " AND title LIKE \'%${subjectConditionModel.searchText}%\'" : ""}',
+        orderBy: subjectConditionModel.parentId != null ? "id ASC" : "id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -307,15 +298,6 @@ class DatabaseProvider {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<int> deleteSubject(SubjectModel subject) async {
-    final db = await _getDB();
-    return await db.delete(
-      "subject",
-      where: 'id = ?',
-      whereArgs: [subject.id],
-    );
-  }
-
   static Future<SubjectModel?> getSubjectById(int id) async {
     final db = await _getDB();
     final List<Map<String, dynamic>> maps = await db.query(
@@ -334,8 +316,8 @@ class DatabaseProvider {
   static Future<List<SubjectModel>?> getAllSubjects() async {
     final db = await _getDB();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query("subjects", orderBy: "id DESC");
+    final List<Map<String, dynamic>> maps = await db.query("subjects",
+        where: 'deletedAt IS NULL', orderBy: "id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -343,5 +325,55 @@ class DatabaseProvider {
 
     return List.generate(
         maps.length, (index) => SubjectModel.fromJson(maps[index]));
+  }
+
+  static Future<int> deleteSubject(SubjectModel subject, int deleteTime) async {
+    final db = await _getDB();
+    return await db.update("subjects", {'deletedAt': deleteTime},
+        where: 'id = ?',
+        whereArgs: [subject.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteForeverSubject(SubjectModel subject) async {
+    final db = await _getDB();
+
+    return await db.delete(
+      "subjects",
+      where: 'id = ?',
+      whereArgs: [subject.id],
+    );
+  }
+
+  static Future<int> restoreSubject(
+      SubjectModel subject, int restoreTime) async {
+    final db = await _getDB();
+    return await db.update(
+        "subjects", {'deletedAt': null, 'updatedAt': restoreTime},
+        where: 'id = ?',
+        whereArgs: [subject.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> countChildren(SubjectModel subject) async {
+    final db = await _getDB();
+    int? countAll = Sqflite.firstIntValue(await db.rawQuery(
+        'SELECT COUNT(*) FROM subjects WHERE deletedAt IS NULL AND parentId = ${subject.id}'));
+
+    if (countAll == null) {
+      return 0;
+    }
+    return countAll;
+  }
+
+  static Future<int> countNotes(SubjectModel subject) async {
+    final db = await _getDB();
+    int? countAll = Sqflite.firstIntValue(await db.rawQuery(
+        'SELECT COUNT(*) FROM notes WHERE deletedAt IS NULL AND subjectId = ${subject.id}'));
+
+    if (countAll == null) {
+      return 0;
+    }
+    return countAll;
   }
 }
