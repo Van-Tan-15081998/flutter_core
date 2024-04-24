@@ -14,30 +14,33 @@ import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../home/home_screen.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
+import '../note/models/note_model.dart';
+import '../note/note_create_screen.dart';
 import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
-import 'databases/note_db_manager.dart';
-import 'models/note_condition_model.dart';
-import 'models/note_model.dart';
-import 'note_create_screen.dart';
-import 'providers/note_notifier.dart';
-import 'widgets/note_widget.dart';
+import 'databases/template_db_manager.dart';
+import 'models/template_condition_model.dart';
+import 'models/template_model.dart';
+import 'providers/template_notifier.dart';
+import 'template_create_screen.dart';
+import 'widgets/template_widget.dart';
 
-class NoteListScreen extends StatefulWidget {
-  final NoteConditionModel? noteConditionModel;
+class TemplateListScreen extends StatefulWidget {
+  final TemplateConditionModel? templateConditionModel;
 
-  const NoteListScreen({super.key, required this.noteConditionModel});
+  const TemplateListScreen({super.key, required this.templateConditionModel});
 
   @override
-  State<NoteListScreen> createState() => _NoteListScreenState();
+  State<TemplateListScreen> createState() => _TemplateListScreenState();
 }
 
-class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
+class _TemplateListScreenState extends State<TemplateListScreen> {
   final ScrollController _scrollController = ScrollController();
 
   /*
@@ -48,7 +51,6 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
   final _searchFocusNode = FocusNode();
   String _searchText = "";
   bool _filterByDeleted = false;
-  bool _filterByDate = false;
   bool _filterByRecentlyUpdated = false;
   bool _filterByFavourite = false;
 
@@ -59,21 +61,21 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
    Parameters For Pagination
    */
   static const _pageSize = 10;
-  final PagingController<int, NoteModel> _pagingController =
+  final PagingController<int, TemplateModel> _pagingController =
       PagingController(firstPageKey: 0);
 
   final CorePaginationModel _corePaginationModel =
       CorePaginationModel(currentPageIndex: 0, itemPerPage: _pageSize);
-  NoteConditionModel _noteConditionModel = NoteConditionModel();
+  TemplateConditionModel _templateConditionModel = TemplateConditionModel();
 
   /*
   Function fetch page data
    */
-  Future<List<NoteModel>> _onFetchPage(int pageKey) async {
+  Future<List<TemplateModel>> _onFetchPage(int pageKey) async {
     try {
-      List<NoteModel>? result = [];
-      result = await NoteDatabaseManager.onGetNotePagination(
-          _corePaginationModel, _noteConditionModel);
+      List<TemplateModel>? result = [];
+      result = await TemplateDatabaseManager.onGetTemplatePagination(
+          _corePaginationModel, _templateConditionModel);
 
       if (result == null) {
         return [];
@@ -95,62 +97,6 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
     );
   }
 
-  /*
-   Date Picker For Filter
-   */
-  @override
-  // TODO: implement restorationId
-  String? get restorationId => 'main';
-  RestorableDateTime _selectedDate = RestorableDateTime(DateTime.now());
-  late final RestorableRouteFuture<DateTime?> _restorAbleDatePickerRouteFuture =
-      RestorableRouteFuture<DateTime?>(
-    onComplete: _selectDate,
-    onPresent: (NavigatorState navigator, Object? arguments) {
-      return navigator.restorablePush(
-        _datePickerRoute,
-        arguments: _selectedDate.value.millisecondsSinceEpoch,
-      );
-    },
-  );
-
-  @pragma('vm:entry-point')
-  static Route<DateTime> _datePickerRoute(
-    BuildContext context,
-    Object? arguments,
-  ) {
-    return DialogRoute<DateTime>(
-      context: context,
-      builder: (BuildContext context) {
-        return DatePickerDialog(
-          restorationId: 'date_picker_dialog',
-          initialEntryMode: DatePickerEntryMode.calendarOnly,
-          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2025),
-        );
-      },
-    );
-  }
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(
-        _restorAbleDatePickerRouteFuture, 'date_picker_route_future');
-  }
-
-  void _selectDate(DateTime? newSelectedDate) {
-    if (newSelectedDate != null) {
-      setState(() {
-        _selectedDate.value = newSelectedDate;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
-        ));
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -170,8 +116,8 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
     });
 
     // Init Condition
-    if (widget.noteConditionModel != null) {
-      _noteConditionModel = widget.noteConditionModel!;
+    if (widget.templateConditionModel != null) {
+      _templateConditionModel = widget.templateConditionModel!;
     }
 
     // Init For Pagination
@@ -232,30 +178,30 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
   }
 
   /*
-  Get note's labels
+  Get template's labels
    */
-  List<LabelModel>? _getNoteLabels(String jsonLabelIds) {
-    List<LabelModel>? noteLabels = [];
+  List<LabelModel>? _getTemplateLabels(String jsonLabelIds) {
+    List<LabelModel>? templateLabels = [];
     List<dynamic> labelIds = jsonDecode(jsonLabelIds);
 
-    // noteLabels = context
+    // templateLabels = context
     //     .watch<LabelNotifier>()
     //     .labels!
     //     .where((model) => labelIds.contains(model.id))
     //     .toList();
 
     if (labelList != null && labelList!.isNotEmpty) {
-      noteLabels =
+      templateLabels =
           labelList!.where((model) => labelIds.contains(model.id)).toList();
     }
 
-    return noteLabels;
+    return templateLabels;
   }
 
   /*
-    Get note's subject
+    Get template's subject
    */
-  SubjectModel? _getNoteSubject(int? subjectId) {
+  SubjectModel? _getTemplateSubject(int? subjectId) {
     List<SubjectModel>? subjects = [];
 
     // if (context.watch<SubjectNotifier>().subjects!.isNotEmpty) {
@@ -273,27 +219,39 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
   }
 
   /*
-  Reset conditions - NoteConditionModel noteConditionModel
+  Reset conditions - TemplateConditionModel templateConditionModel
    */
   _resetConditions() {
     setState(() {
-      _selectedDate = RestorableDateTime(DateTime.now());
       _searchText = "";
       _searchController.text = "";
       _filterByDeleted = false;
-      _filterByDate = false;
+      _filterByFavourite = false;
       _filterByRecentlyUpdated = false;
 
-      _noteConditionModel.createdAtEndOfDay = null;
-      _noteConditionModel.createdAtStartOfDay = null;
-      _noteConditionModel.searchText = null;
-      _noteConditionModel.isDeleted = null;
-      _noteConditionModel.recentlyUpdated = null;
-      _noteConditionModel.subjectId = null;
-      _noteConditionModel.favourite = null;
+      _templateConditionModel.searchText = null;
+      _templateConditionModel.isDeleted = null;
+      _templateConditionModel.recentlyUpdated = null;
+      _templateConditionModel.subjectId = null;
+      _templateConditionModel.favourite = null;
 
       _reloadPage();
     });
+  }
+
+  /*
+  Check is filtering
+   */
+  bool _isFiltering() {
+    if ((_templateConditionModel.searchText != null &&
+            _templateConditionModel.searchText != "") ||
+        _templateConditionModel.isDeleted == true ||
+        _templateConditionModel.recentlyUpdated == true ||
+        _templateConditionModel.subjectId != null ||
+        _templateConditionModel.favourite == true) {
+      return true;
+    }
+    return false;
   }
 
   /*
@@ -304,37 +262,54 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
     _pagingController.refresh();
   }
 
-  _onUpdateNote(BuildContext context, NoteModel note) async {
+  _onUpdateTemplate(BuildContext context, TemplateModel template) async {
     await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => NoteCreateScreen(
-                  note: note,
+            builder: (context) => TemplateCreateScreen(
+                  template: template,
                   subject: null,
                   actionMode: ActionModeEnum.update,
                 )));
   }
 
-  Future<bool> _onDeleteNote(BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.delete(
-        note, DateTime.now().millisecondsSinceEpoch);
+  _onCreateNoteFromTemplate(
+      BuildContext context, TemplateModel template) async {
+    NoteModel noteFromTemplate = NoteModel.fromJson(template.toJson());
+
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => NoteCreateScreen(
+                  note: null,
+                  copyNote: noteFromTemplate,
+                  subject: null,
+                  actionMode: ActionModeEnum.copy,
+                )));
   }
 
-  Future<bool> _onDeleteNoteForever(
-      BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.deleteForever(note);
+  Future<bool> _onDeleteTemplate(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.delete(
+        template, DateTime.now().millisecondsSinceEpoch);
   }
 
-  Future<bool> _onRestoreNoteFromTrash(
-      BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.restoreFromTrash(
-        note, DateTime.now().millisecondsSinceEpoch);
+  Future<bool> _onDeleteTemplateForever(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.deleteForever(template);
   }
 
-  Future<bool> _onFavouriteNote(BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.favourite(
-        note,
-        note.isFavourite == null
+  Future<bool> _onRestoreTemplateFromTrash(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.restoreFromTrash(
+        template, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<bool> _onFavouriteTemplate(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.favourite(
+        template,
+        template.isFavourite == null
             ? DateTime.now().millisecondsSinceEpoch
             : null);
   }
@@ -347,17 +322,16 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    final noteNotifier = Provider.of<NoteNotifier>(context);
+    final templateNotifier = Provider.of<TemplateNotifier>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF202124),
+      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       appBar: AppBar(
         actions: [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text('Home', style: CommonStyles.buttonTextStyle),
+            child: CoreElevatedButton.iconOnly(
+              icon: const Icon(Icons.home_rounded, size: 25.0),
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
@@ -368,19 +342,14 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                   (route) => false,
                 );
               },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitBackgroundColorOption: Colors.white,
-                  kitForegroundColorOption: const Color(0xFF404040),
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context),
             ),
           )
         ],
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         title: Text(
-          'Notes',
+          'Templates',
           style: GoogleFonts.montserrat(
               fontStyle: FontStyle.italic,
               fontSize: 30,
@@ -391,24 +360,25 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
           color: Color(0xFF404040),
         ),
       ),
-      body: PagedListView<int, NoteModel>(
-        scrollController: _scrollController,
-        pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<NoteModel>(
-          animateTransitions: true,
-          transitionDuration: const Duration(milliseconds: 500),
-          itemBuilder: (context, item, index) => NoteWidget(
+      body: Stack(children: [
+        PagedListView<int, TemplateModel>(
+          scrollController: _scrollController,
+          pagingController: _pagingController,
+          builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
+            animateTransitions: true,
+            transitionDuration: const Duration(milliseconds: 500),
+            itemBuilder: (context, item, index) => TemplateWidget(
               index: index + 1,
-              note: item,
-              labels: _getNoteLabels(item.labels!),
-              subject: _getNoteSubject(item.subjectId),
+              template: item,
+              labels: _getTemplateLabels(item.labels!),
+              subject: _getTemplateSubject(item.subjectId),
               onUpdate: () {
-                _onUpdateNote(context, item);
+                _onUpdateTemplate(context, item);
               },
               onDelete: () {
-                _onDeleteNote(context, item).then((result) {
+                _onDeleteTemplate(context, item).then((result) {
                   if (result) {
-                    noteNotifier.onCountAll();
+                    templateNotifier.onCountAll();
 
                     setState(() {
                       _pagingController.itemList!.remove(item);
@@ -418,18 +388,18 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                         context,
                         CoreNotificationStatus.success,
                         CoreNotificationAction.delete,
-                        'Note');
+                        'Template');
                   } else {
                     CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.delete, 'Note');
+                        CoreNotificationAction.delete, 'Template');
                   }
                 });
               },
               onDeleteForever: () async {
                 if (await CoreHelperWidget.confirmFunction(context)) {
-                  _onDeleteNoteForever(context, item).then((result) {
+                  _onDeleteTemplateForever(context, item).then((result) {
                     if (result) {
-                      noteNotifier.onCountAll();
+                      templateNotifier.onCountAll();
 
                       setState(() {
                         _pagingController.itemList!.remove(item);
@@ -439,21 +409,21 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                           context,
                           CoreNotificationStatus.success,
                           CoreNotificationAction.delete,
-                          'Note');
+                          'Template');
                     } else {
                       CoreNotification.show(
                           context,
                           CoreNotificationStatus.error,
                           CoreNotificationAction.delete,
-                          'Note');
+                          'Template');
                     }
                   });
                 }
               },
               onRestoreFromTrash: () {
-                _onRestoreNoteFromTrash(context, item).then((result) {
+                _onRestoreTemplateFromTrash(context, item).then((result) {
                   if (result) {
-                    noteNotifier.onCountAll();
+                    templateNotifier.onCountAll();
 
                     setState(() {
                       _pagingController.itemList!.remove(item);
@@ -463,15 +433,15 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                         context,
                         CoreNotificationStatus.success,
                         CoreNotificationAction.restore,
-                        'Note');
+                        'Template');
                   } else {
                     CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.restore, 'Note');
+                        CoreNotificationAction.restore, 'Template');
                   }
                 });
               },
               onFavourite: () {
-                _onFavouriteNote(context, item).then((result) {
+                _onFavouriteTemplate(context, item).then((result) {
                   if (result) {
                     setState(() {
                       item.isFavourite = item.isFavourite == null
@@ -483,43 +453,80 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                     //     context,
                     //     CoreNotificationStatus.success,
                     //     CoreNotificationAction.update,
-                    //     'Note');
+                    //     'Template');
                     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
                     audio.playAudioOnFavourite();
-
                   } else {
                     CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.update, 'Note');
+                        CoreNotificationAction.update, 'Template');
                   }
                 });
-              }),
-          firstPageErrorIndicatorBuilder: (context) => const Center(
-            child: Text('Error loading data!',
-                style: TextStyle(color: Colors.white54)),
-          ),
-          noItemsFoundIndicatorBuilder: (context) => const Center(
-            child: Text('No items found.',
-                style: TextStyle(color: Colors.white54)),
+              },
+              onCreateNoteFromTemplate: () {
+                _onCreateNoteFromTemplate(context, item);
+              },
+            ),
+            firstPageErrorIndicatorBuilder: (context) => Center(
+              child: Text('Error loading data!',
+                  style: TextStyle(
+                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
+            ),
+            noItemsFoundIndicatorBuilder: (context) => Center(
+              child: Text('No items found.',
+                  style: TextStyle(
+                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
+            ),
           ),
         ),
-      ),
+        _isFiltering()
+            ? Positioned(
+                top: 0,
+                left: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    BounceInLeft(
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        width: 180.0,
+                        decoration:
+                            ThemeDataCenter.getFilteringLabelStyle(context),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Center(
+                            child: Text('Filtering...',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: ThemeDataCenter
+                                        .getFilteringTextColorStyle(context),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w400)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Container(),
+      ]),
       bottomNavigationBar: CoreBottomNavigationBar(
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         child: IconTheme(
           data: const IconThemeData(color: Colors.white),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CoreElevatedButton(
                 onPressed: () {
                   _resetConditions();
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
-                  Icons.home_rounded,
+                  Icons.refresh_rounded,
                   size: 25.0,
                 ),
               ),
@@ -548,23 +555,32 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           CoreTextFormField(
-                                            style: null,
+                                            style: TextStyle(
+                                                color: ThemeDataCenter
+                                                    .getAloneTextColorStyle(
+                                                        context)),
                                             onChanged: (String value) {
-                                              setState(() {
-                                                _searchText = value.trim();
-                                              });
+                                              if (value.isNotEmpty) {
+                                                setState(() {
+                                                  _searchText = value.trim();
+                                                });
+                                              }
                                             },
                                             controller: _searchController,
                                             focusNode: _searchFocusNode,
                                             validateString:
-                                                'Please enter your search string',
-                                            maxLength: null,
-                                            icon: const Icon(Icons.edit,
-                                                color: Colors.black54),
+                                                'Please enter search string!',
+                                            maxLength: 60,
+                                            icon: Icon(Icons.edit,
+                                                color: ThemeDataCenter
+                                                    .getFormFieldLabelColorStyle(
+                                                        context)),
                                             label: 'Search',
-                                            labelColor: Colors.black54,
-                                            placeholder: 'Search on notes',
-                                            helper: 'Enter your search string',
+                                            labelColor: ThemeDataCenter
+                                                .getFormFieldLabelColorStyle(
+                                                    context),
+                                            placeholder: 'Search on templates',
+                                            helper: '',
                                           ),
                                         ],
                                       ),
@@ -576,59 +592,49 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         CoreElevatedButton.iconOnly(
-                                          icon: const FaIcon(
-                                              FontAwesomeIcons.xmark,
-                                              color: Color(0xFF404040),
-                                              size: 24.0),
-                                          onPressed: () {
-                                            setState(() {
-                                              _searchController.text =
+                                            icon:
+                                                const Icon(Icons.close_rounded),
+                                            onPressed: () {
+                                              if (_searchController
+                                                  .text.isNotEmpty) {
+                                                setState(() {
+                                                  _searchController.text = "";
                                                   _searchText = "";
-                                              _noteConditionModel.searchText =
-                                                  _searchText;
-                                            });
-                                          },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.options(
-                                                  coreStyle: CoreStyle.filled,
-                                                  coreColor: CoreColor.stormi,
-                                                  coreRadius:
-                                                      CoreRadius.radius_6,
-                                                  kitForegroundColorOption:
-                                                      Colors.black,
-                                                  coreFixedSizeButton:
-                                                      CoreFixedSizeButton
-                                                          .medium_48),
-                                        ),
+                                                  _templateConditionModel
+                                                      .searchText = _searchText;
+                                                });
+                                                // Reload Page
+                                                _reloadPage();
+                                              }
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getCoreScreenButtonStyle(
+                                                    context)),
                                         CoreElevatedButton.iconOnly(
-                                          icon: const FaIcon(
-                                              FontAwesomeIcons.magnifyingGlass,
-                                              color: Color(0xFF404040),
-                                              size: 24.0),
+                                          icon:
+                                              const Icon(Icons.search_rounded),
                                           onPressed: () {
-                                            setState(() {
-                                              // Set Condition
-                                              _noteConditionModel.searchText =
-                                                  _searchText;
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              setState(() {
+                                                // Set Condition
+                                                if (_searchController
+                                                    .text.isNotEmpty) {
+                                                  _templateConditionModel
+                                                      .searchText = _searchText;
 
-                                              // Reload Data
-                                              _reloadPage();
+                                                  // Reload Data
+                                                  _reloadPage();
 
-                                              // Close Dialog
-                                              Navigator.of(context).pop();
-                                            });
+                                                  // Close Dialog
+                                                  Navigator.of(context).pop();
+                                                }
+                                              });
+                                            }
                                           },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.options(
-                                                  coreStyle: CoreStyle.filled,
-                                                  coreColor: CoreColor.success,
-                                                  coreRadius:
-                                                      CoreRadius.radius_6,
-                                                  kitForegroundColorOption:
-                                                      Colors.black,
-                                                  coreFixedSizeButton:
-                                                      CoreFixedSizeButton
-                                                          .medium_48),
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getCoreScreenButtonStyle(
+                                                  context),
                                         ),
                                       ],
                                     )
@@ -638,11 +644,8 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                             ),
                           ));
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.search,
                   size: 25.0,
@@ -669,87 +672,13 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                       return Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
-                                          children: [
-                                            CoreElevatedButton.icon(
-                                              icon: const FaIcon(
-                                                  FontAwesomeIcons.calendarDay,
-                                                  size: 18.0),
-                                              label: Text('Date',
+                                          children: <Widget>[
+                                            Flexible(
+                                              child: Text(
+                                                  'Templates in the trash',
                                                   style: CommonStyles
                                                       .buttonTextStyle),
-                                              onPressed: () {
-                                                _restorAbleDatePickerRouteFuture
-                                                    .present();
-                                              },
-                                              coreButtonStyle:
-                                                  CoreButtonStyle.options(
-                                                coreStyle: CoreStyle.filled,
-                                                coreColor: CoreColor.info,
-                                                coreRadius: CoreRadius.radius_6,
-                                                kitForegroundColorOption:
-                                                    Colors.black,
-                                                coreFixedSizeButton:
-                                                    CoreFixedSizeButton
-                                                        .medium_48,
-                                              ),
                                             ),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByDate,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByDate = value!;
-                                                  if (_filterByDate) {
-                                                    _noteConditionModel
-                                                            .createdAtStartOfDay =
-                                                        DateTime(
-                                                                _selectedDate
-                                                                    .value.year,
-                                                                _selectedDate
-                                                                    .value
-                                                                    .month,
-                                                                _selectedDate
-                                                                    .value.day)
-                                                            .millisecondsSinceEpoch;
-                                                    _noteConditionModel
-                                                            .createdAtEndOfDay =
-                                                        DateTime(
-                                                                _selectedDate
-                                                                    .value.year,
-                                                                _selectedDate
-                                                                    .value
-                                                                    .month,
-                                                                _selectedDate
-                                                                    .value.day,
-                                                                23,
-                                                                59,
-                                                                59,
-                                                                999)
-                                                            .millisecondsSinceEpoch;
-                                                  } else {
-                                                    _noteConditionModel
-                                                            .createdAtStartOfDay =
-                                                        null;
-                                                    _noteConditionModel
-                                                            .createdAtEndOfDay =
-                                                        null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Notes in the trash',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
                                             Checkbox(
                                               checkColor: Colors.white,
                                               value: _filterByDeleted,
@@ -757,11 +686,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                                 setState(() {
                                                   _filterByDeleted = value!;
                                                   if (_filterByDeleted) {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                             .isDeleted =
                                                         _filterByDeleted;
                                                   } else {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                         .isDeleted = null;
                                                   }
                                                 });
@@ -777,9 +706,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: <Widget>[
-                                            Text('Favourite notes',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
+                                            Flexible(
+                                              child: Text('Favourite templates',
+                                                  style: CommonStyles
+                                                      .buttonTextStyle),
+                                            ),
                                             Checkbox(
                                               checkColor: Colors.white,
                                               value: _filterByFavourite,
@@ -787,11 +718,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                                 setState(() {
                                                   _filterByFavourite = value!;
                                                   if (_filterByFavourite) {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                             .favourite =
                                                         _filterByFavourite;
                                                   } else {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                         .favourite = null;
                                                   }
                                                 });
@@ -807,9 +738,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: <Widget>[
-                                            Text('Recently Updated',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
+                                            Flexible(
+                                              child: Text('Recently Updated',
+                                                  style: CommonStyles
+                                                      .buttonTextStyle),
+                                            ),
                                             Checkbox(
                                               checkColor: Colors.white,
                                               value: _filterByRecentlyUpdated,
@@ -818,11 +751,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                                   _filterByRecentlyUpdated =
                                                       value!;
                                                   if (_filterByRecentlyUpdated) {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                             .recentlyUpdated =
                                                         _filterByRecentlyUpdated;
                                                   } else {
-                                                    _noteConditionModel
+                                                    _templateConditionModel
                                                         .recentlyUpdated = null;
                                                   }
                                                 });
@@ -831,40 +764,29 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           ]);
                                     }),
                                     const SizedBox(height: 20.0),
-                                    CoreElevatedButton.icon(
-                                      icon: const FaIcon(FontAwesomeIcons.check,
-                                          size: 18.0),
-                                      label: Text('OK',
-                                          style: CommonStyles.buttonTextStyle),
-                                      onPressed: () {
-                                        setState(() {
-                                          /// Reload Data
-                                          _reloadPage();
+                                    CoreElevatedButton.iconOnly(
+                                        icon: const FaIcon(
+                                            FontAwesomeIcons.check,
+                                            size: 25.0),
+                                        onPressed: () {
+                                          setState(() {
+                                            /// Reload Data
+                                            _reloadPage();
 
-                                          /// Close Dialog
-                                          Navigator.of(context).pop();
-                                        });
-                                      },
-                                      coreButtonStyle: CoreButtonStyle.options(
-                                          coreStyle: CoreStyle.filled,
-                                          coreColor: CoreColor.success,
-                                          coreRadius: CoreRadius.radius_6,
-                                          kitForegroundColorOption:
-                                              Colors.black,
-                                          coreFixedSizeButton:
-                                              CoreFixedSizeButton.medium_48),
-                                    ),
+                                            /// Close Dialog
+                                            Navigator.of(context).pop();
+                                          });
+                                        },
+                                        coreButtonStyle: ThemeDataCenter
+                                            .getCoreScreenButtonStyle(context)),
                                   ],
                                 ),
                               ),
                             ),
                           ));
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.filter_list_alt,
                   size: 25.0,
@@ -876,15 +798,12 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NoteCreateScreen(
+                        builder: (context) => const TemplateCreateScreen(
                             subject: null, actionMode: ActionModeEnum.create)),
                   );
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.add,
                   size: 25.0,

@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -14,6 +16,7 @@ import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../home/home_screen.dart';
@@ -37,7 +40,7 @@ class NoteListScreen extends StatefulWidget {
   State<NoteListScreen> createState() => _NoteListScreenState();
 }
 
-class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
+class _NoteListScreenState extends State<NoteListScreen> {
   final ScrollController _scrollController = ScrollController();
 
   /*
@@ -67,6 +70,22 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
   NoteConditionModel _noteConditionModel = NoteConditionModel();
 
   /*
+  Table Calendar
+   */
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
+      .toggledOn; // Can be toggled on/off by longPressing a date
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  DateTime? _rangeStart;
+  DateTime? _rangeEnd;
+  final _today = DateTime.now();
+  final _firstDay = DateTime(
+      DateTime.now().year, DateTime.now().month - 3, DateTime.now().day);
+  final _lastDay = DateTime(
+      DateTime.now().year, DateTime.now().month + 3, DateTime.now().day);
+
+  /*
   Function fetch page data
    */
   Future<List<NoteModel>> _onFetchPage(int pageKey) async {
@@ -93,62 +112,6 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
-  }
-
-  /*
-   Date Picker For Filter
-   */
-  @override
-  // TODO: implement restorationId
-  String? get restorationId => 'main';
-  RestorableDateTime _selectedDate = RestorableDateTime(DateTime.now());
-  late final RestorableRouteFuture<DateTime?> _restorAbleDatePickerRouteFuture =
-      RestorableRouteFuture<DateTime?>(
-    onComplete: _selectDate,
-    onPresent: (NavigatorState navigator, Object? arguments) {
-      return navigator.restorablePush(
-        _datePickerRoute,
-        arguments: _selectedDate.value.millisecondsSinceEpoch,
-      );
-    },
-  );
-
-  @pragma('vm:entry-point')
-  static Route<DateTime> _datePickerRoute(
-    BuildContext context,
-    Object? arguments,
-  ) {
-    return DialogRoute<DateTime>(
-      context: context,
-      builder: (BuildContext context) {
-        return DatePickerDialog(
-          restorationId: 'date_picker_dialog',
-          initialEntryMode: DatePickerEntryMode.calendarOnly,
-          initialDate: DateTime.fromMillisecondsSinceEpoch(arguments! as int),
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2025),
-        );
-      },
-    );
-  }
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(_selectedDate, 'selected_date');
-    registerForRestoration(
-        _restorAbleDatePickerRouteFuture, 'date_picker_route_future');
-  }
-
-  void _selectDate(DateTime? newSelectedDate) {
-    if (newSelectedDate != null) {
-      setState(() {
-        _selectedDate.value = newSelectedDate;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Selected: ${_selectedDate.value.day}/${_selectedDate.value.month}/${_selectedDate.value.year}'),
-        ));
-      });
-    }
   }
 
   @override
@@ -277,11 +240,11 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
    */
   _resetConditions() {
     setState(() {
-      _selectedDate = RestorableDateTime(DateTime.now());
       _searchText = "";
       _searchController.text = "";
       _filterByDeleted = false;
       _filterByDate = false;
+      _filterByFavourite = false;
       _filterByRecentlyUpdated = false;
 
       _noteConditionModel.createdAtEndOfDay = null;
@@ -294,6 +257,23 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
 
       _reloadPage();
     });
+  }
+
+  /*
+  Check is filtering
+   */
+  bool _isFiltering() {
+    if (_noteConditionModel.createdAtEndOfDay != null ||
+        _noteConditionModel.createdAtStartOfDay != null ||
+        (_noteConditionModel.searchText != null &&
+            _noteConditionModel.searchText != "") ||
+        _noteConditionModel.isDeleted == true ||
+        _noteConditionModel.recentlyUpdated == true ||
+        _noteConditionModel.subjectId != null ||
+        _noteConditionModel.favourite == true) {
+      return true;
+    }
+    return false;
   }
 
   /*
@@ -310,6 +290,7 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
         MaterialPageRoute(
             builder: (context) => NoteCreateScreen(
                   note: note,
+                  copyNote: null,
                   subject: null,
                   actionMode: ActionModeEnum.update,
                 )));
@@ -350,14 +331,13 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
     final noteNotifier = Provider.of<NoteNotifier>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF202124),
+      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       appBar: AppBar(
         actions: [
           Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text('Home', style: CommonStyles.buttonTextStyle),
+            child: CoreElevatedButton.iconOnly(
+              icon: const Icon(Icons.home_rounded, size: 25.0),
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
@@ -368,17 +348,12 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                   (route) => false,
                 );
               },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitBackgroundColorOption: Colors.white,
-                  kitForegroundColorOption: const Color(0xFF404040),
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context),
             ),
           )
         ],
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         title: Text(
           'Notes',
           style: GoogleFonts.montserrat(
@@ -391,135 +366,296 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
           color: Color(0xFF404040),
         ),
       ),
-      body: PagedListView<int, NoteModel>(
-        scrollController: _scrollController,
-        pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<NoteModel>(
-          animateTransitions: true,
-          transitionDuration: const Duration(milliseconds: 500),
-          itemBuilder: (context, item, index) => NoteWidget(
-              index: index + 1,
-              note: item,
-              labels: _getNoteLabels(item.labels!),
-              subject: _getNoteSubject(item.subjectId),
-              onUpdate: () {
-                _onUpdateNote(context, item);
-              },
-              onDelete: () {
-                _onDeleteNote(context, item).then((result) {
-                  if (result) {
-                    noteNotifier.onCountAll();
+      body: Column(
+        children: [
+          _filterByDate
+              ? Container(
+                  color:
+                      ThemeDataCenter.getTableCalendarBackgroundColor(context),
+                  child: TableCalendar(
+                    firstDay: _firstDay,
+                    lastDay: _lastDay,
+                    focusedDay: _focusedDay,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    rangeStartDay: _rangeStart,
+                    rangeEndDay: _rangeEnd,
+                    calendarFormat: _calendarFormat,
+                    rangeSelectionMode: _rangeSelectionMode,
+                    onDaySelected: (selectedDay, focusedDay) {
+                      if (!isSameDay(_selectedDay, selectedDay)) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                          _rangeStart = null; // Important to clean those
+                          _rangeEnd = null;
+                          _rangeSelectionMode = RangeSelectionMode.toggledOff;
+                        });
 
-                    setState(() {
-                      _pagingController.itemList!.remove(item);
-                    });
-
-                    CoreNotification.show(
-                        context,
-                        CoreNotificationStatus.success,
-                        CoreNotificationAction.delete,
-                        'Note');
-                  } else {
-                    CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.delete, 'Note');
-                  }
-                });
-              },
-              onDeleteForever: () async {
-                if (await CoreHelperWidget.confirmFunction(context)) {
-                  _onDeleteNoteForever(context, item).then((result) {
-                    if (result) {
-                      noteNotifier.onCountAll();
-
+                        if (_selectedDay != null) {
+                          /*
+                  Update Condition
+                   */
+                          _noteConditionModel.createdAtStartOfDay = DateTime(
+                                  _selectedDay!.year,
+                                  _selectedDay!.month,
+                                  _selectedDay!.day)
+                              .millisecondsSinceEpoch;
+                          _noteConditionModel.createdAtEndOfDay = DateTime(
+                                  _selectedDay!.year,
+                                  _selectedDay!.month,
+                                  _selectedDay!.day,
+                                  23,
+                                  59,
+                                  59,
+                                  999)
+                              .millisecondsSinceEpoch;
+                          /*
+                  Reload Page
+                   */
+                          _reloadPage();
+                        }
+                      }
+                    },
+                    onRangeSelected: (start, end, focusedDay) {
                       setState(() {
-                        _pagingController.itemList!.remove(item);
+                        _selectedDay = null;
+                        _focusedDay = focusedDay;
+                        _rangeStart = start;
+                        _rangeEnd = end;
+                        _rangeSelectionMode = RangeSelectionMode.toggledOn;
                       });
 
-                      CoreNotification.show(
-                          context,
-                          CoreNotificationStatus.success,
-                          CoreNotificationAction.delete,
-                          'Note');
-                    } else {
-                      CoreNotification.show(
-                          context,
-                          CoreNotificationStatus.error,
-                          CoreNotificationAction.delete,
-                          'Note');
-                    }
-                  });
-                }
-              },
-              onRestoreFromTrash: () {
-                _onRestoreNoteFromTrash(context, item).then((result) {
-                  if (result) {
-                    noteNotifier.onCountAll();
+                      if (_rangeStart != null && _rangeEnd != null) {
+                        /*
+                Update Condition
+                 */
+                        _noteConditionModel.createdAtStartOfDay = DateTime(
+                                _rangeStart!.year,
+                                _rangeStart!.month,
+                                _rangeStart!.day)
+                            .millisecondsSinceEpoch;
+                        _noteConditionModel.createdAtEndOfDay = DateTime(
+                                _rangeEnd!.year,
+                                _rangeEnd!.month,
+                                _rangeEnd!.day,
+                                23,
+                                59,
+                                59,
+                                999)
+                            .millisecondsSinceEpoch;
+                        /*
+                  Reload Page
+                   */
+                        _reloadPage();
+                      } else {
+                        _noteConditionModel.createdAtStartOfDay = null;
+                        _noteConditionModel.createdAtEndOfDay = null;
+                      }
+                    },
+                    onFormatChanged: (format) {
+                      if (_calendarFormat != format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      }
+                    },
+                    onPageChanged: (focusedDay) {
+                      _focusedDay = focusedDay;
+                    },
+                  ),
+                )
+              : Container(),
+          Expanded(
+            child: Stack(children: [
+              PagedListView<int, NoteModel>(
+                scrollController: _scrollController,
+                pagingController: _pagingController,
+                builderDelegate: PagedChildBuilderDelegate<NoteModel>(
+                  animateTransitions: true,
+                  transitionDuration: const Duration(milliseconds: 500),
+                  itemBuilder: (context, item, index) => NoteWidget(
+                      index: index + 1,
+                      note: item,
+                      labels: _getNoteLabels(item.labels!),
+                      subject: _getNoteSubject(item.subjectId),
+                      onUpdate: () {
+                        _onUpdateNote(context, item);
+                      },
+                      onDelete: () {
+                        _onDeleteNote(context, item).then((result) {
+                          if (result) {
+                            noteNotifier.onCountAll();
 
-                    setState(() {
-                      _pagingController.itemList!.remove(item);
-                    });
+                            setState(() {
+                              _pagingController.itemList!.remove(item);
+                            });
 
-                    CoreNotification.show(
-                        context,
-                        CoreNotificationStatus.success,
-                        CoreNotificationAction.restore,
-                        'Note');
-                  } else {
-                    CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.restore, 'Note');
-                  }
-                });
-              },
-              onFavourite: () {
-                _onFavouriteNote(context, item).then((result) {
-                  if (result) {
-                    setState(() {
-                      item.isFavourite = item.isFavourite == null
-                          ? DateTime.now().millisecondsSinceEpoch
-                          : null;
-                    });
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.success,
+                                CoreNotificationAction.delete,
+                                'Note');
+                          } else {
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.error,
+                                CoreNotificationAction.delete,
+                                'Note');
+                          }
+                        });
+                      },
+                      onDeleteForever: () async {
+                        if (await CoreHelperWidget.confirmFunction(context)) {
+                          _onDeleteNoteForever(context, item).then((result) {
+                            if (result) {
+                              noteNotifier.onCountAll();
 
-                    // CoreNotification.show(
-                    //     context,
-                    //     CoreNotificationStatus.success,
-                    //     CoreNotificationAction.update,
-                    //     'Note');
-                    CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-                    audio.playAudioOnFavourite();
+                              setState(() {
+                                _pagingController.itemList!.remove(item);
+                              });
 
-                  } else {
-                    CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.update, 'Note');
-                  }
-                });
-              }),
-          firstPageErrorIndicatorBuilder: (context) => const Center(
-            child: Text('Error loading data!',
-                style: TextStyle(color: Colors.white54)),
+                              CoreNotification.show(
+                                  context,
+                                  CoreNotificationStatus.success,
+                                  CoreNotificationAction.delete,
+                                  'Note');
+                            } else {
+                              CoreNotification.show(
+                                  context,
+                                  CoreNotificationStatus.error,
+                                  CoreNotificationAction.delete,
+                                  'Note');
+                            }
+                          });
+                        }
+                      },
+                      onRestoreFromTrash: () {
+                        _onRestoreNoteFromTrash(context, item).then((result) {
+                          if (result) {
+                            noteNotifier.onCountAll();
+
+                            setState(() {
+                              _pagingController.itemList!.remove(item);
+                            });
+
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.success,
+                                CoreNotificationAction.restore,
+                                'Note');
+                          } else {
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.error,
+                                CoreNotificationAction.restore,
+                                'Note');
+                          }
+                        });
+                      },
+                      onFavourite: () {
+                        _onFavouriteNote(context, item).then((result) {
+                          if (result) {
+                            setState(() {
+                              item.isFavourite = item.isFavourite == null
+                                  ? DateTime.now().millisecondsSinceEpoch
+                                  : null;
+                            });
+
+                            // CoreNotification.show(
+                            //     context,
+                            //     CoreNotificationStatus.success,
+                            //     CoreNotificationAction.update,
+                            //     'Note');
+                            CommonAudioOnPressButton audio =
+                                CommonAudioOnPressButton();
+                            audio.playAudioOnFavourite();
+                          } else {
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.error,
+                                CoreNotificationAction.update,
+                                'Note');
+                          }
+                        });
+                      },
+                    onFilterBySubject: () {
+                        if (item.subjectId != null) {
+                          setState(() {
+                            _noteConditionModel.subjectId = item.subjectId;
+                          });
+
+                          _reloadPage();
+                        }
+                    },
+                  ),
+                  firstPageErrorIndicatorBuilder: (context) => Center(
+                    child: Text('Error loading data!',
+                        style: TextStyle(
+                            color: ThemeDataCenter.getAloneTextColorStyle(
+                                context))),
+                  ),
+                  noItemsFoundIndicatorBuilder: (context) => Center(
+                    child: Text('No items found.',
+                        style: TextStyle(
+                            color: ThemeDataCenter.getAloneTextColorStyle(
+                                context))),
+                  ),
+                ),
+              ),
+              _isFiltering()
+                  ? Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          BounceInLeft(
+                            duration: const Duration(milliseconds: 200),
+                            child: Container(
+                              width: 180.0,
+                              decoration:
+                                  ThemeDataCenter.getFilteringLabelStyle(
+                                      context),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Center(
+                                  child: Text('Filtering...',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          color: ThemeDataCenter
+                                              .getFilteringTextColorStyle(
+                                                  context),
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w400)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(),
+            ]),
           ),
-          noItemsFoundIndicatorBuilder: (context) => const Center(
-            child: Text('No items found.',
-                style: TextStyle(color: Colors.white54)),
-          ),
-        ),
+        ],
       ),
       bottomNavigationBar: CoreBottomNavigationBar(
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         child: IconTheme(
           data: const IconThemeData(color: Colors.white),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CoreElevatedButton(
                 onPressed: () {
                   _resetConditions();
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
-                  Icons.home_rounded,
+                  Icons.refresh_rounded,
                   size: 25.0,
                 ),
               ),
@@ -548,23 +684,32 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                         mainAxisSize: MainAxisSize.max,
                                         children: [
                                           CoreTextFormField(
-                                            style: null,
+                                            style: TextStyle(
+                                                color: ThemeDataCenter
+                                                    .getAloneTextColorStyle(
+                                                        context)),
                                             onChanged: (String value) {
-                                              setState(() {
-                                                _searchText = value.trim();
-                                              });
+                                              if (value.isNotEmpty) {
+                                                setState(() {
+                                                  _searchText = value.trim();
+                                                });
+                                              }
                                             },
                                             controller: _searchController,
                                             focusNode: _searchFocusNode,
                                             validateString:
-                                                'Please enter your search string',
-                                            maxLength: null,
-                                            icon: const Icon(Icons.edit,
-                                                color: Colors.black54),
+                                                'Please enter search string!',
+                                            maxLength: 60,
+                                            icon: Icon(Icons.edit,
+                                                color: ThemeDataCenter
+                                                    .getFormFieldLabelColorStyle(
+                                                        context)),
                                             label: 'Search',
-                                            labelColor: Colors.black54,
+                                            labelColor: ThemeDataCenter
+                                                .getFormFieldLabelColorStyle(
+                                                    context),
                                             placeholder: 'Search on notes',
-                                            helper: 'Enter your search string',
+                                            helper: '',
                                           ),
                                         ],
                                       ),
@@ -576,60 +721,50 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         CoreElevatedButton.iconOnly(
-                                          icon: const FaIcon(
-                                              FontAwesomeIcons.xmark,
-                                              color: Color(0xFF404040),
-                                              size: 24.0),
-                                          onPressed: () {
-                                            setState(() {
-                                              _searchController.text =
+                                            icon:
+                                                const Icon(Icons.close_rounded),
+                                            onPressed: () {
+                                              if (_searchController
+                                                  .text.isNotEmpty) {
+                                                setState(() {
+                                                  _searchController.text = "";
                                                   _searchText = "";
-                                              _noteConditionModel.searchText =
-                                                  _searchText;
-                                            });
-                                          },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.options(
-                                                  coreStyle: CoreStyle.filled,
-                                                  coreColor: CoreColor.stormi,
-                                                  coreRadius:
-                                                      CoreRadius.radius_6,
-                                                  kitForegroundColorOption:
-                                                      Colors.black,
-                                                  coreFixedSizeButton:
-                                                      CoreFixedSizeButton
-                                                          .medium_48),
-                                        ),
+                                                  _noteConditionModel
+                                                      .searchText = _searchText;
+                                                });
+                                                // Reload Page
+                                                _reloadPage();
+                                              }
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getCoreScreenButtonStyle(
+                                                    context)),
                                         CoreElevatedButton.iconOnly(
-                                          icon: const FaIcon(
-                                              FontAwesomeIcons.magnifyingGlass,
-                                              color: Color(0xFF404040),
-                                              size: 24.0),
-                                          onPressed: () {
-                                            setState(() {
-                                              // Set Condition
-                                              _noteConditionModel.searchText =
-                                                  _searchText;
+                                            icon: const Icon(
+                                                Icons.search_rounded),
+                                            onPressed: () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                setState(() {
+                                                  // Set Condition
+                                                  if (_searchController
+                                                      .text.isNotEmpty) {
+                                                    _noteConditionModel
+                                                            .searchText =
+                                                        _searchText;
 
-                                              // Reload Data
-                                              _reloadPage();
+                                                    // Reload Data
+                                                    _reloadPage();
 
-                                              // Close Dialog
-                                              Navigator.of(context).pop();
-                                            });
-                                          },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.options(
-                                                  coreStyle: CoreStyle.filled,
-                                                  coreColor: CoreColor.success,
-                                                  coreRadius:
-                                                      CoreRadius.radius_6,
-                                                  kitForegroundColorOption:
-                                                      Colors.black,
-                                                  coreFixedSizeButton:
-                                                      CoreFixedSizeButton
-                                                          .medium_48),
-                                        ),
+                                                    // Close Dialog
+                                                    Navigator.of(context).pop();
+                                                  }
+                                                });
+                                              }
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getCoreScreenButtonStyle(
+                                                    context)),
                                       ],
                                     )
                                   ],
@@ -638,11 +773,8 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                             ),
                           ));
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.search,
                   size: 25.0,
@@ -670,63 +802,17 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: [
-                                            CoreElevatedButton.icon(
-                                              icon: const FaIcon(
-                                                  FontAwesomeIcons.calendarDay,
-                                                  size: 18.0),
-                                              label: Text('Date',
-                                                  style: CommonStyles
-                                                      .buttonTextStyle),
-                                              onPressed: () {
-                                                _restorAbleDatePickerRouteFuture
-                                                    .present();
-                                              },
-                                              coreButtonStyle:
-                                                  CoreButtonStyle.options(
-                                                coreStyle: CoreStyle.filled,
-                                                coreColor: CoreColor.info,
-                                                coreRadius: CoreRadius.radius_6,
-                                                kitForegroundColorOption:
-                                                    Colors.black,
-                                                coreFixedSizeButton:
-                                                    CoreFixedSizeButton
-                                                        .medium_48,
-                                              ),
-                                            ),
+                                            Text('Date created',
+                                                style: CommonStyles
+                                                    .buttonTextStyle),
                                             Checkbox(
                                               checkColor: Colors.white,
                                               value: _filterByDate,
                                               onChanged: (bool? value) {
                                                 setState(() {
                                                   _filterByDate = value!;
-                                                  if (_filterByDate) {
-                                                    _noteConditionModel
-                                                            .createdAtStartOfDay =
-                                                        DateTime(
-                                                                _selectedDate
-                                                                    .value.year,
-                                                                _selectedDate
-                                                                    .value
-                                                                    .month,
-                                                                _selectedDate
-                                                                    .value.day)
-                                                            .millisecondsSinceEpoch;
-                                                    _noteConditionModel
-                                                            .createdAtEndOfDay =
-                                                        DateTime(
-                                                                _selectedDate
-                                                                    .value.year,
-                                                                _selectedDate
-                                                                    .value
-                                                                    .month,
-                                                                _selectedDate
-                                                                    .value.day,
-                                                                23,
-                                                                59,
-                                                                59,
-                                                                999)
-                                                            .millisecondsSinceEpoch;
-                                                  } else {
+
+                                                  if (!_filterByDate) {
                                                     _noteConditionModel
                                                             .createdAtStartOfDay =
                                                         null;
@@ -831,11 +917,7 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           ]);
                                     }),
                                     const SizedBox(height: 20.0),
-                                    CoreElevatedButton.icon(
-                                      icon: const FaIcon(FontAwesomeIcons.check,
-                                          size: 18.0),
-                                      label: Text('OK',
-                                          style: CommonStyles.buttonTextStyle),
+                                    CoreElevatedButton.iconOnly(
                                       onPressed: () {
                                         setState(() {
                                           /// Reload Data
@@ -845,14 +927,10 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                                           Navigator.of(context).pop();
                                         });
                                       },
-                                      coreButtonStyle: CoreButtonStyle.options(
-                                          coreStyle: CoreStyle.filled,
-                                          coreColor: CoreColor.success,
-                                          coreRadius: CoreRadius.radius_6,
-                                          kitForegroundColorOption:
-                                              Colors.black,
-                                          coreFixedSizeButton:
-                                              CoreFixedSizeButton.medium_48),
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(context),
+                                      icon: const Icon(Icons.check_rounded,
+                                          size: 25.0),
                                     ),
                                   ],
                                 ),
@@ -860,11 +938,8 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                             ),
                           ));
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.filter_list_alt,
                   size: 25.0,
@@ -877,14 +952,14 @@ class _NoteListScreenState extends State<NoteListScreen> with RestorationMixin {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const NoteCreateScreen(
-                            subject: null, actionMode: ActionModeEnum.create)),
+                            note: null,
+                            copyNote: null,
+                            subject: null,
+                            actionMode: ActionModeEnum.create)),
                   );
                 },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
                 child: const Icon(
                   Icons.add,
                   size: 25.0,

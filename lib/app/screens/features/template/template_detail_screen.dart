@@ -12,35 +12,36 @@ import '../../../../core/components/actions/common_buttons/CoreElevatedButton.da
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
+import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/models/label_model.dart';
 import '../subjects/models/subject_condition_model.dart';
 import '../subjects/models/subject_model.dart';
 import '../subjects/widgets/subject_list_screen.dart';
-import 'databases/note_db_manager.dart';
-import 'models/note_model.dart';
-import 'note_create_screen.dart';
-import 'note_list_screen.dart';
-import 'providers/note_notifier.dart';
+import 'databases/template_db_manager.dart';
+import 'models/template_model.dart';
+import 'providers/template_notifier.dart';
+import 'template_create_screen.dart';
+import 'template_list_screen.dart';
 
-class NoteDetailScreen extends StatefulWidget {
-  final NoteModel note;
+class TemplateDetailScreen extends StatefulWidget {
+  final TemplateModel template;
   final List<LabelModel>? labels;
   final SubjectModel? subject;
 
-  const NoteDetailScreen({
+  const TemplateDetailScreen({
     super.key,
-    required this.note,
+    required this.template,
     required this.subject,
     required this.labels,
   });
 
   @override
-  State<NoteDetailScreen> createState() => _NoteDetailScreenState();
+  State<TemplateDetailScreen> createState() => _TemplateDetailScreenState();
 }
 
-class _NoteDetailScreenState extends State<NoteDetailScreen> {
+class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
   /*
   Editor parameters
    */
@@ -60,25 +61,25 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => NoteCreateScreen(
-                  note: widget.note,
+            builder: (context) => TemplateCreateScreen(
+                  template: widget.template,
                   subject: null,
                   actionMode: ActionModeEnum.update,
                 )));
   }
 
-  Future<bool> _onDeleteNote(BuildContext context) async {
-    return await NoteDatabaseManager.delete(
-        widget.note, DateTime.now().millisecondsSinceEpoch);
+  Future<bool> _onDeleteTemplate(BuildContext context) async {
+    return await TemplateDatabaseManager.delete(
+        widget.template, DateTime.now().millisecondsSinceEpoch);
   }
 
-  Future<bool> _onDeleteNoteForever(BuildContext context) async {
-    return await NoteDatabaseManager.deleteForever(widget.note);
+  Future<bool> _onDeleteTemplateForever(BuildContext context) async {
+    return await TemplateDatabaseManager.deleteForever(widget.template);
   }
 
-  Future<bool> _onRestoreNoteFromTrash(BuildContext context) async {
-    return await NoteDatabaseManager.restoreFromTrash(
-        widget.note, DateTime.now().millisecondsSinceEpoch);
+  Future<bool> _onRestoreTemplateFromTrash(BuildContext context) async {
+    return await TemplateDatabaseManager.restoreFromTrash(
+        widget.template, DateTime.now().millisecondsSinceEpoch);
   }
 
   @override
@@ -86,9 +87,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     // TODO: implement initState
     super.initState();
 
-    if (widget.note.title.isNotEmpty) {
+    if (widget.template.title.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.title);
+      List<dynamic> deltaMap = jsonDecode(widget.template.title);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -100,9 +101,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       /// Set selection
     }
 
-    if (widget.note.description.isNotEmpty) {
+    if (widget.template.description.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.description);
+      List<dynamic> deltaMap = jsonDecode(widget.template.description);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -112,7 +113,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       });
 
       if (_descriptionQuillController.document.toString().isNotEmpty) {
-        List<dynamic> deltaMap = jsonDecode(widget.note.description);
+        List<dynamic> deltaMap = jsonDecode(widget.template.description);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         setState(() {
@@ -127,9 +128,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   setDocuments() {
-    if (widget.note.title.isNotEmpty) {
+    if (widget.template.title.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.title);
+      List<dynamic> deltaMap = jsonDecode(widget.template.title);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -141,9 +142,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       /// Set selection
     }
 
-    if (widget.note.description.isNotEmpty) {
+    if (widget.template.description.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.description);
+      List<dynamic> deltaMap = jsonDecode(widget.template.description);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -153,7 +154,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       });
 
       if (_descriptionQuillController.document.toString().isNotEmpty) {
-        List<dynamic> deltaMap = jsonDecode(widget.note.description);
+        List<dynamic> deltaMap = jsonDecode(widget.template.description);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         setState(() {
@@ -181,7 +182,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   Widget _onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.note.createdAt!)}';
+        'You wrote at ${getTimeString(widget.template.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -189,7 +190,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   bool checkTitleEmpty() {
-    List<dynamic> deltaMap = jsonDecode(widget.note.title);
+    List<dynamic> deltaMap = jsonDecode(widget.template.title);
 
     flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -349,13 +350,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       title: 'Detail',
       actions: AppBarActionButtonEnum.home,
       isConfirmToClose: false,
-      homeLabel: 'Notes',
+      homeLabel: 'Templates',
       onGoHome: () {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-              builder: (context) => const NoteListScreen(
-                    noteConditionModel: null,
+              builder: (context) => const TemplateListScreen(
+                    templateConditionModel: null,
                   )),
           (route) => false,
         );
@@ -379,14 +380,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               endActionPane: ActionPane(
                 motion: const ScrollMotion(),
                 children: [
-                  widget.note.deletedAt == null
+                  widget.template.deletedAt == null
                       ? SlidableAction(
                           flex: 1,
                           onPressed: (context) {
                             // _onDelete();
-                            _onDeleteNote(context).then((result) {
+                            _onDeleteTemplate(context).then((result) {
                               if (result) {
-                                Provider.of<NoteNotifier>(context,
+                                Provider.of<TemplateNotifier>(context,
                                         listen: false)
                                     .onCountAll();
 
@@ -394,8 +395,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const NoteListScreen(
-                                              noteConditionModel: null)),
+                                          const TemplateListScreen(
+                                              templateConditionModel: null)),
                                   (route) => false,
                                 );
 
@@ -403,13 +404,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                     context,
                                     CoreNotificationStatus.success,
                                     CoreNotificationAction.delete,
-                                    'Note');
+                                    'Template');
                               } else {
                                 CoreNotification.show(
                                     context,
                                     CoreNotificationStatus.error,
                                     CoreNotificationAction.delete,
-                                    'Note');
+                                    'Template');
                               }
                             });
                           },
@@ -427,79 +428,112 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   initialExpanded: true,
                   child: Column(
                     children: [
-                      widget.note.updatedAt == null &&
-                              widget.note.deletedAt == null
+                      widget.template.updatedAt == null &&
+                              widget.template.deletedAt == null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    getTimeString(widget.note.createdAt!),
-                                    style: const TextStyle(
-                                        fontSize: 13.0, color: Colors.white54),
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  widget.note.isFavourite != null
-                                      ? const Icon(Icons.favorite,
-                                          color: Color(0xffdc3545), size: 26.0)
-                                      : Container(),
-                                ],
+                              child: Tooltip(
+                                message: 'Created time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    const Icon(Icons.create_rounded,
+                                        size: 13.0, color: Colors.white54),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                      getTimeString(widget.template.createdAt!),
+                                      style: const TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.white54),
+                                    ),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? const Icon(Icons.favorite,
+                                            color: Color(0xffdc3545),
+                                            size: 26.0)
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
-                      widget.note.updatedAt != null &&
-                              widget.note.deletedAt == null
+                      widget.template.updatedAt != null &&
+                              widget.template.deletedAt == null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Icon(Icons.edit,
-                                      size: 13.0, color: Colors.white54),
-                                  const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.note.updatedAt!),
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.white54)),
-                                  const SizedBox(width: 4.0),
-                                  widget.note.isFavourite != null
-                                      ? const Icon(Icons.favorite,
-                                          color: Color(0xffdc3545), size: 26.0)
-                                      : Container(),
-                                ],
+                              child: Tooltip(
+                                message: 'Updated time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        getTimeString(
+                                            widget.template.updatedAt!),
+                                        style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? const Icon(Icons.favorite,
+                                            color: Color(0xffdc3545),
+                                            size: 26.0)
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
-                      widget.note.deletedAt != null
+                      widget.template.deletedAt != null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Icon(Icons.delete_rounded,
-                                      size: 13.0, color: Colors.white54),
-                                  const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.note.deletedAt!),
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.white54)),
-                                  const SizedBox(width: 4.0),
-                                  widget.note.isFavourite != null
-                                      ? const Icon(Icons.favorite,
-                                          color: Color(0xffdc3545), size: 26.0)
-                                      : Container(),
-                                ],
+                              child: Tooltip(
+                                message: 'Deleted time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        getTimeString(
+                                            widget.template.deletedAt!),
+                                        style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? const Icon(Icons.favorite,
+                                            color: Color(0xffdc3545),
+                                            size: 26.0)
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
                       Card(
+                        shadowColor: const Color(0xff1f1f1f),
+                        elevation: 2.0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Đây là giá trị bo góc ở đây
+                          side: BorderSide(
+                              color: ThemeDataCenter.getBorderCardColorStyle(
+                                  context),
+                              width: 1.0),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Column(
@@ -547,7 +581,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                   scrollable: false,
                                                   showCursor: false)
                                               : _onGetTitle()),
-                                      widget.note.deletedAt == null
+                                      widget.template.deletedAt == null
                                           ? Tooltip(
                                               message: 'Update',
                                               child:
@@ -570,11 +604,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     onPressed: () {
-                                                      _onRestoreNoteFromTrash(
+                                                      _onRestoreTemplateFromTrash(
                                                               context)
                                                           .then((result) {
                                                         if (result) {
-                                                          Provider.of<NoteNotifier>(
+                                                          Provider.of<TemplateNotifier>(
                                                                   context,
                                                                   listen: false)
                                                               .onCountAll();
@@ -584,8 +618,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                             context,
                                                             MaterialPageRoute(
                                                                 builder: (context) =>
-                                                                    const NoteListScreen(
-                                                                        noteConditionModel:
+                                                                    const TemplateListScreen(
+                                                                        templateConditionModel:
                                                                             null)),
                                                             (route) => false,
                                                           );
@@ -596,7 +630,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                   .success,
                                                               CoreNotificationAction
                                                                   .restore,
-                                                              'Note');
+                                                              'Template');
                                                         } else {
                                                           CoreNotification.show(
                                                               context,
@@ -604,7 +638,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                   .error,
                                                               CoreNotificationAction
                                                                   .restore,
-                                                              'Note');
+                                                              'Template');
                                                         }
                                                       });
                                                     },
@@ -626,11 +660,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                       if (await CoreHelperWidget
                                                           .confirmFunction(
                                                               context)) {
-                                                        _onDeleteNoteForever(
+                                                        _onDeleteTemplateForever(
                                                                 context)
                                                             .then((result) {
                                                           if (result) {
-                                                            Provider.of<NoteNotifier>(
+                                                            Provider.of<TemplateNotifier>(
                                                                     context,
                                                                     listen:
                                                                         false)
@@ -641,8 +675,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                               context,
                                                               MaterialPageRoute(
                                                                   builder: (context) =>
-                                                                      const NoteListScreen(
-                                                                          noteConditionModel:
+                                                                      const TemplateListScreen(
+                                                                          templateConditionModel:
                                                                               null)),
                                                               (route) => false,
                                                             );
@@ -653,7 +687,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                     .success,
                                                                 CoreNotificationAction
                                                                     .delete,
-                                                                'Note');
+                                                                'Template');
                                                           } else {
                                                             CoreNotification.show(
                                                                 context,
@@ -661,7 +695,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                     .error,
                                                                 CoreNotificationAction
                                                                     .delete,
-                                                                'Note');
+                                                                'Template');
                                                           }
                                                         });
                                                       }
@@ -698,7 +732,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                   child: Row(
                                     children: [
                                       Text(
-                                        "[${widget.note.id!}] ",
+                                        "[${widget.template.id!}] ",
                                         style: const TextStyle(
                                             fontSize: 13.0,
                                             color: Colors.black45),

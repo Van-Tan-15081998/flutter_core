@@ -11,6 +11,7 @@ import '../../../../../core/components/form/CoreTextFormField.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
+import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../databases/label_db_manager.dart';
 import '../models/label_model.dart';
@@ -32,7 +33,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
   String _title = '';
   String _color = '';
 
-  Color defaultColor = Colors.black;
+  Color defaultColor = Color(0xff1f1f1f);
   final ScrollController _controllerScrollController = ScrollController();
 
   final myController = TextEditingController();
@@ -229,17 +230,25 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              'Title:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  color: Colors.white54),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(0, 5.0, 5.0, 0),
+                              child: Text(
+                                'Title:',
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: ThemeDataCenter
+                                        .getFormFieldLabelColorStyle(context)),
+                              ),
                             ),
                           ],
                         ),
                         CoreTextFormField(
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(
+                              color: ThemeDataCenter.getAloneTextColorStyle(
+                                  context)),
                           onChanged: (value) {
                             setState(() {
                               _title = value;
@@ -249,22 +258,32 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                           focusNode: myFocusNode,
                           validateString: 'Please enter your title',
                           maxLength: 30,
-                          icon: const Icon(Icons.edit, color: Colors.white54),
+                          icon: Icon(Icons.edit,
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                           label: 'Title',
-                          labelColor: Colors.white54,
+                          labelColor:
+                              ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context),
                           placeholder: 'Enter you title',
                           helper: '',
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              'Color:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  color: Colors.white54),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
+                              child: Text(
+                                'Color:',
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: ThemeDataCenter
+                                        .getFormFieldLabelColorStyle(context)),
+                              ),
                             ),
                           ],
                         ),
@@ -327,7 +346,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                     coreStyle: CoreStyle.outlined,
                                     coreColor: CoreColor.dark,
                                     coreRadius: CoreRadius.radius_6,
-                                    kitForegroundColorOption: Colors.black,
+                                    kitForegroundColorOption:
+                                        const Color(0xff1f1f1f),
                                     coreFixedSizeButton:
                                         CoreFixedSizeButton.medium_40),
                                 child: Text('Choose color',

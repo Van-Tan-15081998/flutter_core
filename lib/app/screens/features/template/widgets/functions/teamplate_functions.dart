@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 
-class NoteFunctions {
+class TemplateFunctions {
   static void addStringToQuillContent(
       {required flutter_quill.QuillController quillController,
       required TextSelection selection,

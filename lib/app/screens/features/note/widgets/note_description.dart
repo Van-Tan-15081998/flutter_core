@@ -5,17 +5,15 @@ import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class NoteDescription extends StatefulWidget {
-  const NoteDescription({
-    super.key
-  });
+  const NoteDescription({super.key});
 
   @override
   State<NoteDescription> createState() => _NoteDescriptionState();
 }
 
 class _NoteDescriptionState extends State<NoteDescription> {
-
-  final flutter_quill.QuillController _controller = flutter_quill.QuillController.basic();
+  final flutter_quill.QuillController _controller =
+      flutter_quill.QuillController.basic();
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +42,14 @@ class _NoteDescriptionState extends State<NoteDescription> {
               ),
             ),
           ),
-
         ),
         floatingActionButton: Padding(
           padding: EdgeInsets.fromLTRB(4, 0, 4, 10),
           child: Container(
-
-            padding: const EdgeInsets.fromLTRB(4, 1 ,4 , 0),
-            width: MediaQuery.of(context).size.width, // Đặt chiều rộng của container bằng chiều ngang của màn hình
+            padding: const EdgeInsets.fromLTRB(4, 1, 4, 0),
+            width: MediaQuery.of(context)
+                .size
+                .width, // Đặt chiều rộng của container bằng chiều ngang của màn hình
             decoration: BoxDecoration(
               // border: Border.all(
               //   color: Colors.black, // Màu viền
@@ -68,20 +66,16 @@ class _NoteDescriptionState extends State<NoteDescription> {
               children: [
                 CoreElevatedButton.iconOnly(
                   icon: const FaIcon(FontAwesomeIcons.font, size: 18.0),
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   coreButtonStyle: CoreButtonStyle.options(
                       coreFixedSizeButton: CoreFixedSizeButton.squareIcon4050,
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: const Color(0xff1f1f1f)),
                 ),
                 CoreElevatedButton.iconOnly(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   coreButtonStyle: CoreButtonStyle.options(
                       coreFixedSizeButton: CoreFixedSizeButton.squareIcon4050,
                       coreStyle: CoreStyle.outlined,
@@ -106,9 +100,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                   icon: const FaIcon(FontAwesomeIcons.squareCheck, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   coreButtonStyle: CoreButtonStyle.options(
                       coreFixedSizeButton: CoreFixedSizeButton.squareIcon4050,
                       coreStyle: CoreStyle.outlined,
@@ -118,9 +110,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                   icon: const FaIcon(FontAwesomeIcons.listUl, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   coreButtonStyle: CoreButtonStyle.options(
                       coreFixedSizeButton: CoreFixedSizeButton.squareIcon4050,
                       coreStyle: CoreStyle.outlined,
@@ -130,9 +120,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                   icon: const FaIcon(FontAwesomeIcons.arrowLeft, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                   coreButtonStyle: CoreButtonStyle.options(
                       coreFixedSizeButton: CoreFixedSizeButton.squareIcon4050,
                       coreStyle: CoreStyle.outlined,
@@ -145,7 +133,8 @@ class _NoteDescriptionState extends State<NoteDescription> {
             ),
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterDocked,
       ),
     );
   }

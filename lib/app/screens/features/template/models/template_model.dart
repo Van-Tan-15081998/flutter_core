@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-class NoteModel {
+class TemplateModel {
   final int? id;
   final String title;
   final String description;
@@ -11,7 +11,7 @@ class NoteModel {
   final int? updatedAt;
   final int? deletedAt;
 
-  NoteModel(
+  TemplateModel(
       {required this.title,
       required this.description,
       required this.createdAt,
@@ -22,7 +22,7 @@ class NoteModel {
       this.deletedAt,
       this.id});
 
-  factory NoteModel.fromJson(Map<String, dynamic> json) => NoteModel(
+  factory TemplateModel.fromJson(Map<String, dynamic> json) => TemplateModel(
       id: json['id'],
       title: json['title'],
       description: json['description'],

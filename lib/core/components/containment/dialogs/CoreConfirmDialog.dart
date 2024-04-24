@@ -56,6 +56,7 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
                     coreStyle: CoreStyle.filled,
                     coreColor: CoreColor.success,
                     coreRadius: CoreRadius.radius_6,
+                    kitBorderColorOption: Colors.black,
                     kitForegroundColorOption: Colors.black,
                     coreFixedSizeButton: CoreFixedSizeButton.medium_48),
               ),
@@ -71,6 +72,7 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
                     coreStyle: CoreStyle.filled,
                     coreColor: CoreColor.danger,
                     coreRadius: CoreRadius.radius_6,
+                    kitBorderColorOption: Colors.black,
                     kitForegroundColorOption: Colors.black,
                     coreFixedSizeButton: CoreFixedSizeButton.medium_48),
               )

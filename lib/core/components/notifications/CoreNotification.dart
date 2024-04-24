@@ -211,7 +211,7 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Colors.black,
+          backgroundColor: Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
@@ -228,7 +228,7 @@ class CoreNotification {
                         child: Container(
                             width: 50,
                             height: 50,
-                            color: Colors.black,
+                            color: Color(0xff1f1f1f),
                             child: const Icon(
                               Icons.notifications_none_rounded,
                               color: Colors.white,
@@ -432,7 +432,7 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Colors.black,
+          backgroundColor: Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
@@ -447,7 +447,7 @@ class CoreNotification {
                       child: Container(
                           width: 50,
                           height: 50,
-                          color: Colors.black,
+                          color: const Color(0xff1f1f1f),
                           child: const Icon(
                             Icons.notifications_none_rounded,
                             color: Colors.white,

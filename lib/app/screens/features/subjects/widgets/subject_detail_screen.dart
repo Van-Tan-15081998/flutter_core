@@ -9,6 +9,7 @@ import '../../../../../core/components/actions/common_buttons/CoreElevatedButton
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../note/models/note_condition_model.dart';
 import '../../note/note_create_screen.dart';
@@ -151,10 +152,12 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               }
                             });
                           },
-                          backgroundColor: const Color(0xFF202124),
-                          foregroundColor: const Color(0xffffb90f),
+                          backgroundColor:
+                              ThemeDataCenter.getBackgroundColor(context),
+                          foregroundColor:
+                              ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                                  context),
                           icon: Icons.delete,
-                          label: 'Delete',
                         )
                       : Container()
                 ],
@@ -168,16 +171,27 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               widget.subject.deletedAt == null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Text(getTimeString(widget.subject.createdAt!),
-                                      style: const TextStyle(
-                                        fontSize: 13.0,
-                                        color: Colors.white54,
-                                      )),
-                                ],
+                              child: Tooltip(
+                                message: 'Created time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.create_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        getTimeString(
+                                            widget.subject.createdAt!),
+                                        style: TextStyle(
+                                          fontSize: 13.0,
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context),
+                                        )),
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
@@ -185,43 +199,64 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               widget.subject.deletedAt == null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Icon(Icons.edit,
-                                      size: 13.0, color: Colors.white54),
-                                  const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.subject.updatedAt!),
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.white54))
-                                ],
+                              child: Tooltip(
+                                message: 'Updated time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        getTimeString(
+                                            widget.subject.updatedAt!),
+                                        style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
                       widget.subject.deletedAt != null
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  const Icon(Icons.delete_rounded,
-                                      size: 13.0, color: Colors.white54),
-                                  const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.subject.deletedAt!),
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.white54))
-                                ],
+                              child: Tooltip(
+                                message: 'Deleted time',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        getTimeString(
+                                            widget.subject.deletedAt!),
+                                        style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
                               ),
                             )
                           : Container(),
                       Card(
+                        shadowColor: const Color(0xff1f1f1f),
+                        elevation: 2.0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              5.0), // Đây là giá trị bo góc ở đây
+                          side: BorderSide(
+                              color: ThemeDataCenter.getBorderCardColorStyle(
+                                  context),
+                              width: 1.0),
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Column(
@@ -310,8 +345,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                   )));
                                                     },
                                                     coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                        ThemeDataCenter
+                                                            .getUpdateButtonStyle(
+                                                                context),
                                                     icon: const Icon(Icons
                                                         .edit_note_rounded),
                                                   ),
@@ -332,9 +368,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                       ActionModeEnum
                                                                           .create)));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getCreateSubSubjectButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .create_new_folder_rounded),
                                                   ),
@@ -358,9 +394,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                       noteConditionModel:
                                                                           noteConditionModel)));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getViewNotesButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .playlist_play_rounded),
                                                   ),
@@ -374,15 +410,18 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                           context,
                                                           MaterialPageRoute(
                                                               builder: (context) => NoteCreateScreen(
+                                                                  note: null,
+                                                                  copyNote:
+                                                                      null,
                                                                   subject: widget
                                                                       .subject,
                                                                   actionMode:
                                                                       ActionModeEnum
                                                                           .create)));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getCreateNoteButtonStyle(
+                                                            context),
                                                     icon: const Icon(
                                                         Icons.add_card_rounded),
                                                   ),
@@ -412,9 +451,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                         ),
                                                       );
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getFilterParentSubjectButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .arrow_upward_rounded),
                                                   ),
@@ -445,9 +484,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                         ),
                                                       );
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getFilterSubSubjectButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .arrow_downward_rounded),
                                                   ),
@@ -493,9 +532,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     }
                                                   });
                                                 },
-                                                coreButtonStyle:
-                                                    CoreButtonStyle.info(
-                                                        kitRadius: 6.0),
+                                                coreButtonStyle: ThemeDataCenter
+                                                    .getRestoreButtonStyle(
+                                                        context),
                                                 icon: const Icon(
                                                     Icons
                                                         .restore_from_trash_rounded,
@@ -544,9 +583,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     });
                                                   }
                                                 },
-                                                coreButtonStyle:
-                                                    CoreButtonStyle.danger(
-                                                        kitRadius: 6.0),
+                                                coreButtonStyle: ThemeDataCenter
+                                                    .getDeleteForeverButtonStyle(
+                                                        context),
                                                 icon: const Icon(
                                                     Icons
                                                         .delete_forever_rounded,

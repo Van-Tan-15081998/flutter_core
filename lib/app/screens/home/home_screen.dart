@@ -1,14 +1,18 @@
+import 'package:animate_do/animate_do.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_create_screen.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../core/components/notifications/CoreNotification.dart';
 import '../../library/common/styles/CommonStyles.dart';
+import '../../library/common/themes/ThemeDataCenter.dart';
 import '../../library/enums/CommonEnums.dart';
 import '../features/label/providers/label_notifier.dart';
 import '../features/label/widgets/label_list_screen.dart';
@@ -16,7 +20,10 @@ import '../features/note/databases/note_db_manager.dart';
 import '../features/note/providers/note_notifier.dart';
 import '../features/subjects/providers/subject_notifier.dart';
 import '../features/subjects/widgets/subject_list_screen.dart';
+import '../features/template/providers/template_notifier.dart';
+import '../features/template/template_list_screen.dart';
 import '../setting/providers/setting_notifier.dart';
+import '../setting/setting_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -30,319 +37,586 @@ class HomeScreen extends StatefulWidget {
 enum NavigationBarEnum { masterHome, masterSearch, masterAdd, masterDrawer }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late BannerAd bannerAd;
+  bool isAdLoaded = false;
+  initBannerAd() {
+    bannerAd = BannerAd(
+        size: AdSize.banner,
+        // adUnitId: "ca-app-pub-7127345763306561/2981583992",
+        adUnitId: 'ca-app-pub-3940256099942544/9214589741',
+        listener: BannerAdListener(onAdLoaded: (ad) {
+          setState(() {
+            isAdLoaded = true;
+          });
+        }, onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          print(error);
+        }),
+        request: const AdRequest());
 
-  int screenIndex = 0;
+    bannerAd.load();
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   int countAllNotes = 0;
   int countAllLabels = 0;
   int countAllTasks = 0;
 
-  bool isSetColorAccordingSubjectColor = false;
-  bool isActiveSound = false;
-  bool isExpandedNoteContent = false;
-  bool isExpandedSubjectActions = false;
+  Widget _buildAd() {
+    if (isAdLoaded) {
+      return SizedBox(
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(
+          ad: bannerAd,
+        ),
+      );
+    }
+    return Container(
+      height: 100,
+      width: 200,
+      color: Colors.yellow,
+    );
+  }
 
-  Widget statisticHomeScreen() {
+  Widget _buildAdB(BuildContext context) {
+    if (isAdLoaded) {
+      return FadeIn(
+        duration: const Duration(milliseconds: 200),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+          child: Card(
+            shadowColor: const Color(0xff1f1f1f),
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                  color:
+                      ThemeDataCenter.getTemplateBorderCardColorStyle(context),
+                  width: 1.0),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  // height: 150,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ThemeDataCenter.getTopBannerCardBackgroundColor(
+                          context),
+                      shape: BoxShape.rectangle,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          const Icon(
+                            Icons.ad_units_rounded,
+                            size: 26.0,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width - 125.0,
+                            child: const Text(
+                              'Advertisement',
+                              style: TextStyle(
+                                  fontSize: 18.0, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          Tooltip(
+                            message: 'Hide',
+                            child: CoreElevatedButton(
+                              onPressed: () {},
+                              coreButtonStyle:
+                                  ThemeDataCenter.getViewButtonStyle(context),
+                              child: const Text('Hide'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 10.0, 0, 10.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: bannerAd.size.height.toDouble(),
+                          width: bannerAd.size.width.toDouble(),
+                          child: AdWidget(
+                            ad: bannerAd,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    return Container();
+  }
+
+  Widget statisticHomeScreen(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  // height: 150,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.lightGreen,
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Icon(
-                            Icons.note_alt_outlined,
-                            size: 26.0,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width - 125.0,
-                            child: const Text(
-                              'Notes',
-                              style: TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.w500),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+            child: Card(
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color:
+                          ThemeDataCenter.getNoteBorderCardColorStyle(context),
+                      width: 1.0),
+                  borderRadius: BorderRadius.circular(5.0)),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    // height: 150,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
+                            context),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.note_alt_outlined,
+                              size: 26.0,
                             ),
-                          ),
-                          Tooltip(
-                            message: 'View',
-                            child: CoreElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const NoteListScreen(
-                                            noteConditionModel: null,
-                                          )),
-                                );
-                              },
-                              coreButtonStyle:
-                                  CoreButtonStyle.dark(kitRadius: 6.0),
-                              child: const Text('View'),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width - 125.0,
+                              child: const Text(
+                                'Notes',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                            Tooltip(
+                              message: 'View',
+                              child: CoreElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const NoteListScreen(
+                                              noteConditionModel: null,
+                                            )),
+                                  );
+                                },
+                                coreButtonStyle:
+                                    ThemeDataCenter.getViewButtonStyle(context),
+                                child: const Text('View'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        boxShadow: [],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          color: ThemeDataCenter
+                              .getBottomBannerCardBackgroundColor(context),
+                          shape: BoxShape.rectangle,
+                          boxShadow: [],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const Icon(Icons.now_widgets_rounded,
+                                    color: Colors.black45),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                const Text(
+                                  'Total:',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                Text(
+                                  context
+                                      .watch<NoteNotifier>()
+                                      .countAllNotes
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              const Icon(Icons.now_widgets_rounded,
-                                  color: Colors.black45),
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              const Text(
-                                'Total:',
-                                style: TextStyle(fontSize: 16.0),
-                              ),
-                              Text(
-                                context
-                                    .watch<NoteNotifier>()
-                                    .countAllNotes
-                                    .toString(),
-                                style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
           ///
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  // height: 150,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.lightGreen,
-                      shape: BoxShape.rectangle,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+            child: Card(
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color: ThemeDataCenter.getSubjectBorderCardColorStyle(
+                          context),
+                      width: 1.0),
+                  borderRadius: BorderRadius.circular(5.0)),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    // height: 150,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
+                            context),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.palette_outlined,
+                              size: 26.0,
+                            ),
+                            SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width - 125.0,
+                                child: const Text(
+                                  'Subjects',
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.w500),
+                                )),
+                            Tooltip(
+                              message: 'View',
+                              child: CoreElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const SubjectListScreen(
+                                        subjectConditionModel: null,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                coreButtonStyle:
+                                    ThemeDataCenter.getViewButtonStyle(context),
+                                child: const Text('View'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Icon(
-                            Icons.palette_outlined,
-                            size: 26.0,
-                          ),
-                          SizedBox(
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          color: ThemeDataCenter
+                              .getBottomBannerCardBackgroundColor(context),
+                          shape: BoxShape.rectangle,
+                          boxShadow: [],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const Icon(Icons.now_widgets_rounded,
+                                    color: Colors.black45),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                const Text(
+                                  'Total:',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                Text(
+                                  context
+                                      .watch<SubjectNotifier>()
+                                      .countAllSubjects
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          ///
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+            child: Card(
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color:
+                          ThemeDataCenter.getLabelBorderCardColorStyle(context),
+                      width: 1.0),
+                  borderRadius: BorderRadius.circular(5.0)),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    // height: 150,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
+                            context),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.label_important_outline,
+                              size: 26.0,
+                            ),
+                            SizedBox(
                               width: MediaQuery.of(context).size.width - 125.0,
                               child: const Text(
-                                'Subjects',
+                                'Labels',
                                 style: TextStyle(
                                     fontSize: 18.0,
                                     fontWeight: FontWeight.w500),
-                              )),
-                          Tooltip(
-                            message: 'View',
-                            child: CoreElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const SubjectListScreen(
-                                      subjectConditionModel: null,
-                                    ),
-                                  ),
-                                );
-                              },
-                              coreButtonStyle:
-                                  CoreButtonStyle.dark(kitRadius: 6.0),
-                              child: const Text('View'),
+                              ),
                             ),
-                          ),
-                        ],
+                            Tooltip(
+                              message: 'View',
+                              child: CoreElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LabelListScreen(
+                                              labelConditionModel: null,
+                                            )),
+                                  );
+                                },
+                                coreButtonStyle:
+                                    ThemeDataCenter.getViewButtonStyle(context),
+                                child: const Text('View'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        boxShadow: [],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          color: ThemeDataCenter
+                              .getBottomBannerCardBackgroundColor(context),
+                          shape: BoxShape.rectangle,
+                          boxShadow: [],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const Icon(Icons.now_widgets_rounded,
+                                    color: Colors.black45),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                const Text(
+                                  'Total:',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                Text(
+                                  context
+                                      .watch<LabelNotifier>()
+                                      .countAllLabels
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              const Icon(Icons.now_widgets_rounded,
-                                  color: Colors.black45),
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              const Text(
-                                'Total:',
-                                style: TextStyle(fontSize: 16.0),
-                              ),
-                              Text(
-                                context
-                                    .watch<SubjectNotifier>()
-                                    .countAllSubjects
-                                    .toString(),
-                                style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
-          ///
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  // height: 150,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.lightGreen,
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Icon(
-                            Icons.label_important_outline,
-                            size: 26.0,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width - 125.0,
-                            child: const Text(
-                              'Labels',
-                              style: TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.w500),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+            child: Card(
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 2.0,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                    color: ThemeDataCenter.getTemplateBorderCardColorStyle(
+                        context),
+                    width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: <Widget>[
+                  SizedBox(
+                    // height: 150,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
+                            context),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            const Icon(
+                              Icons.my_library_books_rounded,
+                              size: 26.0,
                             ),
-                          ),
-                          Tooltip(
-                            message: 'View',
-                            child: CoreElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const LabelListScreen(
-                                            labelConditionModel: null,
-                                          )),
-                                );
-                              },
-                              coreButtonStyle:
-                                  CoreButtonStyle.dark(kitRadius: 6.0),
-                              child: const Text('View'),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width - 125.0,
+                              child: const Text(
+                                'Templates',
+                                style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
                             ),
-                          ),
-                        ],
+                            Tooltip(
+                              message: 'View',
+                              child: CoreElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const TemplateListScreen(
+                                              templateConditionModel: null,
+                                            )),
+                                  );
+                                },
+                                coreButtonStyle:
+                                    ThemeDataCenter.getViewButtonStyle(context),
+                                child: const Text('View'),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(5.0),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        boxShadow: [],
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          color: ThemeDataCenter
+                              .getBottomBannerCardBackgroundColor(context),
+                          shape: BoxShape.rectangle,
+                          boxShadow: [],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const Icon(Icons.now_widgets_rounded,
+                                    color: Colors.black45),
+                                const SizedBox(
+                                  width: 10.0,
+                                ),
+                                const Text(
+                                  'Total:',
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                                Text(
+                                  context
+                                      .watch<TemplateNotifier>()
+                                      .countAllTemplates
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              const Icon(Icons.now_widgets_rounded,
-                                  color: Colors.black45),
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                              const Text(
-                                'Total:',
-                                style: TextStyle(fontSize: 16.0),
-                              ),
-                              Text(
-                                context
-                                    .watch<LabelNotifier>()
-                                    .countAllLabels
-                                    .toString(),
-                                style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
+
+          _buildAdB(context)
         ],
       ),
     );
@@ -352,6 +626,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    initBannerAd();
   }
 
   onGetCountAll() async {
@@ -361,17 +637,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
-    isSetColorAccordingSubjectColor =
-        settingNotifier.isSetColorAccordingSubjectColor ?? false;
-    isActiveSound = settingNotifier.isActiveSound ?? false;
-    isExpandedNoteContent = settingNotifier.isExpandedNoteContent ?? false;
-    isExpandedSubjectActions = settingNotifier.isExpandedSubjectActions ?? false;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFF202124),
+      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         title: Text(
           widget.title,
           style: GoogleFonts.montserrat(
@@ -385,231 +656,108 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       drawer: Drawer(
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color(0xFF202124),
+            SizedBox(
+              width: double.infinity,
+              child: DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Color(0xFF202124),
+                ),
+                child: Text('Hi Notes',
+                    style: GoogleFonts.montserrat(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 30,
+                        color: const Color(0xFF404040),
+                        fontWeight: FontWeight.bold)),
               ),
-              child: Text('Hi Notes',
-                  style: GoogleFonts.montserrat(
-                      fontStyle: FontStyle.italic,
-                      fontSize: 30,
-                      color: const Color(0xFF404040),
-                      fontWeight: FontWeight.bold)),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(25, 16, 25, 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        color: const Color(0xFF202124),
-                        borderRadius: BorderRadius.circular(4.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 10, 0, 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('Settings',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 18,
-                                  color: const Color(0xFF404040),
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 5, 0, 0),
-                    child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                      return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                  'Set note background color according to subject color',
-                                  style: CommonStyles.settingLabelTextStyle),
-                            ),
-                            Checkbox(
-                              checkColor: Colors.white,
-                              value: isSetColorAccordingSubjectColor,
-                              onChanged: (bool? value) {
-                                settingNotifier
-                                    .setIsSetColorAccordingSubjectColor(value!)
-                                    .then((success) {
-                                  if (success) {
-                                    setState(() {
-                                      isSetColorAccordingSubjectColor = value;
-                                    });
-
-                                    CoreNotification.show(
-                                        context,
-                                        CoreNotificationStatus.success,
-                                        CoreNotificationAction.update,
-                                        'Setting');
-                                  }
-                                });
-                              },
-                            ),
-                          ]);
-                    }),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 5, 0, 0),
-                    child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                      return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Flexible(
-                              child: Text('Note content expanded',
-                                  style: CommonStyles.settingLabelTextStyle),
-                            ),
-                            Checkbox(
-                              checkColor: Colors.white,
-                              value: isExpandedNoteContent,
-                              onChanged: (bool? value) {
-                                settingNotifier
-                                    .setIsExpandedNoteContent(value!)
-                                    .then((success) {
-                                  if (success) {
-                                    setState(() {
-                                      isExpandedNoteContent = value;
-                                    });
-
-                                    CoreNotification.show(
-                                        context,
-                                        CoreNotificationStatus.success,
-                                        CoreNotificationAction.update,
-                                        'Setting');
-                                  }
-                                });
-                              },
-                            ),
-                          ]);
-                    }),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                    child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Flexible(
-                                  child: Text('Subject actions expanded',
-                                      style: CommonStyles.settingLabelTextStyle),
-                                ),
-                                Checkbox(
-                                  checkColor: Colors.white,
-                                  value: isExpandedSubjectActions,
-                                  onChanged: (bool? value) {
-                                    settingNotifier
-                                        .setIsExpandedSubjectActions(value!)
-                                        .then((success) {
-                                      if (success) {
-                                        setState(() {
-                                          isExpandedSubjectActions = value;
-                                        });
-
-                                        CoreNotification.show(
-                                            context,
-                                            CoreNotificationStatus.success,
-                                            CoreNotificationAction.update,
-                                            'Setting');
-                                      }
-                                    });
-                                  },
-                                ),
-                              ]);
-                        }),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                    child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                      return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Flexible(
-                              child: Text('Sounds',
-                                  style: CommonStyles.settingLabelTextStyle),
-                            ),
-                            Checkbox(
-                              checkColor: Colors.white,
-                              value: isActiveSound,
-                              onChanged: (bool? value) {
-                                settingNotifier
-                                    .setIsActiveSound(value!)
-                                    .then((success) {
-                                  if (success) {
-                                    setState(() {
-                                      isActiveSound = value;
-                                    });
-
-                                    CoreNotification.show(
-                                        context,
-                                        CoreNotificationStatus.success,
-                                        CoreNotificationAction.update,
-                                        'Setting');
-                                  }
-                                });
-                              },
-                            ),
-                          ]);
-                    }),
-                  ),
-                  const Divider(color: Colors.black45),
-                  CoreElevatedButton.icon(
-                    icon: const FaIcon(FontAwesomeIcons.xmark, size: 18.0),
-                    label: const Text('Close menu'),
-                    onPressed: () {
-                      _scaffoldKey.currentState!.closeDrawer();
-                    },
-                    coreButtonStyle: CoreButtonStyle.options(
-                        coreStyle: CoreStyle.outlined,
-                        coreColor: CoreColor.dark,
-                        coreRadius: CoreRadius.radius_6,
-                        kitForegroundColorOption: Colors.black,
-                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-                  ),
-                ],
+              padding: const EdgeInsets.all(8.0),
+              child: CoreElevatedButton(
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Settings',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SettingScreen()),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CoreElevatedButton(
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('User manual',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SettingScreen()),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
-      body: statisticHomeScreen(),
+      body: statisticHomeScreen(context),
       bottomNavigationBar: CoreBottomNavigationBar(
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         child: IconTheme(
           data: const IconThemeData(color: Colors.white),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              CoreElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NoteCreateScreen(
-                            subject: null, actionMode: ActionModeEnum.create)),
-                  );
-                },
-                coreButtonStyle: CoreButtonStyle.options(
-                    coreStyle: CoreStyle.outlined,
-                    coreColor: CoreColor.dark,
-                    coreRadius: CoreRadius.radius_6,
-                    kitForegroundColorOption: Colors.black),
-                child: const Icon(
-                  Icons.add,
-                  size: 25.0,
+              Tooltip(
+                message: 'Create note',
+                child: CoreElevatedButton.iconOnly(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const NoteCreateScreen(
+                              note: null,
+                              copyNote: null,
+                              subject: null,
+                              actionMode: ActionModeEnum.create)),
+                    );
+                  },
+                  coreButtonStyle:
+                      ThemeDataCenter.getCoreScreenButtonStyle(context),
+                  icon: SizedBox(
+                    width: 80.0,
+                    child: AvatarGlow(
+                      glowRadiusFactor: 0.3,
+                      curve: Curves.linearToEaseOut,
+                      child: const Icon(
+                        Icons.add,
+                        size: 30.0,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

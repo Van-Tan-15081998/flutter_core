@@ -1,8 +1,6 @@
-class NoteConditionModel {
+class TemplateConditionModel {
   String? title;
   String? description;
-  int? createdAtStartOfDay;
-  int? createdAtEndOfDay;
   int? labelId;
   int? subjectId;
   String? searchText;
@@ -10,11 +8,9 @@ class NoteConditionModel {
   bool? recentlyUpdated;
   bool? favourite;
 
-  NoteConditionModel({
+  TemplateConditionModel({
     this.title,
     this.description,
-    this.createdAtStartOfDay,
-    this.createdAtEndOfDay,
     this.labelId,
     this.subjectId,
     this.searchText,

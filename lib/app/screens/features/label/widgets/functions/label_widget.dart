@@ -5,6 +5,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../models/label_model.dart';
 import '../label_create_screen.dart';
@@ -73,10 +74,10 @@ class _LabelWidgetState extends State<LabelWidget> {
                       builder: (context) =>
                           LabelDetailScreen(label: widget.label)));
             },
-            backgroundColor: const Color(0xFF202124),
-            foregroundColor: const Color(0xff17a2b8),
+            backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+            foregroundColor:
+                ThemeDataCenter.getViewSlidableActionColorStyle(context),
             icon: Icons.remove_red_eye_rounded,
-            label: 'View',
           ),
           widget.label.deletedAt == null
               ? SlidableAction(
@@ -86,10 +87,11 @@ class _LabelWidgetState extends State<LabelWidget> {
                       widget.onDelete!();
                     }
                   },
-                  backgroundColor: const Color(0xFF202124),
-                  foregroundColor: const Color(0xffffb90f),
+                  backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+                  foregroundColor:
+                      ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                          context),
                   icon: Icons.delete,
-                  label: 'Delete',
                 )
               : Container()
         ],
@@ -102,57 +104,84 @@ class _LabelWidgetState extends State<LabelWidget> {
             widget.label.updatedAt == null && widget.label.deletedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(getTimeString(widget.label.createdAt!),
-                            style: const TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.white54,
-                            )),
-                      ],
+                    child: Tooltip(
+                      message: 'Created time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.create_rounded,
+                              size: 13.0,
+                              color: ThemeDataCenter.getTopCardLabelStyle(
+                                  context)),
+                          const SizedBox(width: 5.0),
+                          Text(getTimeString(widget.label.createdAt!),
+                              style: TextStyle(
+                                fontSize: 13.0,
+                                color: ThemeDataCenter.getTopCardLabelStyle(
+                                    context),
+                              )),
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             widget.label.updatedAt != null && widget.label.deletedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.edit,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.label.updatedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
+                    child: Tooltip(
+                      message: 'Updated time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.update_rounded,
+                              size: 13.0,
+                              color: ThemeDataCenter.getTopCardLabelStyle(
+                                  context)),
+                          const SizedBox(width: 5.0),
+                          Text(getTimeString(widget.label.updatedAt!),
+                              style: TextStyle(
+                                  fontSize: 13.0,
+                                  color: ThemeDataCenter.getTopCardLabelStyle(
+                                      context)))
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             widget.label.deletedAt != null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.delete_rounded,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.label.deletedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
+                    child: Tooltip(
+                      message: 'Deleted time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.delete_rounded,
+                              size: 13.0,
+                              color: ThemeDataCenter.getTopCardLabelStyle(
+                                  context)),
+                          const SizedBox(width: 5.0),
+                          Text(getTimeString(widget.label.deletedAt!),
+                              style: TextStyle(
+                                  fontSize: 13.0,
+                                  color: ThemeDataCenter.getTopCardLabelStyle(
+                                      context)))
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             Card(
+              shadowColor: Colors.black,
+              elevation: 2.0,
               shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
+                side: BorderSide(
+                    color: ThemeDataCenter.getBorderCardColorStyle(context),
+                    width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
@@ -220,8 +249,8 @@ class _LabelWidgetState extends State<LabelWidget> {
                                                         label: widget.label,
                                                       )));
                                         },
-                                        coreButtonStyle: CoreButtonStyle.dark(
-                                            kitRadius: 6.0),
+                                        coreButtonStyle: ThemeDataCenter
+                                            .getUpdateButtonStyle(context),
                                         icon:
                                             const Icon(Icons.edit_note_rounded),
                                       ),
@@ -236,8 +265,8 @@ class _LabelWidgetState extends State<LabelWidget> {
                                               widget.onRestoreFromTrash!();
                                             }
                                           },
-                                          coreButtonStyle: CoreButtonStyle.info(
-                                              kitRadius: 6.0),
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getRestoreButtonStyle(context),
                                           icon: const Icon(
                                               Icons.restore_from_trash_rounded,
                                               size: 26.0),
@@ -253,9 +282,9 @@ class _LabelWidgetState extends State<LabelWidget> {
                                               widget.onDeleteForever!();
                                             }
                                           },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.danger(
-                                                  kitRadius: 6.0),
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getDeleteForeverButtonStyle(
+                                                  context),
                                           icon: const Icon(
                                               Icons.delete_forever_rounded,
                                               size: 26.0),

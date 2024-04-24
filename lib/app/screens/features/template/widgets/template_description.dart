@@ -76,7 +76,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                 ),
                 CoreElevatedButton.iconOnly(
                   onPressed: () {
@@ -87,7 +87,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                   icon: const FaIcon(FontAwesomeIcons.faceSmile, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
@@ -102,7 +102,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                   icon: const FaIcon(FontAwesomeIcons.squareCheck, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
@@ -114,7 +114,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                   icon: const FaIcon(FontAwesomeIcons.listUl, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
@@ -126,7 +126,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                   icon: const FaIcon(FontAwesomeIcons.arrowLeft, size: 18.0),
                 ),
                 CoreElevatedButton.iconOnly(
@@ -138,7 +138,7 @@ class _NoteDescriptionState extends State<NoteDescription> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.turtles,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black),
+                      kitForegroundColorOption: Color(0xff1f1f1f)),
                   icon: const FaIcon(FontAwesomeIcons.arrowRight, size: 18.0),
                 ),
               ],

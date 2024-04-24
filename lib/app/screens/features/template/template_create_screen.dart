@@ -15,32 +15,37 @@ import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../core/stores/icons/CoreStoreIcons.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
 import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
-import 'databases/note_db_manager.dart';
-import 'models/note_model.dart';
-import 'note_detail_screen.dart';
-import 'providers/note_notifier.dart';
-import 'widgets/functions/note_functions.dart';
+import 'databases/template_db_manager.dart';
+import 'models/template_model.dart';
+import 'providers/template_notifier.dart';
+import 'template_detail_screen.dart';
+import 'template_list_screen.dart';
+import 'widgets/functions/teamplate_functions.dart';
 
 enum CurrentFocusNodeEnum { none, title, detailContent }
 
-class NoteCreateScreen extends StatefulWidget {
-  final NoteModel? note;
+class TemplateCreateScreen extends StatefulWidget {
+  final TemplateModel? template;
   final SubjectModel? subject;
   final ActionModeEnum actionMode;
 
-  const NoteCreateScreen(
-      {super.key, this.note, required this.subject, required this.actionMode});
+  const TemplateCreateScreen(
+      {super.key,
+      this.template,
+      required this.subject,
+      required this.actionMode});
 
   @override
-  State<NoteCreateScreen> createState() => _NoteCreateScreenState();
+  State<TemplateCreateScreen> createState() => _TemplateCreateScreenState();
 }
 
-class _NoteCreateScreenState extends State<NoteCreateScreen> {
+class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
   final ScrollController _controllerScrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
 
@@ -91,7 +96,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   late StreamController<List<SubjectModel>?> _subjectStreamController;
   late Stream<List<SubjectModel>?> _subjectStream;
 
-  List<LabelModel>? selectedNoteLabels = [];
+  List<LabelModel>? selectedTemplateLabels = [];
   List<LabelModel>? labelList = [];
   List<SubjectModel>? subjectList = [];
   SubjectModel? selectedSubject;
@@ -182,10 +187,10 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     });
 
     /// If edit
-    if (widget.note is NoteModel) {
-      if (widget.note!.title.isNotEmpty) {
+    if (widget.template is TemplateModel) {
+      if (widget.template!.title.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.title);
+        List<dynamic> deltaMap = jsonDecode(widget.template!.title);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
@@ -193,9 +198,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         /// Set selection
       }
 
-      if (widget.note!.description.isNotEmpty) {
+      if (widget.template!.description.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.description);
+        List<dynamic> deltaMap = jsonDecode(widget.template!.description);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
@@ -301,7 +306,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: Colors.black, // Màu đường viền
+                color: Color(0xff1f1f1f), // Màu đường viền
                 width: 1.0, // Độ dày của đường viền
               ),
               borderRadius: BorderRadius.circular(6.0)),
@@ -352,7 +357,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TemplateFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
                                     insertString: CoreStoreIcons.emojis[index]
@@ -360,7 +365,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               });
                             } else if (_detailContentFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TemplateFunctions.addStringToQuillContent(
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
@@ -375,7 +380,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black),
+                              kitForegroundColorOption: Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.emojis[index],
@@ -408,7 +413,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TemplateFunctions.addStringToQuillContent(
                                     quillController: _titleQuillController,
                                     selection: _titleTextSelection,
                                     insertString: CoreStoreIcons
@@ -417,7 +422,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               });
                             } else if (_detailContentFocusNodeHasFocus) {
                               setState(() {
-                                NoteFunctions.addStringToQuillContent(
+                                TemplateFunctions.addStringToQuillContent(
                                     quillController:
                                         _detailContentQuillController,
                                     selection: _detailContentTextSelection,
@@ -433,7 +438,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black),
+                              kitForegroundColorOption: Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.natureAndAnimals[index],
@@ -459,7 +464,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: Colors.black, // Màu đường viền
+                color: Color(0xff1f1f1f), // Màu đường viền
                 width: 1.0, // Độ dày của đường viền
               ),
               borderRadius: BorderRadius.circular(6.0)),
@@ -475,7 +480,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           } else {
                             selectedLabelIds.add(labelList![index].id!);
                           }
-                          selectedNoteLabels = labelList!
+                          selectedTemplateLabels = labelList!
                               .where((model) =>
                                   selectedLabelIds.contains(model.id))
                               .toList();
@@ -1052,7 +1057,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Colors.black,
+            kitForegroundColorOption: const Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1072,7 +1077,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Colors.black,
+            kitForegroundColorOption: const Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1091,12 +1096,22 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     if (labelList != null &&
         labelList!.isNotEmpty &&
         !selectedLabelDataLoaded) {
-      if (widget.note != null) {
-        List<dynamic> labelIds = jsonDecode(widget.note!.labels!);
-        selectedLabelIds = labelIds;
+      if (widget.template != null) {
+        List<dynamic> labelIds = jsonDecode(widget.template!.labels!);
+
+        // Get only label not deleted
+        List<int?> labelListIds =
+            labelList!.map((element) => element.id).toList();
+        for (var element in labelIds) {
+          if (labelListIds.contains(element)) {
+            selectedLabelIds.add(element);
+          }
+        }
+
         setState(() {
-          selectedNoteLabels =
-              labelList!.where((model) => labelIds.contains(model.id)).toList();
+          selectedTemplateLabels = labelList!
+              .where((model) => selectedLabelIds.contains(model.id))
+              .toList();
           selectedLabelDataLoaded = true;
         });
       }
@@ -1105,16 +1120,16 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
   _setSelectedSubject() {
     /*
-    Update note
+    Update template
      */
-    if (widget.note?.subjectId != null) {
+    if (widget.template?.subjectId != null) {
       List<SubjectModel>? subjects;
 
       if (subjectList != null &&
           subjectList!.isNotEmpty &&
           !selectedSubjectDataLoaded) {
         subjects = subjectList!
-            .where((model) => widget.note!.subjectId == model.id)
+            .where((model) => widget.template!.subjectId == model.id)
             .toList();
 
         if (subjects.isNotEmpty) {
@@ -1126,7 +1141,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     }
 
     /*
-    Create note for subject
+    Create template for subject
      */
     if (widget.subject != null && subjectList!.isNotEmpty) {
       selectedSubject = subjectList!.first;
@@ -1136,8 +1151,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   Widget _buildLabels() {
     List<Widget> labelWidgets = [];
 
-    if (selectedNoteLabels!.isNotEmpty) {
-      for (var element in selectedNoteLabels!) {
+    if (selectedTemplateLabels!.isNotEmpty) {
+      for (var element in selectedTemplateLabels!) {
         labelWidgets.add(
           Padding(
             padding: const EdgeInsets.all(2.0),
@@ -1180,26 +1195,28 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         ));
   }
 
-  Future<bool> _onCreateNote(BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.create(note);
+  Future<bool> _onCreateTemplate(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.create(template);
   }
 
-  Future<bool> _onUpdateNote(BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.update(note);
+  Future<bool> _onUpdateTemplate(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.update(template);
   }
 
-  Future<NoteModel?> _onGetUpdatedNote(
-      BuildContext context, NoteModel note) async {
-    return await NoteDatabaseManager.getById(note.id!);
+  Future<TemplateModel?> _onGetUpdatedTemplate(
+      BuildContext context, TemplateModel template) async {
+    return await TemplateDatabaseManager.getById(template.id!);
   }
 
   @override
   Widget build(BuildContext context) {
-    final noteNotifier = Provider.of<NoteNotifier>(context);
+    final templateNotifier = Provider.of<TemplateNotifier>(context);
 
     return CoreFullScreenDialog(
       isShowOptionActionButton: true,
-      title: widget.note == null ? 'Create' : 'Update',
+      title: widget.template == null ? 'Create' : 'Update',
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
       isShowBottomActionButton: true,
@@ -1224,68 +1241,60 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
           final labels = jsonEncode(selectedLabelIds);
 
-          if (widget.note == null &&
+          if (widget.template == null &&
               widget.actionMode == ActionModeEnum.create) {
-            final NoteModel model = NoteModel(
+            final TemplateModel model = TemplateModel(
                 title: title,
                 description: description,
                 labels: labels,
                 subjectId: selectedSubject?.id,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
-                id: widget.note?.id);
+                id: widget.template?.id);
 
-            _onCreateNote(context, model).then((result) {
+            _onCreateTemplate(context, model).then((result) {
               if (result) {
-                noteNotifier.onCountAll();
+                templateNotifier.onCountAll();
 
                 CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.create, 'Note');
+                    CoreNotificationAction.create, 'Template');
 
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          const NoteListScreen(noteConditionModel: null)),
+                      builder: (context) => const TemplateListScreen(
+                          templateConditionModel: null)),
                   (route) => false,
                 );
               } else {
                 CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.create, 'Note');
+                    CoreNotificationAction.create, 'Template');
               }
             });
-          } else if (widget.note != null &&
+          } else if (widget.template != null &&
               widget.actionMode == ActionModeEnum.update) {
-            final NoteModel model = NoteModel(
+            final TemplateModel model = TemplateModel(
                 title: title,
                 description: description,
                 labels: labels,
                 subjectId: selectedSubject?.id,
-                isFavourite: widget.note?.isFavourite,
-                createdAt: widget.note?.createdAt,
+                isFavourite: widget.template?.isFavourite,
+                createdAt: widget.template?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
-                id: widget.note?.id);
+                id: widget.template?.id);
 
-            _onUpdateNote(context, model).then((result) {
+            _onUpdateTemplate(context, model).then((result) {
               if (result) {
                 CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.update, 'Note');
+                    CoreNotificationAction.update, 'Template');
 
-                // Navigator.pushAndRemoveUntil(
-                //   context,
-                //   MaterialPageRoute(
-                //       builder: (context) =>
-                //           const NoteListScreen(noteConditionModel: null)),
-                //   (route) => false,
-                // );
-
-                _onGetUpdatedNote(context, model).then((result) {
+                _onGetUpdatedTemplate(context, model).then((result) {
                   if (result != null) {
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => NoteDetailScreen(
-                                  note: result,
-                                  labels: selectedNoteLabels,
+                            builder: (context) => TemplateDetailScreen(
+                                  template: result,
+                                  labels: selectedTemplateLabels,
                                   subject: selectedSubject,
                                 )),
                         (route) => false);
@@ -1293,7 +1302,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 });
               } else {
                 CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.update, 'Note');
+                    CoreNotificationAction.update, 'Template');
               }
             });
           }
@@ -1352,12 +1361,17 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'Title:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                      child: Text(
+                        'Title:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                context)),
+                      ),
                     ),
                   ],
                 ),
@@ -1400,13 +1414,18 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      key: _detailContentKeyForScroll,
-                      'Content:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                      child: Text(
+                        key: _detailContentKeyForScroll,
+                        'Content:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                context)),
+                      ),
                     ),
                   ],
                 ),
@@ -1456,7 +1475,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 16,
-                          color: Colors.white54),
+                          fontWeight: FontWeight.w500,
+                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                              context)),
                     ),
                   ],
                 ),
@@ -1513,8 +1534,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
-                        return const Text('No subjects found',
-                            style: TextStyle(color: Colors.white54));
+                        return Text('No subjects found',
+                            style: TextStyle(
+                                color:
+                                    ThemeDataCenter.getFormFieldLabelColorStyle(
+                                        context)));
                       }
                     }),
                 const SizedBox(height: 15),
@@ -1526,7 +1550,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 16,
-                          color: Colors.white54),
+                          fontWeight: FontWeight.w500,
+                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                              context)),
                     ),
                   ],
                 ),
@@ -1550,7 +1576,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       coreStyle: CoreStyle.outlined,
                       coreColor: CoreColor.dark,
                       coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: Colors.black,
+                      kitForegroundColorOption: const Color(0xff1f1f1f),
                       coreFixedSizeButton: CoreFixedSizeButton.medium_40),
                 ),
                 _buildLabels(),

@@ -8,17 +8,24 @@ class SettingNotifier with ChangeNotifier {
   bool? _isActiveSound;
   bool? _isExpandedNoteContent;
   bool? _isExpandedSubjectActions;
+  bool? _isExpandedTemplateContent;
 
   bool? get isSetColorAccordingSubjectColor => _isSetColorAccordingSubjectColor;
   bool? get isActiveSound => _isActiveSound;
   bool? get isExpandedNoteContent => _isExpandedNoteContent;
   bool? get isExpandedSubjectActions => _isExpandedSubjectActions;
+  bool? get isExpandedTemplateContent => _isExpandedTemplateContent;
+
+  String? _themeString;
+  String? get themeString =>  _themeString;
 
   SettingNotifier() {
     init();
   }
 
   init() async {
+    _themeString = await getThemeString();
+
     _isSetColorAccordingSubjectColor =
         await getIsSetColorAccordingSubjectColor();
 
@@ -26,9 +33,14 @@ class SettingNotifier with ChangeNotifier {
 
     _isExpandedNoteContent = await getIsExpandedNoteContent();
 
+    _isExpandedTemplateContent = await getIsExpandedTemplateContent();
+
     notifyListeners();
   }
 
+  /*
+  GETTER
+   */
   Future<bool?> getIsSetColorAccordingSubjectColor() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
@@ -96,6 +108,44 @@ class SettingNotifier with ChangeNotifier {
 
     return result;
   }
+
+  Future<bool?> getIsExpandedTemplateContent() async {
+    bool? result;
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    result = await settingSharedPreferences.getIsExpandedTemplateContent();
+
+    if (result == null) {
+      // Set false
+      await settingSharedPreferences.setIsExpandedTemplateContent(false);
+
+      // Get again
+      result = await getIsExpandedTemplateContent();
+    }
+
+    return result;
+  }
+
+  Future<String?> getThemeString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    result = await settingSharedPreferences.getThemeString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setThemeString('isSetThemeDefault');
+
+      // Get again
+      result = await getThemeString();
+    }
+
+    return result;
+  }
+
+  /*
+  SETTER
+   */
 
   Future<bool> setIsSetColorAccordingSubjectColor(bool isSet) async {
     bool? result;
@@ -166,6 +216,44 @@ class SettingNotifier with ChangeNotifier {
 
     if (result != null) {
       _isExpandedSubjectActions = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setIsExpandedTemplateContent(bool isSet) async {
+    bool? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    await settingSharedPreferences.setIsExpandedTemplateContent(isSet);
+
+    result = await settingSharedPreferences.getIsExpandedTemplateContent();
+
+    if (result != null) {
+      _isExpandedTemplateContent = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setThemeString(String themeStr) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    await settingSharedPreferences.setThemeString(themeStr);
+
+    result = await settingSharedPreferences.getThemeString();
+
+    if (result != null) {
+      _themeString = result;
       notifyListeners();
 
       return true;

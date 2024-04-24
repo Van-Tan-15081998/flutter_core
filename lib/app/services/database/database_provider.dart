@@ -7,6 +7,8 @@ import '../../screens/features/note/models/note_condition_model.dart';
 import '../../screens/features/note/models/note_model.dart';
 import '../../screens/features/subjects/models/subject_condition_model.dart';
 import '../../screens/features/subjects/models/subject_model.dart';
+import '../../screens/features/template/models/template_condition_model.dart';
+import '../../screens/features/template/models/template_model.dart';
 
 class DatabaseProvider {
   static const int _version = 1;
@@ -17,6 +19,8 @@ class DatabaseProvider {
         onCreate: (db, version) async {
       await db.execute(
           "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+      await db.execute(
+          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
           "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, parentId INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
@@ -375,5 +379,125 @@ class DatabaseProvider {
       return 0;
     }
     return countAll;
+  }
+
+  /// TEMPLATES
+  static Future<int> countAllTemplates() async {
+    final db = await _getDB();
+    int? countAll = Sqflite.firstIntValue(await db
+        .rawQuery('SELECT COUNT(*) FROM templates WHERE deletedAt IS NULL'));
+
+    if (countAll == null) {
+      return 0;
+    }
+    return countAll;
+  }
+
+  static Future<int> createTemplate(TemplateModel template) async {
+    final db = await _getDB();
+    return await db.insert("templates", template.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> updateTemplate(TemplateModel template) async {
+    final db = await _getDB();
+    return await db.update("templates", template.toJson(),
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> favouriteTemplate(
+      TemplateModel template, int? isFavourite) async {
+    final db = await _getDB();
+    return await db.update("templates", {'isFavourite': isFavourite},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteTemplate(
+      TemplateModel template, int deleteTime) async {
+    final db = await _getDB();
+    return await db.update("templates", {'deletedAt': deleteTime},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteForeverTemplate(TemplateModel template) async {
+    final db = await _getDB();
+
+    return await db.delete(
+      "templates",
+      where: 'id = ?',
+      whereArgs: [template.id],
+    );
+  }
+
+  static Future<int> restoreTemplate(
+      TemplateModel template, int restoreTime) async {
+    final db = await _getDB();
+    return await db.update(
+        "templates", {'deletedAt': null, 'updatedAt': restoreTime},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<List<TemplateModel>?> getAllTemplates() async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps =
+        await db.query("templates", orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => TemplateModel.fromJson(maps[index]));
+  }
+
+  static Future<List<TemplateModel>?> getTemplatePagination(
+      CorePaginationModel corePaginationModel,
+      TemplateConditionModel templateConditionModel) async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps = await db.query("templates",
+        limit: corePaginationModel.itemPerPage,
+        offset: corePaginationModel.currentPageIndex *
+            corePaginationModel.itemPerPage,
+        where:
+            ' ${templateConditionModel.isDeleted == null || templateConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
+            ' ${templateConditionModel.subjectId != null ? " AND subjectID = ${templateConditionModel.subjectId}" : ""}'
+            ' ${templateConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${templateConditionModel.searchText != null && templateConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${templateConditionModel.searchText}%\' OR description LIKE \'%${templateConditionModel.searchText}%\')" : ""}',
+        orderBy: templateConditionModel.recentlyUpdated != null
+            ? "updatedAt DESC"
+            : "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => TemplateModel.fromJson(maps[index]));
+  }
+
+  static Future<TemplateModel?> getTemplateById(int id) async {
+    final db = await _getDB();
+    final List<Map<String, dynamic>> maps = await db.query(
+      "templates",
+      where: 'id = ?', // Điều kiện WHERE để lấy ghi chú theo ID
+      whereArgs: [id], // Giá trị ID
+    );
+
+    if (maps.isEmpty) {
+      return null; // Trả về null nếu không tìm thấy ghi chú với ID tương ứng
+    }
+
+    return TemplateModel.fromJson(
+        maps.first); // Trả về ghi chú đầu tiên (nếu có)
   }
 }

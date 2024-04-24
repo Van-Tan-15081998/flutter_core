@@ -6,9 +6,12 @@ import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreEleva
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../app/library/common/styles/CommonStyles.dart';
+import '../../../../app/library/common/themes/ThemeDataCenter.dart';
 import '../../../../app/screens/home/home_screen.dart';
+import '../../../../app/screens/setting/providers/setting_notifier.dart';
 import '../../helper_widgets/CoreHelperWidget.dart';
 
 enum AppBarActionButtonEnum { save, cancel, home }
@@ -89,20 +92,20 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
         {
           return Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.floppyDisk, size: 18.0),
-              label: Text('Save', style: CommonStyles.labelTextStyle),
-              onPressed: () {
-                if (widget.onSubmit != null) {
-                  widget.onSubmit!();
-                }
-              },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitForegroundColorOption: Colors.black,
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+            child: Tooltip(
+              message: 'Save',
+              child: CoreElevatedButton.iconOnly(
+                icon: const Padding(
+                  padding: EdgeInsets.fromLTRB(15.0, 0, 15.0, 0),
+                  child: Icon(Icons.save_alt_rounded, size: 25.0),
+                ),
+                onPressed: () {
+                  if (widget.onSubmit != null) {
+                    widget.onSubmit!();
+                  }
+                },
+                coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(context),
+              ),
             ),
           );
         }
@@ -152,13 +155,13 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
               fontWeight: FontWeight.bold),
         ),
         actions: [_buildAppBarActionButtons()],
-        backgroundColor: const Color(0xFF202124),
+        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         iconTheme: const IconThemeData(
           color: Color(0xFF404040), // Set the color you desire
         ),
       ),
       body: widget.child,
-      backgroundColor: const Color(0xFF202124),
+      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(6.0),
         child: widget.isShowBottomActionButton!

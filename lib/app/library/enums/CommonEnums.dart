@@ -1,4 +1,4 @@
-enum ActionModeEnum { create, update, delete }
+enum ActionModeEnum { create, update, delete, copy }
 
 enum TaskStatusEnum {
   newStatus,

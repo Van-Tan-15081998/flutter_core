@@ -1,25 +1,25 @@
 import 'package:flutter_core_v3/app/services/database/database_provider.dart';
 
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
-import '../models/note_condition_model.dart';
-import '../models/note_model.dart';
+import '../models/template_condition_model.dart';
+import '../models/template_model.dart';
 
-class NoteDatabaseManager {
-  static Future<List<NoteModel>?> all() async {
-    List<NoteModel>? notes = await DatabaseProvider.getAllNotes();
+class TemplateDatabaseManager {
+  static Future<List<TemplateModel>?> all() async {
+    List<TemplateModel>? templates = await DatabaseProvider.getAllTemplates();
 
-    return notes;
+    return templates;
   }
 
-  static Future<List<NoteModel>?> onGetNotePagination(CorePaginationModel corePaginationModel, NoteConditionModel noteConditionModel) async {
-    List<NoteModel>? notes = await DatabaseProvider.getNotePagination(corePaginationModel, noteConditionModel);
+  static Future<List<TemplateModel>?> onGetTemplatePagination(CorePaginationModel corePaginationModel, TemplateConditionModel templateConditionModel) async {
+    List<TemplateModel>? templates = await DatabaseProvider.getTemplatePagination(corePaginationModel, templateConditionModel);
 
-    return notes;
+    return templates;
   }
 
   static Future<int> onCountAll() async {
     try {
-      int countAll = await DatabaseProvider.countAllNotes();
+      int countAll = await DatabaseProvider.countAllTemplates();
 
       return countAll;
     } catch (e){
@@ -27,10 +27,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> create(NoteModel note) async {
+  static Future<bool> create(TemplateModel template) async {
     try {
-      NoteModel? createdModel;
-      createdModel = await _onCreate(note);
+      TemplateModel? createdModel;
+      createdModel = await _onCreate(template);
 
       if (createdModel != null) {
         return true;
@@ -41,12 +41,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static Future<NoteModel?> _onCreate(NoteModel note) async {
+  static Future<TemplateModel?> _onCreate(TemplateModel template) async {
     try {
-      int resultId = await DatabaseProvider.createNote(note);
+      int resultId = await DatabaseProvider.createTemplate(template);
 
       if (resultId != 0) {
-        NoteModel? createdModel = await getById(resultId);
+        TemplateModel? createdModel = await getById(resultId);
 
         return createdModel;
       } else {
@@ -57,10 +57,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> update(NoteModel note) async {
+  static Future<bool> update(TemplateModel template) async {
     try {
-      NoteModel? updatedModel;
-      updatedModel = await _onUpdate(note);
+      TemplateModel? updatedModel;
+      updatedModel = await _onUpdate(template);
 
       if (updatedModel != null) {
         return true;
@@ -71,12 +71,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onUpdate(NoteModel note) async {
+  static  Future<TemplateModel?> _onUpdate(TemplateModel template) async {
     try {
-      int result = await DatabaseProvider.updateNote(note);
+      int result = await DatabaseProvider.updateTemplate(template);
 
       if (result != 0) {
-        NoteModel? updatedModel = await getById(note.id!);
+        TemplateModel? updatedModel = await getById(template.id!);
 
         return updatedModel;
       } else {
@@ -87,10 +87,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> favourite(NoteModel note, int? isFavourite) async {
+  static Future<bool> favourite(TemplateModel template, int? isFavourite) async {
     try {
-      NoteModel? favouriteModel;
-      favouriteModel = await _onFavourite(note, isFavourite);
+      TemplateModel? favouriteModel;
+      favouriteModel = await _onFavourite(template, isFavourite);
 
       if (favouriteModel != null) {
         return true;
@@ -101,12 +101,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onFavourite(NoteModel note, int? isFavourite) async {
+  static  Future<TemplateModel?> _onFavourite(TemplateModel template, int? isFavourite) async {
     try {
-      int result = await DatabaseProvider.favouriteNote(note, isFavourite);
+      int result = await DatabaseProvider.favouriteTemplate(template, isFavourite);
 
       if (result != 0) {
-        NoteModel? favouriteModel = await getById(note.id!);
+        TemplateModel? favouriteModel = await getById(template.id!);
 
         return favouriteModel;
       } else {
@@ -117,10 +117,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> delete(NoteModel note, int deleteTime) async {
+  static Future<bool> delete(TemplateModel template, int deleteTime) async {
     try {
-      NoteModel? deletedModel;
-      deletedModel = await _onDelete(note, deleteTime);
+      TemplateModel? deletedModel;
+      deletedModel = await _onDelete(template, deleteTime);
 
       if (deletedModel != null) {
         return true;
@@ -131,12 +131,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onDelete(NoteModel note, int deleteTime) async {
+  static  Future<TemplateModel?> _onDelete(TemplateModel template, int deleteTime) async {
     try {
-      int result = await DatabaseProvider.deleteNote(note, deleteTime);
+      int result = await DatabaseProvider.deleteTemplate(template, deleteTime);
 
       if (result != 0) {
-        NoteModel? deletedModel = await getById(note.id!);
+        TemplateModel? deletedModel = await getById(template.id!);
 
         return deletedModel;
       } else {
@@ -147,10 +147,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> deleteForever(NoteModel note) async {
+  static Future<bool> deleteForever(TemplateModel template) async {
     try {
-      NoteModel? deletedModel;
-      deletedModel = await _onDeleteForever(note);
+      TemplateModel? deletedModel;
+      deletedModel = await _onDeleteForever(template);
 
       if (deletedModel == null) {
         return true;
@@ -161,12 +161,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onDeleteForever(NoteModel note) async {
+  static  Future<TemplateModel?> _onDeleteForever(TemplateModel template) async {
     try {
-      int result = await DatabaseProvider.deleteForeverNote(note);
+      int result = await DatabaseProvider.deleteForeverTemplate(template);
 
       if (result != 0) {
-        NoteModel? deletedModel = await getById(note.id!);
+        TemplateModel? deletedModel = await getById(template.id!);
 
         return deletedModel;
       } else {
@@ -177,10 +177,10 @@ class NoteDatabaseManager {
     }
   }
 
-  static Future<bool> restoreFromTrash(NoteModel note, int restoreTime) async {
+  static Future<bool> restoreFromTrash(TemplateModel template, int restoreTime) async {
     try {
-      NoteModel? restoredModel;
-      restoredModel = await _restoreFromTrash(note, restoreTime);
+      TemplateModel? restoredModel;
+      restoredModel = await _restoreFromTrash(template, restoreTime);
 
       if (restoredModel != null) {
         return true;
@@ -191,12 +191,12 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _restoreFromTrash(NoteModel note, int restoreTime) async {
+  static  Future<TemplateModel?> _restoreFromTrash(TemplateModel template, int restoreTime) async {
     try {
-      int result = await DatabaseProvider.restoreNote(note, restoreTime);
+      int result = await DatabaseProvider.restoreTemplate(template, restoreTime);
 
       if (result != 0) {
-        NoteModel? restoredModel = await getById(note.id!);
+        TemplateModel? restoredModel = await getById(template.id!);
 
         return restoredModel;
       } else {
@@ -207,9 +207,9 @@ class NoteDatabaseManager {
     }
   }
 
-  static  Future<NoteModel?> getById(int id) async {
+  static  Future<TemplateModel?> getById(int id) async {
     try {
-      NoteModel? result = await DatabaseProvider.getNoteById(id);
+      TemplateModel? result = await DatabaseProvider.getTemplateById(id);
 
       return result;
     } catch (e) {

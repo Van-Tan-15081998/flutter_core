@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,11 +31,21 @@ enum CurrentFocusNodeEnum { none, title, detailContent }
 
 class NoteCreateScreen extends StatefulWidget {
   final NoteModel? note;
+
+  /*
+  Create note by copy note OR create from template
+   */
+  final NoteModel? copyNote;
+
   final SubjectModel? subject;
   final ActionModeEnum actionMode;
 
   const NoteCreateScreen(
-      {super.key, this.note, required this.subject, required this.actionMode});
+      {super.key,
+      required this.note,
+      required this.copyNote,
+      required this.subject,
+      required this.actionMode});
 
   @override
   State<NoteCreateScreen> createState() => _NoteCreateScreenState();
@@ -181,22 +192,33 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
       }
     });
 
-    /// If edit
-    if (widget.note is NoteModel) {
+    /// If update
+    if (widget.note != null && widget.actionMode == ActionModeEnum.update) {
       if (widget.note!.title.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.note!.title);
-
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
-
-        /// Set selection
       }
 
       if (widget.note!.description.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.note!.description);
+        flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
+        _detailContentDocument = flutter_quill.Document.fromDelta(delta);
+      }
+    } else if (widget.copyNote != null &&
+        widget.actionMode == ActionModeEnum.copy) {
+      if (widget.copyNote!.title.isNotEmpty) {
+        /// Set data for input
+        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.title);
+        flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
+        _titleDocument = flutter_quill.Document.fromDelta(delta);
+      }
 
+      if (widget.copyNote!.description.isNotEmpty) {
+        /// Set data for input
+        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.description);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
       }
@@ -301,7 +323,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: Colors.black, // Màu đường viền
+                color: Color(0xff1f1f1f), // Màu đường viền
                 width: 1.0, // Độ dày của đường viền
               ),
               borderRadius: BorderRadius.circular(6.0)),
@@ -375,7 +397,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black),
+                              kitForegroundColorOption: Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.emojis[index],
@@ -433,7 +455,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black),
+                              kitForegroundColorOption: Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.natureAndAnimals[index],
@@ -459,7 +481,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: Colors.black, // Màu đường viền
+                color: const Color(0xff1f1f1f), // Màu đường viền
                 width: 1.0, // Độ dày của đường viền
               ),
               borderRadius: BorderRadius.circular(6.0)),
@@ -1052,7 +1074,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Colors.black,
+            kitForegroundColorOption: Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1072,7 +1094,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Colors.black,
+            kitForegroundColorOption: Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1091,12 +1113,41 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     if (labelList != null &&
         labelList!.isNotEmpty &&
         !selectedLabelDataLoaded) {
-      if (widget.note != null) {
+      if (widget.note != null && widget.actionMode == ActionModeEnum.update) {
         List<dynamic> labelIds = jsonDecode(widget.note!.labels!);
-        selectedLabelIds = labelIds;
+
+        // Get only label not deleted
+        List<int?> labelListIds =
+            labelList!.map((element) => element.id).toList();
+        for (var element in labelIds) {
+          if (labelListIds.contains(element)) {
+            selectedLabelIds.add(element);
+          }
+        }
+
         setState(() {
-          selectedNoteLabels =
-              labelList!.where((model) => labelIds.contains(model.id)).toList();
+          selectedNoteLabels = labelList!
+              .where((model) => selectedLabelIds.contains(model.id))
+              .toList();
+          selectedLabelDataLoaded = true;
+        });
+      } else if (widget.copyNote != null &&
+          widget.actionMode == ActionModeEnum.copy) {
+        List<dynamic> labelIds = jsonDecode(widget.copyNote!.labels!);
+
+        // Get only label not deleted
+        List<int?> labelListIds =
+            labelList!.map((element) => element.id).toList();
+        for (var element in labelIds) {
+          if (labelListIds.contains(element)) {
+            selectedLabelIds.add(element);
+          }
+        }
+
+        setState(() {
+          selectedNoteLabels = labelList!
+              .where((model) => selectedLabelIds.contains(model.id))
+              .toList();
           selectedLabelDataLoaded = true;
         });
       }
@@ -1107,20 +1158,46 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     /*
     Update note
      */
-    if (widget.note?.subjectId != null) {
-      List<SubjectModel>? subjects;
+    if (widget.note != null && widget.actionMode == ActionModeEnum.update) {
+      if (widget.note!.subjectId != null) {
+        List<SubjectModel>? subjects;
 
-      if (subjectList != null &&
-          subjectList!.isNotEmpty &&
-          !selectedSubjectDataLoaded) {
-        subjects = subjectList!
-            .where((model) => widget.note!.subjectId == model.id)
-            .toList();
+        if (subjectList != null &&
+            subjectList!.isNotEmpty &&
+            !selectedSubjectDataLoaded) {
+          subjects = subjectList!
+              .where((model) => widget.note!.subjectId == model.id)
+              .toList();
 
-        if (subjects.isNotEmpty) {
-          selectedSubject = subjects.first;
+          if (subjects.isNotEmpty) {
+            selectedSubject = subjects.first;
 
-          selectedSubjectDataLoaded = true;
+            selectedSubjectDataLoaded = true;
+          }
+        }
+      }
+    }
+
+    /*
+    Copy note
+     */
+    else if (widget.copyNote != null &&
+        widget.actionMode == ActionModeEnum.copy) {
+      if (widget.copyNote!.subjectId != null) {
+        List<SubjectModel>? subjects;
+
+        if (subjectList != null &&
+            subjectList!.isNotEmpty &&
+            !selectedSubjectDataLoaded) {
+          subjects = subjectList!
+              .where((model) => widget.copyNote!.subjectId == model.id)
+              .toList();
+
+          if (subjects.isNotEmpty) {
+            selectedSubject = subjects.first;
+
+            selectedSubjectDataLoaded = true;
+          }
         }
       }
     }
@@ -1224,8 +1301,10 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
           final labels = jsonEncode(selectedLabelIds);
 
-          if (widget.note == null &&
-              widget.actionMode == ActionModeEnum.create) {
+          if ((widget.note == null &&
+                  widget.actionMode == ActionModeEnum.create) ||
+              (widget.copyNote != null &&
+                  widget.actionMode == ActionModeEnum.copy)) {
             final NoteModel model = NoteModel(
                 title: title,
                 description: description,
@@ -1352,12 +1431,17 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'Title:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                      child: Text(
+                        'Title:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                context)),
+                      ),
                     ),
                   ],
                 ),
@@ -1400,13 +1484,18 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      key: _detailContentKeyForScroll,
-                      'Content:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          color: Colors.white54),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                      child: Text(
+                        key: _detailContentKeyForScroll,
+                        'Content:',
+                        style: GoogleFonts.montserrat(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                context)),
+                      ),
                     ),
                   ],
                 ),
@@ -1456,7 +1545,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 16,
-                          color: Colors.white54),
+                          fontWeight: FontWeight.w500,
+                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                              context)),
                     ),
                   ],
                 ),
@@ -1513,8 +1604,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
-                        return const Text('No subjects found',
-                            style: TextStyle(color: Colors.white54));
+                        return Text('No subjects found',
+                            style: TextStyle(
+                                color:
+                                    ThemeDataCenter.getFormFieldLabelColorStyle(
+                                        context)));
                       }
                     }),
                 const SizedBox(height: 15),
@@ -1526,7 +1620,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 16,
-                          color: Colors.white54),
+                          fontWeight: FontWeight.w500,
+                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                              context)),
                     ),
                   ],
                 ),
