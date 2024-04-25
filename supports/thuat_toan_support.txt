@@ -1,0 +1,14 @@
+[Kiểm tra một mảng có null và rỗng hay không]
+List<int>? myList;
+if (myList?.isEmpty ?? true) {
+  print('myList is null or empty');
+} else {
+  print('myList is not null and contains elements');
+}
+
+[Giải thích]
+Đoạn mã myList?.isEmpty ?? true có ý nghĩa như sau:
+
+myList?.isEmpty: Sử dụng toán tử null-aware (?.) để kiểm tra nếu myList là null. Nếu myList không phải là null, thì phương thức isEmpty sẽ được gọi để kiểm tra xem myList có rỗng không. Nếu myList là null, toán tử null-aware sẽ trả về null thay vì gây ra lỗi.
+?? true: Nếu kết quả của myList?.isEmpty là null (do myList là null) hoặc false (do myList không rỗng), thì toán tử ?? sẽ trả về giá trị đứng sau nó, tức là true.
+Vì vậy, toàn bộ biểu thức myList?.isEmpty ?? true sẽ trả về true nếu myList là null hoặc rỗng. Ngược lại, nó sẽ trả về false nếu myList không phải là null và chứa các phần tử.

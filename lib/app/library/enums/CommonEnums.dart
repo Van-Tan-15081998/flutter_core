@@ -1,6 +1,8 @@
 enum ActionModeEnum { create, update, delete, copy }
 
-enum TaskStatusEnum {
+enum RedirectFromEnum {notes, subjects}
+
+  enum TaskStatusEnum {
   newStatus,
   pendingStatus,
   inProgressStatus,

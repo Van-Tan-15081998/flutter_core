@@ -70,9 +70,9 @@ class _NoteWidgetState extends State<NoteWidget> {
 
     super.initState();
 
-    if (widget.note.title.isNotEmpty) {
+    if (widget.note.title != null && widget.note.title!.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.title);
+      List<dynamic> deltaMap = jsonDecode(widget.note.title!);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -82,9 +82,10 @@ class _NoteWidgetState extends State<NoteWidget> {
       });
     }
 
-    if (widget.note.description.isNotEmpty) {
+    if (widget.note.description != null &&
+        widget.note.description!.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.description);
+      List<dynamic> deltaMap = jsonDecode(widget.note.description!);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -94,7 +95,7 @@ class _NoteWidgetState extends State<NoteWidget> {
       });
 
       if (_descriptionQuillController.document.toString().isNotEmpty) {
-        List<dynamic> deltaMap = jsonDecode(widget.note.description);
+        List<dynamic> deltaMap = jsonDecode(widget.note.description!);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         setState(() {
@@ -109,9 +110,9 @@ class _NoteWidgetState extends State<NoteWidget> {
   }
 
   setDocuments() {
-    if (widget.note.title.isNotEmpty) {
+    if (widget.note.title != null && widget.note.title!.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.title);
+      List<dynamic> deltaMap = jsonDecode(widget.note.title!);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -123,9 +124,10 @@ class _NoteWidgetState extends State<NoteWidget> {
       /// Set selection
     }
 
-    if (widget.note.description.isNotEmpty) {
+    if (widget.note.description != null &&
+        widget.note.description!.isNotEmpty) {
       /// Set data for input
-      List<dynamic> deltaMap = jsonDecode(widget.note.description);
+      List<dynamic> deltaMap = jsonDecode(widget.note.description!);
 
       flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
@@ -135,7 +137,7 @@ class _NoteWidgetState extends State<NoteWidget> {
       });
 
       if (_descriptionQuillController.document.toString().isNotEmpty) {
-        List<dynamic> deltaMap = jsonDecode(widget.note.description);
+        List<dynamic> deltaMap = jsonDecode(widget.note.description!);
 
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         setState(() {
@@ -165,14 +167,16 @@ class _NoteWidgetState extends State<NoteWidget> {
   }
 
   bool checkTitleEmpty() {
-    List<dynamic> deltaMap = jsonDecode(widget.note.title);
+    if (widget.note.title != null && widget.note.title!.isNotEmpty) {
+      List<dynamic> deltaMap = jsonDecode(widget.note.title!);
 
-    flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
+      flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
 
-    var list = delta.toList();
-    if (list.length == 1) {
-      if (list[0].key == 'insert' && list[0].data == '\n') {
-        return false;
+      var list = delta.toList();
+      if (list.length == 1) {
+        if (list[0].key == 'insert' && list[0].data == '\n') {
+          return false;
+        }
       }
     }
     return true;

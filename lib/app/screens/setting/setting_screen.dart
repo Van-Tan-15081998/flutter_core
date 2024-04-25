@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/notifications/CoreNotification.dart';
-import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
 import '../home/home_screen.dart';
 import 'providers/setting_notifier.dart';
@@ -16,6 +15,14 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+
+  TextStyle itemLabelTextStyle(BuildContext context) {
+    return TextStyle(
+      color: ThemeDataCenter.getAloneTextColorStyle(context),
+      fontSize: 18.0,
+      fontWeight: FontWeight.w400
+    );
+  }
   bool isSetColorAccordingSubjectColor = false;
   bool isActiveSound = false;
   bool isExpandedNoteContent = false;
@@ -57,7 +64,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         Flexible(
                           child: Text('Default',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -135,7 +142,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Black and White',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -211,7 +218,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Beach Towels',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -302,7 +309,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Beautiful Blues',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -393,7 +400,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Moonlight Bytes',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -484,7 +491,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Number 3',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -575,7 +582,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Android Lollipop',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -666,7 +673,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Rainbow Dash',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -757,7 +764,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Shades of White',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -848,7 +855,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Blueberry Basket',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -939,7 +946,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child:
-                          Text('Beach', style: CommonStyles.settingLabelTextStyle),
+                          Text('Beach', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1030,7 +1037,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Cappuccino',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1121,7 +1128,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Grey Lavender Colors',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1212,7 +1219,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Metro UI Colors',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1303,7 +1310,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child:
-                          Text('Pinks', style: CommonStyles.settingLabelTextStyle),
+                          Text('Pinks', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1394,7 +1401,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Never Doubt',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1485,7 +1492,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   children: [
                     Flexible(
                       child: Text('Program Catalog',
-                          style: CommonStyles.settingLabelTextStyle),
+                          style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1715,15 +1722,15 @@ class _SettingScreenState extends State<SettingScreen> {
                       Text('Display',
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
-                              fontSize: 18,
-                              color: const Color(0xFF404040),
+                              fontSize: 20,
+                              color: ThemeDataCenter.getAloneTextColorStyle(context),
                               fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
                 child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                   return SwitchListTile(
@@ -1733,7 +1740,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         Flexible(
                           child: Text(
                               'Set note and template background color according to subject color',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -1761,7 +1768,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 }),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
                 child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                   return SwitchListTile(
@@ -1770,7 +1777,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         Flexible(
                           child: Text('Note content expanded',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -1798,7 +1805,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 }),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
                 child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                   return SwitchListTile(
@@ -1807,7 +1814,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         Flexible(
                           child: Text('Template content expanded',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -1835,7 +1842,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 }),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
                 child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                   return SwitchListTile(
@@ -1845,7 +1852,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         Flexible(
                           child: Text('Subject actions expanded',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -1873,7 +1880,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 }),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
                 child: StatefulBuilder(
                     builder: (BuildContext context, StateSetter setState) {
                   return SwitchListTile(
@@ -1883,7 +1890,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       children: [
                         Flexible(
                           child: Text('Sounds',
-                              style: CommonStyles.settingLabelTextStyle),
+                              style: itemLabelTextStyle(context)),
                         ),
                       ],
                     ),
@@ -1920,8 +1927,8 @@ class _SettingScreenState extends State<SettingScreen> {
                       Text('Themes',
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
-                              fontSize: 18,
-                              color: const Color(0xFF404040),
+                              fontSize: 20,
+                              color: ThemeDataCenter.getAloneTextColorStyle(context),
                               fontWeight: FontWeight.w600)),
                     ],
                   ),

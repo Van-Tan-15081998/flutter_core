@@ -19,4 +19,10 @@ class CommonStyles {
       fontSize: 16,
       color: const Color(0xFF404040),
       fontWeight: FontWeight.w500);
+
+  static TextStyle dateTextStyle = GoogleFonts.montserrat(
+      fontStyle: FontStyle.normal,
+      fontSize: 14,
+      color: const Color(0xFF404040),
+      fontWeight: FontWeight.w500);
 }

@@ -194,31 +194,31 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
     /// If update
     if (widget.note != null && widget.actionMode == ActionModeEnum.update) {
-      if (widget.note!.title.isNotEmpty) {
+      if (widget.note!.title != null && widget.note!.title!.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.title);
+        List<dynamic> deltaMap = jsonDecode(widget.note!.title!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
       }
 
-      if (widget.note!.description.isNotEmpty) {
+      if (widget.note!.description != null && widget.note!.description!.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.note!.description);
+        List<dynamic> deltaMap = jsonDecode(widget.note!.description!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
       }
     } else if (widget.copyNote != null &&
         widget.actionMode == ActionModeEnum.copy) {
-      if (widget.copyNote!.title.isNotEmpty) {
+      if (widget.copyNote!.title != null && widget.copyNote!.title!.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.title);
+        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.title!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
       }
 
-      if (widget.copyNote!.description.isNotEmpty) {
+      if (widget.copyNote!.description != null && widget.copyNote!.description!.isNotEmpty) {
         /// Set data for input
-        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.description);
+        List<dynamic> deltaMap = jsonDecode(widget.copyNote!.description!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
       }
@@ -397,7 +397,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Color(0xff1f1f1f)),
+                              kitForegroundColorOption: const Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.emojis[index],
@@ -455,7 +455,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Color(0xff1f1f1f)),
+                              kitForegroundColorOption: const Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.natureAndAnimals[index],
@@ -1074,7 +1074,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Color(0xff1f1f1f),
+            kitForegroundColorOption: const Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1094,7 +1094,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             coreStyle: CoreStyle.outlined,
             coreColor: CoreColor.dark,
             coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: Color(0xff1f1f1f),
+            kitForegroundColorOption: const Color(0xff1f1f1f),
             coreFixedSizeButton: CoreFixedSizeButton.medium_40),
       );
     }
@@ -1311,6 +1311,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 labels: labels,
                 subjectId: selectedSubject?.id,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
+                createdAtDayFormat: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).millisecondsSinceEpoch,
                 id: widget.note?.id);
 
             _onCreateNote(context, model).then((result) {

@@ -265,13 +265,13 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                       )
                     : Container(),
                 GestureDetector(
-                  onDoubleTap: () {
+                  onTap: () {
                     setState(() {
                       expandedActions = !expandedActions;
                     });
                   },
                   child: Card(
-                    shadowColor: Color(0xff1f1f1f),
+                    shadowColor: const Color(0xff1f1f1f),
                     elevation: 2.0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
@@ -381,6 +381,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                             .update,
                                                                     subject: widget
                                                                         .subject,
+                                                                    redirectFromEnum: null,
                                                                   )));
                                                     },
                                                     coreButtonStyle:
@@ -405,7 +406,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                           .subject,
                                                                   actionMode:
                                                                       ActionModeEnum
-                                                                          .create)));
+                                                                          .create,
+                                                                redirectFromEnum: null,
+                                                              )));
                                                     },
                                                     coreButtonStyle: ThemeDataCenter
                                                         .getCreateSubSubjectButtonStyle(

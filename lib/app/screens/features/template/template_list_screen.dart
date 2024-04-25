@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -314,6 +315,148 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             : null);
   }
 
+  Widget _filterPopup(BuildContext context) {
+    return Form(
+      child: CoreBasicDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _templateConditionModel.searchText != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: StatefulBuilder(builder:
+                          (BuildContext context, StateSetter setState) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Search keywords: ',
+                                  style: CommonStyles.buttonTextStyle),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                          '"${_templateConditionModel.searchText!}"',
+                                          style: const TextStyle(
+                                              color: Color(0xFF1f1f1f),
+                                              fontSize: 16.0)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ]);
+                      }),
+                    )
+                  : Container(),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text('Templates in the trash',
+                            style: CommonStyles.buttonTextStyle),
+                      ),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByDeleted,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByDeleted = value!;
+                            if (_filterByDeleted) {
+                              _templateConditionModel.isDeleted =
+                                  _filterByDeleted;
+                            } else {
+                              _templateConditionModel.isDeleted = null;
+                            }
+                          });
+                        },
+                      ),
+                    ]);
+              }),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text('Favourite templates',
+                            style: CommonStyles.buttonTextStyle),
+                      ),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByFavourite,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByFavourite = value!;
+                            if (_filterByFavourite) {
+                              _templateConditionModel.favourite =
+                                  _filterByFavourite;
+                            } else {
+                              _templateConditionModel.favourite = null;
+                            }
+                          });
+                        },
+                      ),
+                    ]);
+              }),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text('Recently Updated',
+                            style: CommonStyles.buttonTextStyle),
+                      ),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByRecentlyUpdated,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByRecentlyUpdated = value!;
+                            if (_filterByRecentlyUpdated) {
+                              _templateConditionModel.recentlyUpdated =
+                                  _filterByRecentlyUpdated;
+                            } else {
+                              _templateConditionModel.recentlyUpdated = null;
+                            }
+                          });
+                        },
+                      ),
+                    ]);
+              }),
+              const SizedBox(height: 20.0),
+              CoreElevatedButton.iconOnly(
+                  icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
+                  onPressed: () {
+                    setState(() {
+                      /// Reload Data
+                      _reloadPage();
+
+                      /// Close Dialog
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  coreButtonStyle:
+                      ThemeDataCenter.getCoreScreenButtonStyle(context)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _pagingController.dispose();
@@ -348,35 +491,76 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
           )
         ],
         backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        title: Text(
-          'Templates',
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 30,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text('Templates',
+                  style: GoogleFonts.montserrat(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 20,
+                      color: const Color(0xFF404040),
+                      fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: IconButton(
+                        icon: AvatarGlow(
+                          glowRadiusFactor: 0.5,
+                          curve: Curves.linearToEaseOut,
+                          child: Icon(Icons.filter_alt_rounded,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context)),
+                        ),
+                        onPressed: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _filterPopup(context));
+                        }),
+                  )
+                : Container()
+          ],
         ),
         iconTheme: const IconThemeData(
           color: Color(0xFF404040),
         ),
       ),
-      body: Stack(children: [
-        PagedListView<int, TemplateModel>(
-          scrollController: _scrollController,
-          pagingController: _pagingController,
-          builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
-            animateTransitions: true,
-            transitionDuration: const Duration(milliseconds: 500),
-            itemBuilder: (context, item, index) => TemplateWidget(
-              index: index + 1,
-              template: item,
-              labels: _getTemplateLabels(item.labels!),
-              subject: _getTemplateSubject(item.subjectId),
-              onUpdate: () {
-                _onUpdateTemplate(context, item);
-              },
-              onDelete: () {
-                _onDeleteTemplate(context, item).then((result) {
+      body: PagedListView<int, TemplateModel>(
+        scrollController: _scrollController,
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
+          animateTransitions: true,
+          transitionDuration: const Duration(milliseconds: 500),
+          itemBuilder: (context, item, index) => TemplateWidget(
+            index: index + 1,
+            template: item,
+            labels: _getTemplateLabels(item.labels!),
+            subject: _getTemplateSubject(item.subjectId),
+            onUpdate: () {
+              _onUpdateTemplate(context, item);
+            },
+            onDelete: () {
+              _onDeleteTemplate(context, item).then((result) {
+                if (result) {
+                  templateNotifier.onCountAll();
+
+                  setState(() {
+                    _pagingController.itemList!.remove(item);
+                  });
+
+                  CoreNotification.show(context, CoreNotificationStatus.success,
+                      CoreNotificationAction.delete, 'Template');
+                } else {
+                  CoreNotification.show(context, CoreNotificationStatus.error,
+                      CoreNotificationAction.delete, 'Template');
+                }
+              });
+            },
+            onDeleteForever: () async {
+              if (await CoreHelperWidget.confirmFunction(context)) {
+                _onDeleteTemplateForever(context, item).then((result) {
                   if (result) {
                     templateNotifier.onCountAll();
 
@@ -394,124 +578,77 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         CoreNotificationAction.delete, 'Template');
                   }
                 });
-              },
-              onDeleteForever: () async {
-                if (await CoreHelperWidget.confirmFunction(context)) {
-                  _onDeleteTemplateForever(context, item).then((result) {
-                    if (result) {
-                      templateNotifier.onCountAll();
+              }
+            },
+            onRestoreFromTrash: () {
+              _onRestoreTemplateFromTrash(context, item).then((result) {
+                if (result) {
+                  templateNotifier.onCountAll();
 
-                      setState(() {
-                        _pagingController.itemList!.remove(item);
-                      });
-
-                      CoreNotification.show(
-                          context,
-                          CoreNotificationStatus.success,
-                          CoreNotificationAction.delete,
-                          'Template');
-                    } else {
-                      CoreNotification.show(
-                          context,
-                          CoreNotificationStatus.error,
-                          CoreNotificationAction.delete,
-                          'Template');
-                    }
+                  setState(() {
+                    _pagingController.itemList!.remove(item);
                   });
+
+                  CoreNotification.show(context, CoreNotificationStatus.success,
+                      CoreNotificationAction.restore, 'Template');
+                } else {
+                  CoreNotification.show(context, CoreNotificationStatus.error,
+                      CoreNotificationAction.restore, 'Template');
                 }
-              },
-              onRestoreFromTrash: () {
-                _onRestoreTemplateFromTrash(context, item).then((result) {
-                  if (result) {
-                    templateNotifier.onCountAll();
+              });
+            },
+            onFavourite: () {
+              _onFavouriteTemplate(context, item).then((result) {
+                if (result) {
+                  setState(() {
+                    item.isFavourite = item.isFavourite == null
+                        ? DateTime.now().millisecondsSinceEpoch
+                        : null;
+                  });
 
-                    setState(() {
-                      _pagingController.itemList!.remove(item);
-                    });
-
-                    CoreNotification.show(
-                        context,
-                        CoreNotificationStatus.success,
-                        CoreNotificationAction.restore,
-                        'Template');
-                  } else {
-                    CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.restore, 'Template');
-                  }
-                });
-              },
-              onFavourite: () {
-                _onFavouriteTemplate(context, item).then((result) {
-                  if (result) {
-                    setState(() {
-                      item.isFavourite = item.isFavourite == null
-                          ? DateTime.now().millisecondsSinceEpoch
-                          : null;
-                    });
-
-                    // CoreNotification.show(
-                    //     context,
-                    //     CoreNotificationStatus.success,
-                    //     CoreNotificationAction.update,
-                    //     'Template');
-                    CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-                    audio.playAudioOnFavourite();
-                  } else {
-                    CoreNotification.show(context, CoreNotificationStatus.error,
-                        CoreNotificationAction.update, 'Template');
-                  }
-                });
-              },
-              onCreateNoteFromTemplate: () {
-                _onCreateNoteFromTemplate(context, item);
-              },
-            ),
-            firstPageErrorIndicatorBuilder: (context) => Center(
-              child: Text('Error loading data!',
-                  style: TextStyle(
-                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
-            ),
-            noItemsFoundIndicatorBuilder: (context) => Center(
-              child: Text('No items found.',
-                  style: TextStyle(
-                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
+                  // CoreNotification.show(
+                  //     context,
+                  //     CoreNotificationStatus.success,
+                  //     CoreNotificationAction.update,
+                  //     'Template');
+                  CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+                  audio.playAudioOnFavourite();
+                } else {
+                  CoreNotification.show(context, CoreNotificationStatus.error,
+                      CoreNotificationAction.update, 'Template');
+                }
+              });
+            },
+            onCreateNoteFromTemplate: () {
+              _onCreateNoteFromTemplate(context, item);
+            },
+          ),
+          firstPageErrorIndicatorBuilder: (context) => Center(
+            child: Text('Error loading data!',
+                style: TextStyle(
+                    color: ThemeDataCenter.getAloneTextColorStyle(context))),
+          ),
+          noItemsFoundIndicatorBuilder: (context) => Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BounceInLeft(
+                    child: FaIcon(FontAwesomeIcons.waze,
+                        size: 30.0,
+                        color:
+                            ThemeDataCenter.getAloneTextColorStyle(context))),
+                const SizedBox(width: 5),
+                BounceInRight(
+                  child: Text('No items found!',
+                      style: TextStyle(
+                          color:
+                              ThemeDataCenter.getAloneTextColorStyle(context))),
+                ),
+              ],
             ),
           ),
         ),
-        _isFiltering()
-            ? Positioned(
-                top: 0,
-                left: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    BounceInLeft(
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        width: 180.0,
-                        decoration:
-                            ThemeDataCenter.getFilteringLabelStyle(context),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Center(
-                            child: Text('Filtering...',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: ThemeDataCenter
-                                        .getFilteringTextColorStyle(context),
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w400)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : Container(),
-      ]),
+      ),
       bottomNavigationBar: CoreBottomNavigationBar(
         backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         child: IconTheme(
@@ -656,134 +793,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                 onPressed: () async {
                   await showDialog<bool>(
                       context: context,
-                      builder: (BuildContext context) => Form(
-                            child: CoreBasicDialog(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Flexible(
-                                              child: Text(
-                                                  'Templates in the trash',
-                                                  style: CommonStyles
-                                                      .buttonTextStyle),
-                                            ),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByDeleted,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByDeleted = value!;
-                                                  if (_filterByDeleted) {
-                                                    _templateConditionModel
-                                                            .isDeleted =
-                                                        _filterByDeleted;
-                                                  } else {
-                                                    _templateConditionModel
-                                                        .isDeleted = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Flexible(
-                                              child: Text('Favourite templates',
-                                                  style: CommonStyles
-                                                      .buttonTextStyle),
-                                            ),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByFavourite,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByFavourite = value!;
-                                                  if (_filterByFavourite) {
-                                                    _templateConditionModel
-                                                            .favourite =
-                                                        _filterByFavourite;
-                                                  } else {
-                                                    _templateConditionModel
-                                                        .favourite = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Flexible(
-                                              child: Text('Recently Updated',
-                                                  style: CommonStyles
-                                                      .buttonTextStyle),
-                                            ),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByRecentlyUpdated,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByRecentlyUpdated =
-                                                      value!;
-                                                  if (_filterByRecentlyUpdated) {
-                                                    _templateConditionModel
-                                                            .recentlyUpdated =
-                                                        _filterByRecentlyUpdated;
-                                                  } else {
-                                                    _templateConditionModel
-                                                        .recentlyUpdated = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    CoreElevatedButton.iconOnly(
-                                        icon: const FaIcon(
-                                            FontAwesomeIcons.check,
-                                            size: 25.0),
-                                        onPressed: () {
-                                          setState(() {
-                                            /// Reload Data
-                                            _reloadPage();
-
-                                            /// Close Dialog
-                                            Navigator.of(context).pop();
-                                          });
-                                        },
-                                        coreButtonStyle: ThemeDataCenter
-                                            .getCoreScreenButtonStyle(context)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ));
+                      builder: (BuildContext context) => _filterPopup(context));
                 },
                 coreButtonStyle:
                     ThemeDataCenter.getCoreScreenButtonStyle(context),

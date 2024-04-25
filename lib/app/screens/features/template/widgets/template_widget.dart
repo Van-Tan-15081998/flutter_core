@@ -248,17 +248,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               Flexible(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12.0),
-                  onTap: () {
-                    SubjectConditionModel subjectConditionModel =
-                        SubjectConditionModel();
-                    subjectConditionModel.id = widget.subject!.id;
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SubjectListScreen(
-                                subjectConditionModel: subjectConditionModel)),
-                        (route) => false);
-                  },
+                  onTap: () {},
                   child: Container(
                     decoration: const BoxDecoration(
                       shape: BoxShape.rectangle,

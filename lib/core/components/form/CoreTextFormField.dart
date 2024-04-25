@@ -65,7 +65,7 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
               widget.onChanged(value); // Gửi sự thay đổi tới trang cha
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value?.isEmpty ?? true) {
 
                 CommonAudioOnPressButton audio = CommonAudioOnPressButton();
                 audio.playAudioOnMessage();

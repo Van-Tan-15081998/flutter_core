@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -192,6 +193,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                   subject: subject,
                   parentSubject: null,
                   actionMode: ActionModeEnum.update,
+                  redirectFromEnum: null,
                 )));
   }
 
@@ -210,6 +212,117 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
       BuildContext context, SubjectModel subject) async {
     return await SubjectDatabaseManager.restoreFromTrash(
         subject, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Widget _filterPopup(BuildContext context) {
+    return Form(
+      child: CoreBasicDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _subjectConditionModel.searchText != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: StatefulBuilder(builder:
+                          (BuildContext context, StateSetter setState) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Search keywords: ',
+                                  style: CommonStyles.buttonTextStyle),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                          '"${_subjectConditionModel.searchText!}"',
+                                          style: const TextStyle(
+                                              color: Color(0xFF1f1f1f),
+                                              fontSize: 16.0)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ]);
+                      }),
+                    )
+                  : Container(),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Root subjects',
+                          style: CommonStyles.buttonTextStyle),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByIsRootSubject,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByIsRootSubject = value!;
+                            if (_filterByIsRootSubject) {
+                              _subjectConditionModel.isRootSubject =
+                                  _filterByIsRootSubject;
+                            } else {
+                              _subjectConditionModel.isRootSubject = null;
+                            }
+                          });
+                        },
+                      ),
+                    ]);
+              }),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Subjects in the trash',
+                          style: CommonStyles.buttonTextStyle),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByDeleted,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByDeleted = value!;
+                            if (_filterByDeleted) {
+                              _subjectConditionModel.isDeleted =
+                                  _filterByDeleted;
+                            } else {
+                              _subjectConditionModel.isDeleted = null;
+                            }
+                          });
+                        },
+                      ),
+                    ]);
+              }),
+              const SizedBox(height: 20.0),
+              CoreElevatedButton.iconOnly(
+                  icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
+                  onPressed: () {
+                    setState(() {
+                      /// Reload Data
+                      _reloadPage();
+
+                      /// Close Dialog
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  coreButtonStyle:
+                      ThemeDataCenter.getCoreScreenButtonStyle(context)),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -246,96 +359,95 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
           )
         ],
         backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        title: Text(
-          'Subjects',
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 30,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.w600),
+        title: Row(
+          children: [
+            Text(
+              'Subjects',
+              style: GoogleFonts.montserrat(
+                  fontStyle: FontStyle.italic,
+                  fontSize: 28,
+                  color: const Color(0xFF404040),
+                  fontWeight: FontWeight.bold),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: IconButton(
+                        icon: AvatarGlow(
+                          glowRadiusFactor: 0.5,
+                          curve: Curves.linearToEaseOut,
+                          child: Icon(Icons.filter_alt_rounded,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context)),
+                        ),
+                        onPressed: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _filterPopup(context));
+                        }),
+                  )
+                : Container()
+          ],
         ),
         iconTheme: const IconThemeData(
           color: Color(0xFF404040), // Set the color you desire
         ),
       ),
-      body: Stack(children: [
-        PagedListView<int, SubjectModel>(
-          scrollController: _scrollController,
-          pagingController: _pagingController,
-          builderDelegate: PagedChildBuilderDelegate<SubjectModel>(
-            animateTransitions: true,
-            transitionDuration: const Duration(milliseconds: 500),
-            itemBuilder: (context, item, index) {
-              return SubjectWidget(
-                  index: index + 1,
-                  key: ValueKey<int>(item.id!),
-                  subject: item,
-                  isSubSubject: isSubSubject(item),
-                  onUpdate: () async {
-                    await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SubjectCreateScreen(
-                                  subject: item,
-                                  parentSubject: null,
-                                  actionMode: ActionModeEnum.update,
-                                )));
-                    setState(() {});
-                  },
-                  onDelete: () {
-                    _onDeleteSubject(context, item).then((result) {
-                      if (result) {
-                        subjectNotifier.onCountAll();
+      body: PagedListView<int, SubjectModel>(
+        scrollController: _scrollController,
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<SubjectModel>(
+          animateTransitions: true,
+          transitionDuration: const Duration(milliseconds: 500),
+          itemBuilder: (context, item, index) {
+            return SubjectWidget(
+                index: index + 1,
+                key: ValueKey<int>(item.id!),
+                subject: item,
+                isSubSubject: isSubSubject(item),
+                onUpdate: () async {
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SubjectCreateScreen(
+                                subject: item,
+                                parentSubject: null,
+                                actionMode: ActionModeEnum.update,
+                                redirectFromEnum: null,
+                              )));
+                  setState(() {});
+                },
+                onDelete: () {
+                  _onDeleteSubject(context, item).then((result) {
+                    if (result) {
+                      subjectNotifier.onCountAll();
 
-                        setState(() {
-                          _pagingController.itemList!.remove(item);
-                        });
-
-                        if (_subjectConditionModel.parentId != null) {
-                          _reloadPage();
-                        }
-
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.success,
-                            CoreNotificationAction.delete,
-                            'Subject');
-                      } else {
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.error,
-                            CoreNotificationAction.delete,
-                            'Subject');
-                      }
-                    });
-                  },
-                  onDeleteForever: () async {
-                    if (await CoreHelperWidget.confirmFunction(context)) {
-                      _onDeleteSubjectForever(context, item).then((result) {
-                        if (result) {
-                          subjectNotifier.onCountAll();
-
-                          setState(() {
-                            _pagingController.itemList!.remove(item);
-                          });
-
-                          CoreNotification.show(
-                              context,
-                              CoreNotificationStatus.success,
-                              CoreNotificationAction.delete,
-                              'Subject');
-                        } else {
-                          CoreNotification.show(
-                              context,
-                              CoreNotificationStatus.error,
-                              CoreNotificationAction.delete,
-                              'Subject');
-                        }
+                      setState(() {
+                        _pagingController.itemList!.remove(item);
                       });
+
+                      if (_subjectConditionModel.parentId != null) {
+                        _reloadPage();
+                      }
+
+                      CoreNotification.show(
+                          context,
+                          CoreNotificationStatus.success,
+                          CoreNotificationAction.delete,
+                          'Subject');
+                    } else {
+                      CoreNotification.show(
+                          context,
+                          CoreNotificationStatus.error,
+                          CoreNotificationAction.delete,
+                          'Subject');
                     }
-                  },
-                  onRestoreFromTrash: () {
-                    _onRestoreSubjectFromTrash(context, item).then((result) {
+                  });
+                },
+                onDeleteForever: () async {
+                  if (await CoreHelperWidget.confirmFunction(context)) {
+                    _onDeleteSubjectForever(context, item).then((result) {
                       if (result) {
                         subjectNotifier.onCountAll();
 
@@ -346,78 +458,82 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                         CoreNotification.show(
                             context,
                             CoreNotificationStatus.success,
-                            CoreNotificationAction.restore,
+                            CoreNotificationAction.delete,
                             'Subject');
                       } else {
                         CoreNotification.show(
                             context,
                             CoreNotificationStatus.error,
-                            CoreNotificationAction.restore,
+                            CoreNotificationAction.delete,
                             'Subject');
                       }
                     });
-                  },
-                  onFilterChildren: () {
-                    setState(() {
-                      _subjectConditionModel.parentId = item.id;
-                      _subjectConditionModel.id = null;
-                    });
-                    _reloadPage();
-                  },
-                  onFilterParent: () {
-                    setState(() {
-                      _subjectConditionModel.id = item.parentId;
-                      _subjectConditionModel.parentId = null;
-                    });
-                    _reloadPage();
+                  }
+                },
+                onRestoreFromTrash: () {
+                  _onRestoreSubjectFromTrash(context, item).then((result) {
+                    if (result) {
+                      subjectNotifier.onCountAll();
+
+                      setState(() {
+                        _pagingController.itemList!.remove(item);
+                      });
+
+                      CoreNotification.show(
+                          context,
+                          CoreNotificationStatus.success,
+                          CoreNotificationAction.restore,
+                          'Subject');
+                    } else {
+                      CoreNotification.show(
+                          context,
+                          CoreNotificationStatus.error,
+                          CoreNotificationAction.restore,
+                          'Subject');
+                    }
                   });
-            },
-            firstPageErrorIndicatorBuilder: (context) => Center(
-              child: Text('Error loading data!',
-                  style: TextStyle(
-                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
-            ),
-            noItemsFoundIndicatorBuilder: (context) => Center(
-              child: Text('No items found.',
-                  style: TextStyle(
-                      color: ThemeDataCenter.getAloneTextColorStyle(context))),
+                },
+                onFilterChildren: () {
+                  setState(() {
+                    _subjectConditionModel.parentId = item.id;
+                    _subjectConditionModel.id = null;
+                  });
+                  _reloadPage();
+                },
+                onFilterParent: () {
+                  setState(() {
+                    _subjectConditionModel.id = item.parentId;
+                    _subjectConditionModel.parentId = null;
+                  });
+                  _reloadPage();
+                });
+          },
+          firstPageErrorIndicatorBuilder: (context) => Center(
+            child: Text('Error loading data!',
+                style: TextStyle(
+                    color: ThemeDataCenter.getAloneTextColorStyle(context))),
+          ),
+          noItemsFoundIndicatorBuilder: (context) => Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BounceInLeft(
+                    child: FaIcon(FontAwesomeIcons.waze,
+                        size: 30.0,
+                        color:
+                            ThemeDataCenter.getAloneTextColorStyle(context))),
+                const SizedBox(width: 5),
+                BounceInRight(
+                  child: Text('No items found!',
+                      style: TextStyle(
+                          color:
+                              ThemeDataCenter.getAloneTextColorStyle(context))),
+                ),
+              ],
             ),
           ),
         ),
-        _isFiltering()
-            ? Positioned(
-                top: 0,
-                left: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    BounceInLeft(
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        width: 180.0,
-                        decoration:
-                            ThemeDataCenter.getFilteringLabelStyle(context),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Center(
-                            child: Text('Filtering...',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: ThemeDataCenter
-                                        .getFilteringTextColorStyle(context),
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w400)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : Container(),
-      ]),
+      ),
       bottomNavigationBar: CoreBottomNavigationBar(
         backgroundColor: ThemeDataCenter.getBackgroundColor(context),
         child: IconTheme(
@@ -563,96 +679,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                 onPressed: () async {
                   await showDialog<bool>(
                       context: context,
-                      builder: (BuildContext context) => Form(
-                            child: CoreBasicDialog(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Root subjects',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByIsRootSubject,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByIsRootSubject =
-                                                      value!;
-                                                  if (_filterByIsRootSubject) {
-                                                    _subjectConditionModel
-                                                            .isRootSubject =
-                                                        _filterByIsRootSubject;
-                                                  } else {
-                                                    _subjectConditionModel
-                                                        .isRootSubject = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Subjects in the trash',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByDeleted,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByDeleted = value!;
-                                                  if (_filterByDeleted) {
-                                                    _subjectConditionModel
-                                                            .isDeleted =
-                                                        _filterByDeleted;
-                                                  } else {
-                                                    _subjectConditionModel
-                                                        .isDeleted = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    CoreElevatedButton.iconOnly(
-                                        icon: const FaIcon(
-                                            FontAwesomeIcons.check,
-                                            size: 25.0),
-                                        onPressed: () {
-                                          setState(() {
-                                            /// Reload Data
-                                            _reloadPage();
-
-                                            /// Close Dialog
-                                            Navigator.of(context).pop();
-                                          });
-                                        },
-                                        coreButtonStyle: ThemeDataCenter
-                                            .getCoreScreenButtonStyle(context)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ));
+                      builder: (BuildContext context) => _filterPopup(context));
                 },
                 coreButtonStyle:
                     ThemeDataCenter.getCoreScreenButtonStyle(context),
@@ -668,8 +695,10 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const SubjectCreateScreen(
-                            parentSubject: null,
-                            actionMode: ActionModeEnum.create)),
+                              parentSubject: null,
+                              actionMode: ActionModeEnum.create,
+                              redirectFromEnum: RedirectFromEnum.subjects,
+                            )),
                   );
                 },
                 coreButtonStyle:

@@ -45,6 +45,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                   subject: widget.subject,
                   parentSubject: null,
                   actionMode: ActionModeEnum.update,
+                  redirectFromEnum: null,
                 )));
   }
 
@@ -342,6 +343,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                             .update,
                                                                     subject: widget
                                                                         .subject,
+                                                                    redirectFromEnum:
+                                                                        null,
                                                                   )));
                                                     },
                                                     coreButtonStyle:
@@ -360,13 +363,17 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                              builder: (context) => SubjectCreateScreen(
-                                                                  parentSubject:
-                                                                      widget
-                                                                          .subject,
-                                                                  actionMode:
-                                                                      ActionModeEnum
-                                                                          .create)));
+                                                              builder: (context) =>
+                                                                  SubjectCreateScreen(
+                                                                    parentSubject:
+                                                                        widget
+                                                                            .subject,
+                                                                    actionMode:
+                                                                        ActionModeEnum
+                                                                            .create,
+                                                                    redirectFromEnum:
+                                                                        null,
+                                                                  )));
                                                     },
                                                     coreButtonStyle: ThemeDataCenter
                                                         .getCreateSubSubjectButtonStyle(

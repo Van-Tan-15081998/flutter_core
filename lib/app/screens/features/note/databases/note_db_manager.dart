@@ -11,6 +11,12 @@ class NoteDatabaseManager {
     return notes;
   }
 
+  static Future<List<NoteModel>?> getAllNotesDistinctCreatedAt() async {
+    List<NoteModel>? notes = await DatabaseProvider.getAllNotesDistinctCreatedAt();
+
+    return notes;
+  }
+
   static Future<List<NoteModel>?> onGetNotePagination(CorePaginationModel corePaginationModel, NoteConditionModel noteConditionModel) async {
     List<NoteModel>? notes = await DatabaseProvider.getNotePagination(corePaginationModel, noteConditionModel);
 

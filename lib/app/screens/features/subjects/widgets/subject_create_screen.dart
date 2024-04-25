@@ -14,6 +14,7 @@ import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
+import '../../note/note_list_screen.dart';
 import '../databases/subject_db_manager.dart';
 import '../models/subject_model.dart';
 import '../providers/subject_notifier.dart';
@@ -24,11 +25,14 @@ class SubjectCreateScreen extends StatefulWidget {
   final SubjectModel? subject;
   final SubjectModel? parentSubject;
   final ActionModeEnum actionMode;
-  const SubjectCreateScreen(
-      {super.key,
-      this.subject,
-      required this.parentSubject,
-      required this.actionMode});
+  final RedirectFromEnum? redirectFromEnum;
+  const SubjectCreateScreen({
+    super.key,
+    this.subject,
+    required this.parentSubject,
+    required this.actionMode,
+    required this.redirectFromEnum,
+  });
 
   @override
   State<SubjectCreateScreen> createState() => _SubjectCreateScreenState();
@@ -193,14 +197,25 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                 CoreNotification.show(context, CoreNotificationStatus.success,
                     CoreNotificationAction.create, 'Subject');
 
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SubjectListScreen(
-                            subjectConditionModel: null,
-                          )),
-                  (route) => false,
-                );
+                if (widget.redirectFromEnum == RedirectFromEnum.notes) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NoteListScreen(
+                            noteConditionModel: null,
+                            isOpenSubjectsForFilter: true)),
+                    (route) => false,
+                  );
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SubjectListScreen(
+                              subjectConditionModel: null,
+                            )),
+                    (route) => false,
+                  );
+                }
               } else {
                 CoreNotification.show(context, CoreNotificationStatus.error,
                     CoreNotificationAction.create, 'Subject');

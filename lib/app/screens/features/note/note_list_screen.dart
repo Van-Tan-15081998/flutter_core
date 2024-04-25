@@ -1,5 +1,8 @@
 import 'dart:convert';
-import 'dart:ffi';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
+import 'package:intl/intl.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -8,7 +11,6 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
-import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../core/components/form/CoreTextFormField.dart';
@@ -24,6 +26,7 @@ import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
 import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
+import '../subjects/widgets/subject_create_screen.dart';
 import 'databases/note_db_manager.dart';
 import 'models/note_condition_model.dart';
 import 'models/note_model.dart';
@@ -33,8 +36,12 @@ import 'widgets/note_widget.dart';
 
 class NoteListScreen extends StatefulWidget {
   final NoteConditionModel? noteConditionModel;
+  final bool? isOpenSubjectsForFilter;
 
-  const NoteListScreen({super.key, required this.noteConditionModel});
+  const NoteListScreen(
+      {super.key,
+      required this.noteConditionModel,
+      this.isOpenSubjectsForFilter});
 
   @override
   State<NoteListScreen> createState() => _NoteListScreenState();
@@ -52,11 +59,14 @@ class _NoteListScreenState extends State<NoteListScreen> {
   String _searchText = "";
   bool _filterByDeleted = false;
   bool _filterByDate = false;
+  bool _filterBySubject = false;
   bool _filterByRecentlyUpdated = false;
   bool _filterByFavourite = false;
 
-  List<LabelModel>? labelList = [];
-  List<SubjectModel>? subjectList = [];
+  List<LabelModel>? _labelList = [];
+  List<SubjectModel>? _subjectList = [];
+
+  SubjectModel? filteredSubject;
 
   /*
    Parameters For Pagination
@@ -79,11 +89,11 @@ class _NoteListScreenState extends State<NoteListScreen> {
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
-  final _today = DateTime.now();
   final _firstDay = DateTime(
       DateTime.now().year, DateTime.now().month - 3, DateTime.now().day);
   final _lastDay = DateTime(
       DateTime.now().year, DateTime.now().month + 3, DateTime.now().day);
+  final Map<DateTime, List<dynamic>> _noteEvents = {};
 
   /*
   Function fetch page data
@@ -119,20 +129,33 @@ class _NoteListScreenState extends State<NoteListScreen> {
     super.initState();
 
     // Fetch Labels and Subjects
-    _fetchLabels().then((labels) {
-      if (labels != null && labels.isNotEmpty) {
+    _fetchLabels().then((labelsResult) {
+      if (labelsResult != null && labelsResult.isNotEmpty) {
         setState(() {
-          labelList = labels;
+          _labelList = labelsResult;
         });
       }
     });
-    _fetchSubjects().then((subjects) {
-      if (subjects != null && subjects.isNotEmpty) {
-        subjectList = subjects;
+
+    _fetchSubjects().then((subjectsResult) {
+      if (subjectsResult != null && subjectsResult.isNotEmpty) {
+        _subjectList = subjectsResult;
       }
     });
 
-    // Init Condition
+    _fetchNotesDistinctCreatedAt().then((notesResult) {
+      if (notesResult != null && notesResult.isNotEmpty) {
+        for (var note in notesResult) {
+          DateTime dateTime =
+              DateTime.fromMillisecondsSinceEpoch(note.createdAtDayFormat!);
+          _noteEvents.addAll({
+            DateTime.utc(dateTime.year, dateTime.month, dateTime.day): ['1']
+          });
+        }
+      }
+    });
+
+    // Init Conditions
     if (widget.noteConditionModel != null) {
       _noteConditionModel = widget.noteConditionModel!;
     }
@@ -174,24 +197,64 @@ class _NoteListScreenState extends State<NoteListScreen> {
         );
       }
     });
+
+    /*
+    Redirect from SubjectCreateScreen
+     */
+    if ((widget.isOpenSubjectsForFilter != null &&
+            widget.isOpenSubjectsForFilter == true) ||
+        (widget.noteConditionModel != null &&
+            widget.noteConditionModel!.subjectId != null)) {
+      _filterBySubject = true;
+      _fetchSubjectsForFilter();
+
+      if (widget.noteConditionModel != null &&
+          widget.noteConditionModel!.subjectId != null) {
+        _getFilteredSubject();
+      }
+    }
   }
 
   /*
   Get Labels From DB
    */
   Future<List<LabelModel>?> _fetchLabels() async {
-    labelList = await LabelDatabaseManager.all();
+    List<LabelModel>? localLabelList = await LabelDatabaseManager.all();
 
-    return labelList;
+    return localLabelList;
   }
 
   /*
   Get Subjects From DB
    */
   Future<List<SubjectModel>?> _fetchSubjects() async {
-    subjectList = await SubjectDatabaseManager.all();
+    List<SubjectModel>? localSubjectList = await SubjectDatabaseManager.all();
 
-    return subjectList;
+    return localSubjectList;
+  }
+
+  /*
+  Get Notes Distinct CreatedAt From DB
+   */
+  Future<List<NoteModel>?> _fetchNotesDistinctCreatedAt() async {
+    List<NoteModel>? localNoteList =
+        await NoteDatabaseManager.getAllNotesDistinctCreatedAt();
+
+    return localNoteList;
+  }
+
+  _fetchSubjectsForFilter() {
+    if (_filterBySubject) {
+      if (_subjectList?.isEmpty ?? true) {
+        _fetchSubjects().then((subjectsResult) {
+          if (subjectsResult != null && subjectsResult.isNotEmpty) {
+            setState(() {
+              _subjectList = subjectsResult;
+            });
+          }
+        });
+      }
+    }
   }
 
   /*
@@ -201,15 +264,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
     List<LabelModel>? noteLabels = [];
     List<dynamic> labelIds = jsonDecode(jsonLabelIds);
 
-    // noteLabels = context
-    //     .watch<LabelNotifier>()
-    //     .labels!
-    //     .where((model) => labelIds.contains(model.id))
-    //     .toList();
-
-    if (labelList != null && labelList!.isNotEmpty) {
+    if (_labelList != null && _labelList!.isNotEmpty) {
       noteLabels =
-          labelList!.where((model) => labelIds.contains(model.id)).toList();
+          _labelList!.where((model) => labelIds.contains(model.id)).toList();
     }
 
     return noteLabels;
@@ -221,15 +278,8 @@ class _NoteListScreenState extends State<NoteListScreen> {
   SubjectModel? _getNoteSubject(int? subjectId) {
     List<SubjectModel>? subjects = [];
 
-    // if (context.watch<SubjectNotifier>().subjects!.isNotEmpty) {
-    //   subjects = context
-    //       .watch<SubjectNotifier>()
-    //       .subjects!
-    //       .where((model) => subjectId == model.id)
-    //       .toList();
-    // }
-    if (subjectList != null && subjectList!.isNotEmpty) {
-      subjects = subjectList!.where((model) => subjectId == model.id).toList();
+    if (_subjectList != null && _subjectList!.isNotEmpty) {
+      subjects = _subjectList!.where((model) => subjectId == model.id).toList();
     }
 
     return subjects.isNotEmpty ? subjects.first : null;
@@ -246,6 +296,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
       _filterByDate = false;
       _filterByFavourite = false;
       _filterByRecentlyUpdated = false;
+
+      _filterBySubject = false;
+      filteredSubject = null;
 
       _noteConditionModel.createdAtEndOfDay = null;
       _noteConditionModel.createdAtStartOfDay = null;
@@ -286,14 +339,16 @@ class _NoteListScreenState extends State<NoteListScreen> {
 
   _onUpdateNote(BuildContext context, NoteModel note) async {
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => NoteCreateScreen(
-                  note: note,
-                  copyNote: null,
-                  subject: null,
-                  actionMode: ActionModeEnum.update,
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteCreateScreen(
+          note: note,
+          copyNote: null,
+          subject: null,
+          actionMode: ActionModeEnum.update,
+        ),
+      ),
+    );
   }
 
   Future<bool> _onDeleteNote(BuildContext context, NoteModel note) async {
@@ -318,6 +373,251 @@ class _NoteListScreenState extends State<NoteListScreen> {
         note.isFavourite == null
             ? DateTime.now().millisecondsSinceEpoch
             : null);
+  }
+
+  void _getFilteredSubject() async {
+    SubjectModel? localFilteredSubject =
+        await SubjectDatabaseManager.getById(_noteConditionModel.subjectId!);
+
+    if (localFilteredSubject != null) {
+      setState(() {
+        filteredSubject = localFilteredSubject;
+      });
+    }
+  }
+
+  Widget _filterPopup(BuildContext context) {
+    return Form(
+      child: CoreBasicDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              filteredSubject != null
+                  ? Row(
+                      children: [
+                        Text('Subject: ', style: CommonStyles.buttonTextStyle),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      2.0, 2.0, 2.0, 2.0),
+                                  child: DottedBorder(
+                                    borderType: BorderType.RRect,
+                                    radius: const Radius.circular(12),
+                                    color: filteredSubject!.color.toColor(),
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(12),
+                                      ),
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.palette_rounded,
+                                                color: filteredSubject!.color
+                                                    .toColor(),
+                                              ),
+                                              const SizedBox(width: 6.0),
+                                              Flexible(
+                                                child: Text(
+                                                  filteredSubject!.title,
+                                                  style: const TextStyle(
+                                                      fontSize: 16.0,
+                                                      fontWeight:
+                                                          FontWeight.w400),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    )
+                  : Container(),
+              _noteConditionModel.createdAtStartOfDay != null &&
+                      _noteConditionModel.createdAtEndOfDay != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: StatefulBuilder(builder:
+                          (BuildContext context, StateSetter setState) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text('Date: ',
+                                    style: CommonStyles.buttonTextStyle),
+                              ),
+                              _noteConditionModel.createdAtStartOfDay != null &&
+                                      _noteConditionModel.createdAtEndOfDay !=
+                                          null
+                                  ? Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                          Text(
+                                              'From: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtStartOfDay!))}',
+                                              style:
+                                                  CommonStyles.dateTextStyle),
+                                          Text(
+                                              'To: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtEndOfDay!))}',
+                                              style: CommonStyles.dateTextStyle)
+                                        ])
+                                  : Container(),
+                            ]);
+                      }),
+                    )
+                  : Container(),
+              _noteConditionModel.searchText != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Search keywords: ',
+                                  style: CommonStyles.buttonTextStyle),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        '"${_noteConditionModel.searchText!}"',
+                                        style: const TextStyle(
+                                            color: Color(0xFF1f1f1f),
+                                            fontSize: 16.0),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    )
+                  : Container(),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Notes in the trash',
+                          style: CommonStyles.buttonTextStyle),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByDeleted,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByDeleted = value!;
+                            if (_filterByDeleted) {
+                              _noteConditionModel.isDeleted = _filterByDeleted;
+                            } else {
+                              _noteConditionModel.isDeleted = null;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Favourite notes',
+                          style: CommonStyles.buttonTextStyle),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByFavourite,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByFavourite = value!;
+                            if (_filterByFavourite) {
+                              _noteConditionModel.favourite =
+                                  _filterByFavourite;
+                            } else {
+                              _noteConditionModel.favourite = null;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 20.0),
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Recently Updated',
+                          style: CommonStyles.buttonTextStyle),
+                      Checkbox(
+                        checkColor: Colors.white,
+                        value: _filterByRecentlyUpdated,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            _filterByRecentlyUpdated = value!;
+                            if (_filterByRecentlyUpdated) {
+                              _noteConditionModel.recentlyUpdated =
+                                  _filterByRecentlyUpdated;
+                            } else {
+                              _noteConditionModel.recentlyUpdated = null;
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 20.0),
+              CoreElevatedButton.iconOnly(
+                onPressed: () {
+                  setState(() {
+                    /// Reload Data
+                    _reloadPage();
+
+                    /// Close Dialog
+                    Navigator.of(context).pop();
+                  });
+                },
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context),
+                icon: const Icon(Icons.check_rounded, size: 25.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -354,13 +654,122 @@ class _NoteListScreenState extends State<NoteListScreen> {
           )
         ],
         backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        title: Text(
-          'Notes',
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 30,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                'Notes',
+                style: GoogleFonts.montserrat(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 28,
+                    color: const Color(0xFF404040),
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+            Tooltip(
+              message: 'Created day',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Icon(
+                      Icons.calendar_month_rounded,
+                      size: 22,
+                      color:
+                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _filterByDate = !_filterByDate;
+
+                      if (!_filterByDate) {
+                        _noteConditionModel.createdAtStartOfDay = null;
+                        _noteConditionModel.createdAtEndOfDay = null;
+
+                        /*
+                        Reset Table Calendar
+                         */
+                        _selectedDay = null;
+                        _focusedDay = DateTime.now();
+                        _rangeStart = null;
+                        _rangeEnd = null;
+
+                        _reloadPage();
+                      }
+                    });
+                  },
+                ),
+              ),
+            ),
+            Tooltip(
+              message: 'Subjects',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Icon(
+                      Icons.color_lens_rounded,
+                      size: 22,
+                      color:
+                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                    ),
+                  ),
+                  onTap: () {
+                    try {
+                      setState(() {
+                        _filterBySubject = !_filterBySubject;
+
+                        if (!_filterBySubject) {
+                          filteredSubject = null;
+                          _noteConditionModel.subjectId = null;
+
+                          _reloadPage();
+                        }
+                      });
+                    } catch (exception) {
+                      CoreNotification.showMessage(context,
+                          CoreNotificationStatus.warning, 'System error!');
+                    }
+                  },
+                ),
+              ),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: AvatarGlow(
+                            glowRadiusFactor: 0.5,
+                            curve: Curves.linearToEaseOut,
+                            child: Icon(
+                              Icons.filter_alt_rounded,
+                              size: 22,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context),
+                            ),
+                          ),
+                          onTap: () async {
+                            await showDialog<bool>(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    _filterPopup(context));
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : Container()
+          ],
         ),
         iconTheme: const IconThemeData(
           color: Color(0xFF404040),
@@ -368,276 +777,465 @@ class _NoteListScreenState extends State<NoteListScreen> {
       ),
       body: Column(
         children: [
+          _filterBySubject
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(6.0, 2.0, 6.0, 2.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Tooltip(
+                          message: 'Create subject',
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.add,
+                              color: ThemeDataCenter.getAloneTextColorStyle(
+                                  context),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SubjectCreateScreen(
+                                    parentSubject: null,
+                                    actionMode: ActionModeEnum.create,
+                                    redirectFromEnum: RedirectFromEnum.notes,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(16.0),
+                          onTap: () {
+                            setState(() {
+                              filteredSubject = null;
+                              _noteConditionModel.subjectId = null;
+                            });
+
+                            _reloadPage();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: ((filteredSubject == null &&
+                                      widget.noteConditionModel?.subjectId ==
+                                          null))
+                                  ? ThemeDataCenter
+                                      .getActiveBackgroundColorStyle(context)
+                                  : Colors.transparent,
+                              border: Border(
+                                top: BorderSide(
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context),
+                                  width: 1.0,
+                                ),
+                                right: BorderSide(
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context),
+                                  width: 1.0,
+                                ),
+                                left: BorderSide(
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context),
+                                  width: 1.0,
+                                ),
+                                bottom: BorderSide(
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context),
+                                  width: 1.0,
+                                ),
+                              ),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(16.0),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  10.0, 4.0, 10.0, 4.0),
+                              child: Text(
+                                'All',
+                                style: TextStyle(
+                                    color: ((filteredSubject == null &&
+                                            widget.noteConditionModel
+                                                    ?.subjectId ==
+                                                null))
+                                        ? ThemeDataCenter
+                                            .getTextOnActiveBackgroundColorStyle(
+                                                context)
+                                        : ThemeDataCenter
+                                            .getAloneTextColorStyle(context),
+                                    fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: List.generate(
+                            _subjectList!.length,
+                            (index) => InkWell(
+                              borderRadius: BorderRadius.circular(16.0),
+                              onTap: () {
+                                filteredSubject = null;
+                                _noteConditionModel.subjectId =
+                                    _subjectList![index].id;
+
+                                /*
+                        Get subject
+                         */
+                                _getFilteredSubject();
+
+                                _reloadPage();
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: ((filteredSubject != null &&
+                                              filteredSubject!.id ==
+                                                  _subjectList![index].id) ||
+                                          (widget.noteConditionModel != null &&
+                                              widget.noteConditionModel!
+                                                      .subjectId ==
+                                                  _subjectList![index].id))
+                                      ? ThemeDataCenter
+                                          .getActiveBackgroundColorStyle(
+                                              context)
+                                      : Colors.transparent,
+                                  border: Border(
+                                    top: BorderSide(
+                                      color: ThemeDataCenter
+                                          .getAloneTextColorStyle(context),
+                                      width: 1.0,
+                                    ),
+                                    right: BorderSide(
+                                      color: ThemeDataCenter
+                                          .getAloneTextColorStyle(context),
+                                      width: 1.0,
+                                    ),
+                                    left: BorderSide(
+                                      color: ThemeDataCenter
+                                          .getAloneTextColorStyle(context),
+                                      width: 1.0,
+                                    ),
+                                    bottom: BorderSide(
+                                      color: ThemeDataCenter
+                                          .getAloneTextColorStyle(context),
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(16.0),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      10.0, 4.0, 10.0, 4.0),
+                                  child: Text(
+                                    _subjectList![index].title,
+                                    style: TextStyle(
+                                        color: ((filteredSubject != null &&
+                                                    filteredSubject!.id ==
+                                                        _subjectList![index]
+                                                            .id) ||
+                                                (widget.noteConditionModel !=
+                                                        null &&
+                                                    widget.noteConditionModel!
+                                                            .subjectId ==
+                                                        _subjectList![index]
+                                                            .id))
+                                            ? ThemeDataCenter
+                                                .getTextOnActiveBackgroundColorStyle(
+                                                    context)
+                                            : ThemeDataCenter
+                                                .getAloneTextColorStyle(
+                                                    context),
+                                        fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              : Container(),
           _filterByDate
-              ? Container(
-                  color:
-                      ThemeDataCenter.getTableCalendarBackgroundColor(context),
-                  child: TableCalendar(
-                    firstDay: _firstDay,
-                    lastDay: _lastDay,
-                    focusedDay: _focusedDay,
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    rangeStartDay: _rangeStart,
-                    rangeEndDay: _rangeEnd,
-                    calendarFormat: _calendarFormat,
-                    rangeSelectionMode: _rangeSelectionMode,
-                    onDaySelected: (selectedDay, focusedDay) {
-                      if (!isSameDay(_selectedDay, selectedDay)) {
+              ? FadeIn(
+                  duration: const Duration(milliseconds: 200),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ThemeDataCenter.getTableCalendarBackgroundColor(
+                          context),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(8.0),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1f1f1f).withOpacity(0.5),
+                          spreadRadius: 2,
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: TableCalendar(
+                      eventLoader: (date) {
+                        return _noteEvents[date] ?? [];
+                      },
+                      firstDay: _firstDay,
+                      lastDay: _lastDay,
+                      focusedDay: _focusedDay,
+                      selectedDayPredicate: (day) =>
+                          isSameDay(_selectedDay, day),
+                      rangeStartDay: _rangeStart,
+                      rangeEndDay: _rangeEnd,
+                      calendarFormat: _calendarFormat,
+                      rangeSelectionMode: _rangeSelectionMode,
+                      onDaySelected: (selectedDay, focusedDay) {
+                        if (!isSameDay(_selectedDay, selectedDay)) {
+                          setState(() {
+                            _selectedDay = selectedDay;
+                            _focusedDay = focusedDay;
+                            _rangeStart = null; // Important to clean those
+                            _rangeEnd = null;
+                            _rangeSelectionMode = RangeSelectionMode.toggledOff;
+                          });
+
+                          if (_selectedDay != null) {
+                            /*
+                    Update Condition
+                     */
+                            _noteConditionModel.createdAtStartOfDay = DateTime(
+                                    _selectedDay!.year,
+                                    _selectedDay!.month,
+                                    _selectedDay!.day)
+                                .millisecondsSinceEpoch;
+                            _noteConditionModel.createdAtEndOfDay = DateTime(
+                                    _selectedDay!.year,
+                                    _selectedDay!.month,
+                                    _selectedDay!.day,
+                                    23,
+                                    59,
+                                    59,
+                                    999)
+                                .millisecondsSinceEpoch;
+                            /*
+                    Reload Page
+                     */
+                            _reloadPage();
+                          }
+                        }
+                      },
+                      onRangeSelected: (start, end, focusedDay) {
                         setState(() {
-                          _selectedDay = selectedDay;
+                          _selectedDay = null;
                           _focusedDay = focusedDay;
-                          _rangeStart = null; // Important to clean those
-                          _rangeEnd = null;
-                          _rangeSelectionMode = RangeSelectionMode.toggledOff;
+                          _rangeStart = start;
+                          _rangeEnd = end;
+                          _rangeSelectionMode = RangeSelectionMode.toggledOn;
                         });
 
-                        if (_selectedDay != null) {
+                        if (_rangeStart != null && _rangeEnd != null) {
                           /*
                   Update Condition
                    */
                           _noteConditionModel.createdAtStartOfDay = DateTime(
-                                  _selectedDay!.year,
-                                  _selectedDay!.month,
-                                  _selectedDay!.day)
+                                  _rangeStart!.year,
+                                  _rangeStart!.month,
+                                  _rangeStart!.day)
                               .millisecondsSinceEpoch;
                           _noteConditionModel.createdAtEndOfDay = DateTime(
-                                  _selectedDay!.year,
-                                  _selectedDay!.month,
-                                  _selectedDay!.day,
+                                  _rangeEnd!.year,
+                                  _rangeEnd!.month,
+                                  _rangeEnd!.day,
                                   23,
                                   59,
                                   59,
                                   999)
                               .millisecondsSinceEpoch;
                           /*
-                  Reload Page
-                   */
+                    Reload Page
+                     */
                           _reloadPage();
+                        } else {
+                          _noteConditionModel.createdAtStartOfDay = null;
+                          _noteConditionModel.createdAtEndOfDay = null;
                         }
-                      }
-                    },
-                    onRangeSelected: (start, end, focusedDay) {
-                      setState(() {
-                        _selectedDay = null;
+                      },
+                      onFormatChanged: (format) {
+                        if (_calendarFormat != format) {
+                          setState(() {
+                            _calendarFormat = format;
+                          });
+                        }
+                      },
+                      onPageChanged: (focusedDay) {
                         _focusedDay = focusedDay;
-                        _rangeStart = start;
-                        _rangeEnd = end;
-                        _rangeSelectionMode = RangeSelectionMode.toggledOn;
-                      });
-
-                      if (_rangeStart != null && _rangeEnd != null) {
-                        /*
-                Update Condition
-                 */
-                        _noteConditionModel.createdAtStartOfDay = DateTime(
-                                _rangeStart!.year,
-                                _rangeStart!.month,
-                                _rangeStart!.day)
-                            .millisecondsSinceEpoch;
-                        _noteConditionModel.createdAtEndOfDay = DateTime(
-                                _rangeEnd!.year,
-                                _rangeEnd!.month,
-                                _rangeEnd!.day,
-                                23,
-                                59,
-                                59,
-                                999)
-                            .millisecondsSinceEpoch;
-                        /*
-                  Reload Page
-                   */
-                        _reloadPage();
-                      } else {
-                        _noteConditionModel.createdAtStartOfDay = null;
-                        _noteConditionModel.createdAtEndOfDay = null;
-                      }
-                    },
-                    onFormatChanged: (format) {
-                      if (_calendarFormat != format) {
-                        setState(() {
-                          _calendarFormat = format;
-                        });
-                      }
-                    },
-                    onPageChanged: (focusedDay) {
-                      _focusedDay = focusedDay;
-                    },
+                      },
+                    ),
                   ),
                 )
               : Container(),
           Expanded(
-            child: Stack(children: [
-              PagedListView<int, NoteModel>(
-                scrollController: _scrollController,
-                pagingController: _pagingController,
-                builderDelegate: PagedChildBuilderDelegate<NoteModel>(
-                  animateTransitions: true,
-                  transitionDuration: const Duration(milliseconds: 500),
-                  itemBuilder: (context, item, index) => NoteWidget(
-                      index: index + 1,
-                      note: item,
-                      labels: _getNoteLabels(item.labels!),
-                      subject: _getNoteSubject(item.subjectId),
-                      onUpdate: () {
-                        _onUpdateNote(context, item);
-                      },
-                      onDelete: () {
-                        _onDeleteNote(context, item).then((result) {
-                          if (result) {
-                            noteNotifier.onCountAll();
+            child: PagedListView<int, NoteModel>(
+              scrollController: _scrollController,
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<NoteModel>(
+                animateTransitions: true,
+                transitionDuration: const Duration(milliseconds: 500),
+                itemBuilder: (context, item, index) => NoteWidget(
+                  index: index + 1,
+                  note: item,
+                  labels: _getNoteLabels(item.labels!),
+                  subject: _getNoteSubject(item.subjectId),
+                  onUpdate: () {
+                    _onUpdateNote(context, item);
+                  },
+                  onDelete: () {
+                    _onDeleteNote(context, item).then((result) {
+                      if (result) {
+                        noteNotifier.onCountAll();
 
-                            setState(() {
-                              _pagingController.itemList!.remove(item);
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.delete,
-                                'Note');
-                          } else {
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.error,
-                                CoreNotificationAction.delete,
-                                'Note');
-                          }
+                        setState(() {
+                          _pagingController.itemList!.remove(item);
                         });
-                      },
-                      onDeleteForever: () async {
-                        if (await CoreHelperWidget.confirmFunction(context)) {
-                          _onDeleteNoteForever(context, item).then((result) {
-                            if (result) {
-                              noteNotifier.onCountAll();
 
-                              setState(() {
-                                _pagingController.itemList!.remove(item);
-                              });
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.success,
+                            CoreNotificationAction.delete,
+                            'Note');
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.delete,
+                            'Note');
+                      }
+                    });
+                  },
+                  onDeleteForever: () async {
+                    if (await CoreHelperWidget.confirmFunction(context)) {
+                      _onDeleteNoteForever(context, item).then((result) {
+                        if (result) {
+                          noteNotifier.onCountAll();
 
-                              CoreNotification.show(
-                                  context,
-                                  CoreNotificationStatus.success,
-                                  CoreNotificationAction.delete,
-                                  'Note');
-                            } else {
-                              CoreNotification.show(
-                                  context,
-                                  CoreNotificationStatus.error,
-                                  CoreNotificationAction.delete,
-                                  'Note');
-                            }
-                          });
-                        }
-                      },
-                      onRestoreFromTrash: () {
-                        _onRestoreNoteFromTrash(context, item).then((result) {
-                          if (result) {
-                            noteNotifier.onCountAll();
-
-                            setState(() {
-                              _pagingController.itemList!.remove(item);
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.restore,
-                                'Note');
-                          } else {
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.error,
-                                CoreNotificationAction.restore,
-                                'Note');
-                          }
-                        });
-                      },
-                      onFavourite: () {
-                        _onFavouriteNote(context, item).then((result) {
-                          if (result) {
-                            setState(() {
-                              item.isFavourite = item.isFavourite == null
-                                  ? DateTime.now().millisecondsSinceEpoch
-                                  : null;
-                            });
-
-                            // CoreNotification.show(
-                            //     context,
-                            //     CoreNotificationStatus.success,
-                            //     CoreNotificationAction.update,
-                            //     'Note');
-                            CommonAudioOnPressButton audio =
-                                CommonAudioOnPressButton();
-                            audio.playAudioOnFavourite();
-                          } else {
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.error,
-                                CoreNotificationAction.update,
-                                'Note');
-                          }
-                        });
-                      },
-                    onFilterBySubject: () {
-                        if (item.subjectId != null) {
                           setState(() {
-                            _noteConditionModel.subjectId = item.subjectId;
+                            _pagingController.itemList!.remove(item);
                           });
 
-                          _reloadPage();
+                          CoreNotification.show(
+                              context,
+                              CoreNotificationStatus.success,
+                              CoreNotificationAction.delete,
+                              'Note');
+                        } else {
+                          CoreNotification.show(
+                              context,
+                              CoreNotificationStatus.error,
+                              CoreNotificationAction.delete,
+                              'Note');
                         }
-                    },
+                      });
+                    }
+                  },
+                  onRestoreFromTrash: () {
+                    _onRestoreNoteFromTrash(context, item).then((result) {
+                      if (result) {
+                        noteNotifier.onCountAll();
+
+                        setState(() {
+                          _pagingController.itemList!.remove(item);
+                        });
+
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.success,
+                            CoreNotificationAction.restore,
+                            'Note');
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.restore,
+                            'Note');
+                      }
+                    });
+                  },
+                  onFavourite: () {
+                    _onFavouriteNote(context, item).then((result) {
+                      if (result) {
+                        setState(() {
+                          item.isFavourite = item.isFavourite == null
+                              ? DateTime.now().millisecondsSinceEpoch
+                              : null;
+                        });
+
+                        CommonAudioOnPressButton audio =
+                            CommonAudioOnPressButton();
+                        audio.playAudioOnFavourite();
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.update,
+                            'Note');
+                      }
+                    });
+                  },
+                  onFilterBySubject: () {
+                    if (item.subjectId != null) {
+                      setState(() {
+                        _filterBySubject = true;
+                        _noteConditionModel.subjectId = item.subjectId;
+                      });
+
+                      /*
+                      Get subject
+                       */
+                      _getFilteredSubject();
+
+                      _reloadPage();
+                    }
+                  },
+                ),
+                firstPageErrorIndicatorBuilder: (context) => Center(
+                  child: Text(
+                    'Error loading data!',
+                    style: TextStyle(
+                      color: ThemeDataCenter.getAloneTextColorStyle(context),
+                    ),
                   ),
-                  firstPageErrorIndicatorBuilder: (context) => Center(
-                    child: Text('Error loading data!',
-                        style: TextStyle(
+                ),
+                noItemsFoundIndicatorBuilder: (context) => Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      BounceInLeft(
+                        child: FaIcon(FontAwesomeIcons.waze,
+                            size: 30.0,
                             color: ThemeDataCenter.getAloneTextColorStyle(
-                                context))),
-                  ),
-                  noItemsFoundIndicatorBuilder: (context) => Center(
-                    child: Text('No items found.',
-                        style: TextStyle(
-                            color: ThemeDataCenter.getAloneTextColorStyle(
-                                context))),
+                                context)),
+                      ),
+                      const SizedBox(width: 5),
+                      BounceInRight(
+                        child: Text(
+                          'No items found!',
+                          style: TextStyle(
+                            color:
+                                ThemeDataCenter.getAloneTextColorStyle(context),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              _isFiltering()
-                  ? Positioned(
-                      top: 0,
-                      left: 0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          BounceInLeft(
-                            duration: const Duration(milliseconds: 200),
-                            child: Container(
-                              width: 180.0,
-                              decoration:
-                                  ThemeDataCenter.getFilteringLabelStyle(
-                                      context),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Center(
-                                  child: Text('Filtering...',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          color: ThemeDataCenter
-                                              .getFilteringTextColorStyle(
-                                                  context),
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w400)),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container(),
-            ]),
+            ),
           ),
         ],
       ),
@@ -663,115 +1261,109 @@ class _NoteListScreenState extends State<NoteListScreen> {
               CoreElevatedButton(
                 onPressed: () async {
                   await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext context) => Form(
-                            child: CoreBasicDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24.0),
+                    context: context,
+                    builder: (BuildContext context) => Form(
+                      child: CoreBasicDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Form(
+                                key: _formKey,
                                 child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    Form(
-                                      key: _formKey,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          CoreTextFormField(
-                                            style: TextStyle(
-                                                color: ThemeDataCenter
-                                                    .getAloneTextColorStyle(
-                                                        context)),
-                                            onChanged: (String value) {
-                                              if (value.isNotEmpty) {
-                                                setState(() {
-                                                  _searchText = value.trim();
-                                                });
-                                              }
-                                            },
-                                            controller: _searchController,
-                                            focusNode: _searchFocusNode,
-                                            validateString:
-                                                'Please enter search string!',
-                                            maxLength: 60,
-                                            icon: Icon(Icons.edit,
-                                                color: ThemeDataCenter
-                                                    .getFormFieldLabelColorStyle(
-                                                        context)),
-                                            label: 'Search',
-                                            labelColor: ThemeDataCenter
-                                                .getFormFieldLabelColorStyle(
-                                                    context),
-                                            placeholder: 'Search on notes',
-                                            helper: '',
-                                          ),
-                                        ],
+                                    CoreTextFormField(
+                                      style: TextStyle(
+                                        color: ThemeDataCenter
+                                            .getAloneTextColorStyle(context),
                                       ),
+                                      onChanged: (String value) {
+                                        if (value.isNotEmpty) {
+                                          setState(() {
+                                            _searchText = value.trim();
+                                          });
+                                        }
+                                      },
+                                      controller: _searchController,
+                                      focusNode: _searchFocusNode,
+                                      validateString:
+                                          'Please enter search string!',
+                                      maxLength: 60,
+                                      icon: Icon(
+                                        Icons.edit,
+                                        color: ThemeDataCenter
+                                            .getFormFieldLabelColorStyle(
+                                                context),
+                                      ),
+                                      label: 'Search',
+                                      labelColor: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context),
+                                      placeholder: 'Search on notes',
+                                      helper: '',
                                     ),
-                                    const SizedBox(height: 20.0),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        CoreElevatedButton.iconOnly(
-                                            icon:
-                                                const Icon(Icons.close_rounded),
-                                            onPressed: () {
-                                              if (_searchController
-                                                  .text.isNotEmpty) {
-                                                setState(() {
-                                                  _searchController.text = "";
-                                                  _searchText = "";
-                                                  _noteConditionModel
-                                                      .searchText = _searchText;
-                                                });
-                                                // Reload Page
-                                                _reloadPage();
-                                              }
-                                            },
-                                            coreButtonStyle: ThemeDataCenter
-                                                .getCoreScreenButtonStyle(
-                                                    context)),
-                                        CoreElevatedButton.iconOnly(
-                                            icon: const Icon(
-                                                Icons.search_rounded),
-                                            onPressed: () {
-                                              if (_formKey.currentState!
-                                                  .validate()) {
-                                                setState(() {
-                                                  // Set Condition
-                                                  if (_searchController
-                                                      .text.isNotEmpty) {
-                                                    _noteConditionModel
-                                                            .searchText =
-                                                        _searchText;
-
-                                                    // Reload Data
-                                                    _reloadPage();
-
-                                                    // Close Dialog
-                                                    Navigator.of(context).pop();
-                                                  }
-                                                });
-                                              }
-                                            },
-                                            coreButtonStyle: ThemeDataCenter
-                                                .getCoreScreenButtonStyle(
-                                                    context)),
-                                      ],
-                                    )
                                   ],
                                 ),
                               ),
-                            ),
-                          ));
+                              const SizedBox(height: 20.0),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  CoreElevatedButton.iconOnly(
+                                      icon: const Icon(Icons.close_rounded),
+                                      onPressed: () {
+                                        if (_searchController.text.isNotEmpty) {
+                                          setState(() {
+                                            _searchController.text = "";
+                                            _searchText = "";
+                                            _noteConditionModel.searchText =
+                                                _searchText;
+                                          });
+                                          // Reload Page
+                                          _reloadPage();
+                                        }
+                                      },
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(context)),
+                                  CoreElevatedButton.iconOnly(
+                                    icon: const Icon(Icons.search_rounded),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        setState(() {
+                                          // Set Condition
+                                          if (_searchController
+                                              .text.isNotEmpty) {
+                                            _noteConditionModel.searchText =
+                                                _searchText;
+
+                                            // Reload Data
+                                            _reloadPage();
+
+                                            // Close Dialog
+                                            Navigator.of(context).pop();
+                                          }
+                                        });
+                                      }
+                                    },
+                                    coreButtonStyle: ThemeDataCenter
+                                        .getCoreScreenButtonStyle(context),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
                 },
                 coreButtonStyle:
                     ThemeDataCenter.getCoreScreenButtonStyle(context),
@@ -785,158 +1377,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                 onPressed: () async {
                   await showDialog<bool>(
                       context: context,
-                      builder: (BuildContext context) => Form(
-                            child: CoreBasicDialog(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0)),
-                              child: Padding(
-                                padding: const EdgeInsets.all(24.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Text('Date created',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByDate,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByDate = value!;
-
-                                                  if (!_filterByDate) {
-                                                    _noteConditionModel
-                                                            .createdAtStartOfDay =
-                                                        null;
-                                                    _noteConditionModel
-                                                            .createdAtEndOfDay =
-                                                        null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Notes in the trash',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByDeleted,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByDeleted = value!;
-                                                  if (_filterByDeleted) {
-                                                    _noteConditionModel
-                                                            .isDeleted =
-                                                        _filterByDeleted;
-                                                  } else {
-                                                    _noteConditionModel
-                                                        .isDeleted = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Favourite notes',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByFavourite,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByFavourite = value!;
-                                                  if (_filterByFavourite) {
-                                                    _noteConditionModel
-                                                            .favourite =
-                                                        _filterByFavourite;
-                                                  } else {
-                                                    _noteConditionModel
-                                                        .favourite = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    StatefulBuilder(builder:
-                                        (BuildContext context,
-                                            StateSetter setState) {
-                                      return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Text('Recently Updated',
-                                                style: CommonStyles
-                                                    .buttonTextStyle),
-                                            Checkbox(
-                                              checkColor: Colors.white,
-                                              value: _filterByRecentlyUpdated,
-                                              onChanged: (bool? value) {
-                                                setState(() {
-                                                  _filterByRecentlyUpdated =
-                                                      value!;
-                                                  if (_filterByRecentlyUpdated) {
-                                                    _noteConditionModel
-                                                            .recentlyUpdated =
-                                                        _filterByRecentlyUpdated;
-                                                  } else {
-                                                    _noteConditionModel
-                                                        .recentlyUpdated = null;
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ]);
-                                    }),
-                                    const SizedBox(height: 20.0),
-                                    CoreElevatedButton.iconOnly(
-                                      onPressed: () {
-                                        setState(() {
-                                          /// Reload Data
-                                          _reloadPage();
-
-                                          /// Close Dialog
-                                          Navigator.of(context).pop();
-                                        });
-                                      },
-                                      coreButtonStyle: ThemeDataCenter
-                                          .getCoreScreenButtonStyle(context),
-                                      icon: const Icon(Icons.check_rounded,
-                                          size: 25.0),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ));
+                      builder: (BuildContext context) => _filterPopup(context));
                 },
                 coreButtonStyle:
                     ThemeDataCenter.getCoreScreenButtonStyle(context),
@@ -951,11 +1392,12 @@ class _NoteListScreenState extends State<NoteListScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NoteCreateScreen(
-                            note: null,
-                            copyNote: null,
-                            subject: null,
-                            actionMode: ActionModeEnum.create)),
+                      builder: (context) => NoteCreateScreen(
+                          note: null,
+                          copyNote: null,
+                          subject: filteredSubject,
+                          actionMode: ActionModeEnum.create),
+                    ),
                   );
                 },
                 coreButtonStyle:

@@ -18,13 +18,13 @@ class DatabaseProvider {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, parentId INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
     }, version: _version);
   }
 
@@ -94,6 +94,22 @@ class DatabaseProvider {
 
     final List<Map<String, dynamic>> maps =
         await db.query("notes", orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => NoteModel.fromJson(maps[index]));
+  }
+
+  static Future<List<NoteModel>?> getAllNotesDistinctCreatedAt() async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps =
+    await db.rawQuery(
+      'SELECT DISTINCT notes.createdAtDayFormat FROM notes WHERE notes.deletedAt IS NULL',
+    );
 
     if (maps.isEmpty) {
       return null;
