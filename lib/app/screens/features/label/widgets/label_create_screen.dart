@@ -13,6 +13,7 @@ import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
+import '../../../setting/providers/setting_notifier.dart';
 import '../databases/label_db_manager.dart';
 import '../models/label_model.dart';
 import '../providers/label_notifier.dart';
@@ -79,9 +80,17 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final labelNotifier = Provider.of<LabelNotifier>(context);
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: widget.label == null ? 'Create' : 'Update',
+      title: Text(
+        widget.label == null ? 'Create' : 'Update',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -157,210 +166,218 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
       onBack: null,
       bottomActionBar: [Container()],
       bottomActionBarScrollable: [Container()],
-      child: WillPopScope(
-        onWillPop: () async {
-          onBack();
-          if (await CoreHelperWidget.confirmFunction(context)) {
-            return true;
+      child: settingNotifier.isSetBackgroundImage == true
+          ? DecoratedBox(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        "assets/images/cartoon-background-image.jpg"),
+                    fit: BoxFit.cover),
+              ),
+              child: _buildBody(context),
+            )
+          : _buildBody(context),
+    );
+  }
+
+  WillPopScope _buildBody(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        onBack();
+        if (await CoreHelperWidget.confirmFunction(context)) {
+          return true;
+        }
+        return false;
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (myFocusNode.hasFocus) {
+            myFocusNode.unfocus();
           }
-          return false;
         },
-        child: GestureDetector(
-          onTap: () {
-            if (myFocusNode.hasFocus) {
-              myFocusNode.unfocus();
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SingleChildScrollView(
-              controller: _controllerScrollController,
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(12),
-                      padding: const EdgeInsets.all(6),
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
-                        child: SizedBox(
-                          height: 200,
-                          width: MediaQuery.of(context).size.width,
-                          child: Center(
-                            child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                radius: const Radius.circular(12),
-                                color: _color.toColor(),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                  child: Container(
-                                      color: Colors.white,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(6.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.label_important_rounded,
-                                                color: _color.toColor()),
-                                            Flexible(
-                                              child: Text(_title.isNotEmpty
-                                                  ? _title
-                                                  : 'Your label'),
-                                            ),
-                                          ],
-                                        ),
-                                      )),
-                                )),
-                          ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            controller: _controllerScrollController,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(12),
+                    padding: const EdgeInsets.all(6),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      child: SizedBox(
+                        height: 200,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: DottedBorder(
+                              borderType: BorderType.RRect,
+                              radius: const Radius.circular(12),
+                              color: _color.toColor(),
+                              child: ClipRRect(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(12)),
+                                child: Container(
+                                    color: Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.label_important_rounded,
+                                              color: _color.toColor()),
+                                          Flexible(
+                                            child: Text(_title.isNotEmpty
+                                                ? _title
+                                                : 'Your label'),
+                                          ),
+                                        ],
+                                      ),
+                                    )),
+                              )),
                         ),
                       ),
                     ),
                   ),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(0, 5.0, 5.0, 0),
-                              child: Text(
-                                'Title:',
-                                style: GoogleFonts.montserrat(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: ThemeDataCenter
-                                        .getFormFieldLabelColorStyle(context)),
-                              ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5.0, 5.0, 0),
+                            child: Text(
+                              'Title:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: ThemeDataCenter
+                                      .getFormFieldLabelColorStyle(context)),
                             ),
-                          ],
-                        ),
-                        CoreTextFormField(
-                          style: TextStyle(
-                              color: ThemeDataCenter.getAloneTextColorStyle(
-                                  context)),
-                          onChanged: (value) {
-                            setState(() {
-                              _title = value;
-                            });
-                          },
-                          controller: myController,
-                          focusNode: myFocusNode,
-                          validateString: 'Please enter your title',
-                          maxLength: 30,
-                          icon: Icon(Icons.edit,
-                              color:
-                                  ThemeDataCenter.getFormFieldLabelColorStyle(
-                                      context)),
-                          label: 'Title',
-                          labelColor:
-                              ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context),
-                          placeholder: 'Enter you title',
-                          helper: '',
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
-                              child: Text(
-                                'Color:',
-                                style: GoogleFonts.montserrat(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: ThemeDataCenter
-                                        .getFormFieldLabelColorStyle(context)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6.0)),
-                                  color: _color.toColor(),
-                                ),
-                              ),
-                              const SizedBox(width: 10.0),
-                              CoreElevatedButton(
-                                onPressed: () async {
-                                  myFocusNode.unfocus();
-                                  await showDialog<bool>(
-                                      context: context,
-                                      builder: (BuildContext context) => Form(
-                                            onWillPop: () async {
-                                              return true;
-                                            },
-                                            child: Dialog(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceAround,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      MaterialPicker(
-                                                        pickerColor:
-                                                            defaultColor, //default color
-                                                        onColorChanged:
-                                                            (Color color) {
-                                                          setState(() {
-                                                            _color = color.value
-                                                                .toRadixString(
-                                                                    16)
-                                                                .substring(
-                                                                    2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
-                                                          });
-                                                          // Khi su dung: String colorHex = "29b6f6";
-                                                          // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
-                                                        },
-                                                      )
-                                                    ])),
-                                          ));
-                                },
-                                coreButtonStyle: CoreButtonStyle.options(
-                                    coreStyle: CoreStyle.outlined,
-                                    coreColor: CoreColor.dark,
-                                    coreRadius: CoreRadius.radius_6,
-                                    kitForegroundColorOption:
-                                        const Color(0xff1f1f1f),
-                                    coreFixedSizeButton:
-                                        CoreFixedSizeButton.medium_40),
-                                child: Text('Choose color',
-                                    style: CommonStyles.buttonTextStyle),
-                              ),
-                            ],
                           ),
+                        ],
+                      ),
+                      CoreTextFormField(
+                        style: TextStyle(
+                            color: ThemeDataCenter.getAloneTextColorStyle(
+                                context)),
+                        onChanged: (value) {
+                          setState(() {
+                            _title = value;
+                          });
+                        },
+                        controller: myController,
+                        focusNode: myFocusNode,
+                        validateString: 'Please enter your title',
+                        maxLength: 30,
+                        icon: Icon(Icons.edit,
+                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                context)),
+                        label: 'Title',
+                        labelColor: ThemeDataCenter.getFormFieldLabelColorStyle(
+                            context),
+                        placeholder: 'Enter you title',
+                        helper: '',
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
+                            child: Text(
+                              'Color:',
+                              style: GoogleFonts.montserrat(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: ThemeDataCenter
+                                      .getFormFieldLabelColorStyle(context)),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40.0,
+                              height: 40.0,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color: _color.toColor(),
+                              ),
+                            ),
+                            const SizedBox(width: 10.0),
+                            CoreElevatedButton(
+                              onPressed: () async {
+                                myFocusNode.unfocus();
+                                await showDialog<bool>(
+                                    context: context,
+                                    builder: (BuildContext context) => Form(
+                                          onWillPop: () async {
+                                            return true;
+                                          },
+                                          child: Dialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceAround,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    MaterialPicker(
+                                                      pickerColor:
+                                                          defaultColor, //default color
+                                                      onColorChanged:
+                                                          (Color color) {
+                                                        setState(() {
+                                                          _color = color.value
+                                                              .toRadixString(16)
+                                                              .substring(
+                                                                  2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
+                                                        });
+                                                        // Khi su dung: String colorHex = "29b6f6";
+                                                        // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
+                                                      },
+                                                    )
+                                                  ])),
+                                        ));
+                              },
+                              coreButtonStyle: CoreButtonStyle.options(
+                                  coreStyle: CoreStyle.outlined,
+                                  coreColor: CoreColor.dark,
+                                  coreRadius: CoreRadius.radius_6,
+                                  kitForegroundColorOption:
+                                      const Color(0xff1f1f1f),
+                                  coreFixedSizeButton:
+                                      CoreFixedSizeButton.medium_40),
+                              child: Text('Choose color',
+                                  style: CommonStyles.buttonTextStyle),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

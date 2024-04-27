@@ -1216,7 +1216,14 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
 
     return CoreFullScreenDialog(
       isShowOptionActionButton: true,
-      title: widget.template == null ? 'Create' : 'Update',
+      title: Text(
+        widget.template == null ? 'Create' : 'Update',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
       isShowBottomActionButton: true,

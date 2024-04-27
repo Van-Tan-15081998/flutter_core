@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
-import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
+import '../../../setting/providers/setting_notifier.dart';
 import '../databases/label_db_manager.dart';
 import '../models/label_model.dart';
 import '../providers/label_notifier.dart';
@@ -57,21 +60,9 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
         widget.label, DateTime.now().millisecondsSinceEpoch);
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
   Widget onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.label.createdAt!)}';
+        'You wrote at ${CommonConverters.toTimeString(time: widget.label.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -81,9 +72,17 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final labelNotifier = Provider.of<LabelNotifier>(context);
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: 'Detail',
+      title: Text(
+        'Detail',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       actions: AppBarActionButtonEnum.home,
       isConfirmToClose: false,
       homeLabel: 'Labels',
@@ -107,238 +106,282 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
       optionActionContent: Container(),
       bottomActionBar: const [Row()],
       bottomActionBarScrollable: const [Row()],
-      child: Padding(
-        padding: const EdgeInsets.all(0),
-        child: ListView(children: <Widget>[
-          Slidable(
-            key: const ValueKey(0),
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                widget.label.deletedAt == null
-                    ? SlidableAction(
-                        flex: 1,
-                        onPressed: (context) {
-                          _onDeleteLabel(context).then((result) {
-                            if (result) {
-                              labelNotifier.onCountAll();
+      child: _buildBody(context, labelNotifier, settingNotifier),
+    );
+  }
 
-                              CoreNotification.show(
-                                  context,
-                                  CoreNotificationStatus.success,
-                                  CoreNotificationAction.delete,
-                                  'Label');
+  Widget _buildBody(BuildContext context, LabelNotifier labelNotifier, SettingNotifier settingNotifier) {
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Column(children: <Widget>[
+        Slidable(
+          key: const ValueKey(0),
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            children: [
+              widget.label.deletedAt == null
+                  ? SlidableAction(
+                      flex: 1,
+                      onPressed: (context) {
+                        _onDeleteLabel(context).then((result) {
+                          if (result) {
+                            labelNotifier.onCountAll();
 
-                              Navigator.push(
+                            CoreNotification.show(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LabelListScreen(
-                                    labelConditionModel: null,
-                                  ),
+                                CoreNotificationStatus.success,
+                                CoreNotificationAction.delete,
+                                'Label');
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LabelListScreen(
+                                  labelConditionModel: null,
                                 ),
-                              );
-                            } else {
-                              CoreNotification.show(
-                                  context,
-                                  CoreNotificationStatus.error,
-                                  CoreNotificationAction.delete,
-                                  'Label');
-                            }
-                          });
-                        },
-                        backgroundColor:
-                            ThemeDataCenter.getBackgroundColor(context),
-                        foregroundColor:
-                            ThemeDataCenter.getDeleteSlidableActionColorStyle(
-                                context),
-                        icon: Icons.delete,
-                        label: 'Delete',
+                              ),
+                            );
+                          } else {
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.error,
+                                CoreNotificationAction.delete,
+                                'Label');
+                          }
+                        });
+                      },
+                      backgroundColor:
+                      settingNotifier.isSetBackgroundImage == true
+                          ? Colors.transparent
+                          : ThemeDataCenter.getBackgroundColor(context),
+                      foregroundColor:
+                          ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                              context),
+                      icon: Icons.delete,
+                      label: 'Delete',
+                    )
+                  : Container()
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
+            child: ExpandableNotifier(
+                child: Column(
+              children: [
+                widget.label.updatedAt == null &&
+                        widget.label.deletedAt == null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                        child: Tooltip(
+                          message: 'Created time',
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(Icons.create_rounded,
+                                  size: 13.0,
+                                  color: ThemeDataCenter.getTopCardLabelStyle(
+                                      context)),
+                              const SizedBox(width: 5.0),
+                              Text(CommonConverters.toTimeString(time: widget.label.createdAt!),
+                                  style:CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                            ],
+                          ),
+                        ),
                       )
-                    : Container()
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
-              child: ExpandableNotifier(
+                    : Container(),
+                widget.label.updatedAt != null &&
+                        widget.label.deletedAt == null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                        child: Tooltip(
+                          message: 'Updated time',
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(Icons.update_rounded,
+                                  size: 13.0,
+                                  color: ThemeDataCenter.getTopCardLabelStyle(
+                                      context)),
+                              const SizedBox(width: 5.0),
+                              Text(CommonConverters.toTimeString(time: widget.label.updatedAt!),
+                                  style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+                widget.label.deletedAt != null
+                    ? Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                        child: Tooltip(
+                          message: 'Deleted time',
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(Icons.delete_rounded,
+                                  size: 13.0,
+                                  color: ThemeDataCenter.getTopCardLabelStyle(
+                                      context)),
+                              const SizedBox(width: 5.0),
+                              Text(CommonConverters.toTimeString(time: widget.label.deletedAt!),
+                                  style:CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+                Card(
+                  shadowColor: const Color(0xff1f1f1f),
+                  elevation: 2.0,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        color:
+                            ThemeDataCenter.getBorderCardColorStyle(context),
+                        width: 1.0),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  clipBehavior: Clip.antiAlias,
                   child: Column(
-                children: [
-                  widget.label.updatedAt == null &&
-                          widget.label.deletedAt == null
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                          child: Tooltip(
-                            message: 'Created time',
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Icon(Icons.create_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(getTimeString(widget.label.createdAt!),
-                                    style: TextStyle(
-                                      fontSize: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context),
-                                    )),
-                              ],
-                            ),
+                    children: <Widget>[
+                      SizedBox(
+                        // height: 150,
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.rectangle,
                           ),
-                        )
-                      : Container(),
-                  widget.label.updatedAt != null &&
-                          widget.label.deletedAt == null
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                          child: Tooltip(
-                            message: 'Updated time',
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
                             child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Icon(Icons.update_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(getTimeString(widget.label.updatedAt!),
-                                    style: TextStyle(
-                                        fontSize: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)))
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
-                  widget.label.deletedAt != null
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                          child: Tooltip(
-                            message: 'Deleted time',
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Icon(Icons.delete_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(getTimeString(widget.label.deletedAt!),
-                                    style: TextStyle(
-                                        fontSize: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)))
-                              ],
-                            ),
-                          ),
-                        )
-                      : Container(),
-                  Card(
-                    shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color:
-                              ThemeDataCenter.getBorderCardColorStyle(context),
-                          width: 1.0),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                          // height: 150,
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.rectangle,
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Flexible(
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 6.0),
-                                        child: DottedBorder(
-                                            borderType: BorderType.RRect,
-                                            radius: const Radius.circular(12),
-                                            color: widget.label.color.toColor(),
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                      Radius.circular(12)),
-                                              child: Container(
-                                                  color: Colors.white,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            6.0),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(
-                                                            Icons
-                                                                .label_important_rounded,
-                                                            color: widget
-                                                                .label.color
-                                                                .toColor()),
-                                                        const SizedBox(
-                                                            width: 6.0),
-                                                        Flexible(
-                                                          child: Text(widget
-                                                              .label.title),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )),
-                                            )),
-                                      ),
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Flexible(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 6.0),
+                                      child: DottedBorder(
+                                          borderType: BorderType.RRect,
+                                          radius: const Radius.circular(12),
+                                          color: widget.label.color.toColor(),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(12)),
+                                            child: Container(
+                                                color: Colors.white,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(
+                                                          6.0),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                          Icons
+                                                              .label_important_rounded,
+                                                          color: widget
+                                                              .label.color
+                                                              .toColor()),
+                                                      const SizedBox(
+                                                          width: 6.0),
+                                                      Flexible(
+                                                        child: Text(widget
+                                                            .label.title),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )),
+                                          )),
                                     ),
-                                    widget.label.deletedAt == null
-                                        ? CoreElevatedButton.iconOnly(
+                                  ),
+                                  widget.label.deletedAt == null
+                                      ? CoreElevatedButton.iconOnly(
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        LabelCreateScreen(
+                                                          actionMode:
+                                                              ActionModeEnum
+                                                                  .update,
+                                                          label: widget.label,
+                                                        )));
+                                          },
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getUpdateButtonStyle(context),
+                                          icon: const Icon(
+                                              Icons.edit_note_rounded),
+                                        )
+                                      : Column(children: [
+                                          CoreElevatedButton.iconOnly(
                                             onPressed: () {
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
+                                              _onRestoreLabelFromTrash(
+                                                      context)
+                                                  .then((result) {
+                                                if (result) {
+                                                  labelNotifier.onCountAll();
+
+                                                  CoreNotification.show(
+                                                      context,
+                                                      CoreNotificationStatus
+                                                          .success,
+                                                      CoreNotificationAction
+                                                          .restore,
+                                                      'Label');
+
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
                                                       builder: (context) =>
-                                                          LabelCreateScreen(
-                                                            actionMode:
-                                                                ActionModeEnum
-                                                                    .update,
-                                                            label: widget.label,
-                                                          )));
+                                                          const LabelListScreen(
+                                                        labelConditionModel:
+                                                            null,
+                                                      ),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  CoreNotification.show(
+                                                      context,
+                                                      CoreNotificationStatus
+                                                          .error,
+                                                      CoreNotificationAction
+                                                          .restore,
+                                                      'Label');
+                                                }
+                                              });
                                             },
                                             coreButtonStyle: ThemeDataCenter
-                                                .getUpdateButtonStyle(context),
+                                                .getRestoreButtonStyle(
+                                                    context),
                                             icon: const Icon(
-                                                Icons.edit_note_rounded),
-                                          )
-                                        : Column(children: [
-                                            CoreElevatedButton.iconOnly(
-                                              onPressed: () {
-                                                _onRestoreLabelFromTrash(
-                                                        context)
+                                                Icons
+                                                    .restore_from_trash_rounded,
+                                                size: 26.0),
+                                          ),
+                                          const SizedBox(height: 2.0),
+                                          CoreElevatedButton.iconOnly(
+                                            onPressed: () async {
+                                              if (await CoreHelperWidget
+                                                  .confirmFunction(context)) {
+                                                _onDeleteLabelForever(context)
                                                     .then((result) {
                                                   if (result) {
-                                                    labelNotifier.onCountAll();
+                                                    labelNotifier
+                                                        .onCountAll();
 
                                                     CoreNotification.show(
                                                         context,
                                                         CoreNotificationStatus
                                                             .success,
                                                         CoreNotificationAction
-                                                            .restore,
+                                                            .delete,
                                                         'Label');
 
                                                     Navigator.push(
@@ -357,81 +400,32 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                         CoreNotificationStatus
                                                             .error,
                                                         CoreNotificationAction
-                                                            .restore,
+                                                            .delete,
                                                         'Label');
                                                   }
                                                 });
-                                              },
-                                              coreButtonStyle: ThemeDataCenter
-                                                  .getRestoreButtonStyle(
-                                                      context),
-                                              icon: const Icon(
-                                                  Icons
-                                                      .restore_from_trash_rounded,
-                                                  size: 26.0),
-                                            ),
-                                            const SizedBox(height: 2.0),
-                                            CoreElevatedButton.iconOnly(
-                                              onPressed: () async {
-                                                if (await CoreHelperWidget
-                                                    .confirmFunction(context)) {
-                                                  _onDeleteLabelForever(context)
-                                                      .then((result) {
-                                                    if (result) {
-                                                      labelNotifier
-                                                          .onCountAll();
-
-                                                      CoreNotification.show(
-                                                          context,
-                                                          CoreNotificationStatus
-                                                              .success,
-                                                          CoreNotificationAction
-                                                              .delete,
-                                                          'Label');
-
-                                                      Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              const LabelListScreen(
-                                                            labelConditionModel:
-                                                                null,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    } else {
-                                                      CoreNotification.show(
-                                                          context,
-                                                          CoreNotificationStatus
-                                                              .error,
-                                                          CoreNotificationAction
-                                                              .delete,
-                                                          'Label');
-                                                    }
-                                                  });
-                                                }
-                                              },
-                                              coreButtonStyle: ThemeDataCenter
-                                                  .getDeleteForeverButtonStyle(
-                                                      context),
-                                              icon: const Icon(
-                                                  Icons.delete_forever_rounded,
-                                                  size: 26.0),
-                                            ),
-                                          ])
-                                  ]),
-                            ),
+                                              }
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getDeleteForeverButtonStyle(
+                                                    context),
+                                            icon: const Icon(
+                                                Icons.delete_forever_rounded,
+                                                size: 26.0),
+                                          ),
+                                        ])
+                                ]),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              )),
-            ),
+                ),
+              ],
+            )),
           ),
-        ]),
-      ),
+        ),
+      ]),
     );
   }
 }

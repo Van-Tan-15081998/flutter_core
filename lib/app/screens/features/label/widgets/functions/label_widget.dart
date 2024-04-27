@@ -3,10 +3,15 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../../library/enums/CommonEnums.dart';
+import '../../../../setting/providers/setting_notifier.dart';
 import '../../models/label_model.dart';
 import '../label_create_screen.dart';
 import '../label_detail_screen.dart';
@@ -37,29 +42,10 @@ class _LabelWidgetState extends State<LabelWidget> {
     super.initState();
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
-  Widget onGetTitle() {
-    String defaultTitle =
-        'You wrote at ${getTimeString(widget.label.createdAt!)}';
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Text(defaultTitle),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final settingNotifier = Provider.of<SettingNotifier>(context);
+
     return Slidable(
       key: const ValueKey(0),
       endActionPane: ActionPane(
@@ -74,7 +60,9 @@ class _LabelWidgetState extends State<LabelWidget> {
                       builder: (context) =>
                           LabelDetailScreen(label: widget.label)));
             },
-            backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+            backgroundColor: settingNotifier.isSetBackgroundImage == true
+                ? Colors.transparent
+                : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
             icon: Icons.remove_red_eye_rounded,
@@ -87,7 +75,9 @@ class _LabelWidgetState extends State<LabelWidget> {
                       widget.onDelete!();
                     }
                   },
-                  backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+                  backgroundColor: settingNotifier.isSetBackgroundImage == true
+                      ? Colors.transparent
+                      : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getDeleteSlidableActionColorStyle(
                           context),
@@ -115,12 +105,8 @@ class _LabelWidgetState extends State<LabelWidget> {
                               color: ThemeDataCenter.getTopCardLabelStyle(
                                   context)),
                           const SizedBox(width: 5.0),
-                          Text(getTimeString(widget.label.createdAt!),
-                              style: TextStyle(
-                                fontSize: 13.0,
-                                color: ThemeDataCenter.getTopCardLabelStyle(
-                                    context),
-                              )),
+                          Text(CommonConverters.toTimeString(time: widget.label.createdAt!),
+                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
                         ],
                       ),
                     ),
@@ -140,11 +126,8 @@ class _LabelWidgetState extends State<LabelWidget> {
                               color: ThemeDataCenter.getTopCardLabelStyle(
                                   context)),
                           const SizedBox(width: 5.0),
-                          Text(getTimeString(widget.label.updatedAt!),
-                              style: TextStyle(
-                                  fontSize: 13.0,
-                                  color: ThemeDataCenter.getTopCardLabelStyle(
-                                      context)))
+                          Text(CommonConverters.toTimeString(time: widget.label.updatedAt!),
+                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
                         ],
                       ),
                     ),
@@ -164,11 +147,8 @@ class _LabelWidgetState extends State<LabelWidget> {
                               color: ThemeDataCenter.getTopCardLabelStyle(
                                   context)),
                           const SizedBox(width: 5.0),
-                          Text(getTimeString(widget.label.deletedAt!),
-                              style: TextStyle(
-                                  fontSize: 13.0,
-                                  color: ThemeDataCenter.getTopCardLabelStyle(
-                                      context)))
+                          Text(CommonConverters.toTimeString(time: widget.label.deletedAt!),
+                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
                         ],
                       ),
                     ),

@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../app/library/common/dimensions/CommonDimensions.dart';
 import '../../../../app/library/common/styles/CommonStyles.dart';
 import '../../../../app/library/common/themes/ThemeDataCenter.dart';
 import '../../../../app/screens/home/home_screen.dart';
@@ -17,7 +18,7 @@ import '../../helper_widgets/CoreHelperWidget.dart';
 enum AppBarActionButtonEnum { save, cancel, home }
 
 class CoreFullScreenDialog extends StatefulWidget {
-  final String? title;
+  final Widget? title;
 
   final Widget child;
 
@@ -56,7 +57,7 @@ class CoreFullScreenDialog extends StatefulWidget {
       required this.onRedo,
       required this.onBack,
       required this.onGoHome,
-        this.homeLabel,
+      this.homeLabel,
       required this.isShowGeneralActionButton,
       required this.isShowOptionActionButton,
       required this.isShowBottomActionButton});
@@ -104,7 +105,8 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                     widget.onSubmit!();
                   }
                 },
-                coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(context),
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context: context),
               ),
             ),
           );
@@ -116,7 +118,8 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
             child: CoreElevatedButton.icon(
               icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text(widget.homeLabel != null ? widget.homeLabel! : 'Home',  style: CommonStyles.buttonTextStyle),
+              label: Text(widget.homeLabel != null ? widget.homeLabel! : 'Home',
+                  style: CommonStyles.buttonTextStyle),
               onPressed: () {
                 if (widget.onGoHome != null) {
                   widget.onGoHome!();
@@ -143,25 +146,32 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title!,
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 26,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
-        ),
-        actions: [_buildAppBarActionButtons()],
-        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        iconTheme: const IconThemeData(
-          color: Color(0xFF404040), // Set the color you desire
-        ),
-      ),
-      body: widget.child,
-      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+      extendBodyBehindAppBar:
+          settingNotifier.isSetBackgroundImage == true ? true : false,
+      appBar: _buildAppBar(context, settingNotifier),
+      body: settingNotifier.isSetBackgroundImage == true
+          ? DecoratedBox(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        "assets/images/cartoon-background-image.jpg"),
+                    fit: BoxFit.cover),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(
+                      height: CommonDimensions.scaffoldAppBarHeight(context)),
+                  Expanded(child: SingleChildScrollView(child: widget.child))
+                ],
+              ),
+            )
+          : widget.child,
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
       floatingActionButton: Padding(
         padding: const EdgeInsets.all(6.0),
         child: widget.isShowBottomActionButton!
@@ -265,7 +275,9 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                 Row(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.end,
-                                  children: widget.bottomActionBar != null ? widget.bottomActionBar! :  [Container()],
+                                  children: widget.bottomActionBar != null
+                                      ? widget.bottomActionBar!
+                                      : [Container()],
                                 ),
                                 SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
@@ -276,12 +288,18 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
                                         children:
-                                            widget.bottomActionBarScrollable != null ? widget.bottomActionBarScrollable! : [Container()])),
+                                            widget.bottomActionBarScrollable !=
+                                                    null
+                                                ? widget
+                                                    .bottomActionBarScrollable!
+                                                : [Container()])),
                               ],
                             ),
                           )
                         : Container(),
-                    widget.optionActionContent != null ? widget.optionActionContent! : Container()
+                    widget.optionActionContent != null
+                        ? widget.optionActionContent!
+                        : Container()
                   ],
                 ),
               )
@@ -289,6 +307,19 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
       ),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterDocked,
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
+    return AppBar(
+      title: widget.title,
+      actions: [_buildAppBarActionButtons()],
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
+      iconTheme: const IconThemeData(
+        color: Color(0xFF404040), // Set the color you desire
+      ),
     );
   }
 }

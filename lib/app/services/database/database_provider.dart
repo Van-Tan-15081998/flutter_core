@@ -106,17 +106,36 @@ class DatabaseProvider {
   static Future<List<NoteModel>?> getAllNotesDistinctCreatedAt() async {
     final db = await _getDB();
 
-    final List<Map<String, dynamic>> maps =
-    await db.rawQuery(
+    List<NoteModel> mapsResult = [];
+
+    final List<Map<String, dynamic>> distinctCreatedAtDayFormatMaps =
+        await db.rawQuery(
       'SELECT DISTINCT notes.createdAtDayFormat FROM notes WHERE notes.deletedAt IS NULL',
     );
 
-    if (maps.isEmpty) {
+    final List<Map<String, dynamic>> distinctCreatedForDayMaps =
+        await db.rawQuery(
+      'SELECT DISTINCT notes.createdForDay FROM notes WHERE notes.deletedAt IS NULL',
+    );
+
+    if (distinctCreatedAtDayFormatMaps.isEmpty &&
+        distinctCreatedForDayMaps.isEmpty) {
       return null;
     }
 
-    return List.generate(
-        maps.length, (index) => NoteModel.fromJson(maps[index]));
+    if (distinctCreatedAtDayFormatMaps.isNotEmpty) {
+      for (var element in distinctCreatedAtDayFormatMaps) {
+        mapsResult.add(NoteModel.fromJson(element));
+      }
+    }
+
+    if (distinctCreatedForDayMaps.isNotEmpty) {
+      for (var element in distinctCreatedForDayMaps) {
+        mapsResult.add(NoteModel.fromJson(element));
+      }
+    }
+
+    return mapsResult;
   }
 
   static Future<List<NoteModel>?> getNotePagination(
@@ -130,8 +149,8 @@ class DatabaseProvider {
             corePaginationModel.itemPerPage,
         where:
             ' ${noteConditionModel.isDeleted == null || noteConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
-            ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND createdAt >= ${noteConditionModel.createdAtStartOfDay} "
-                "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} " : ""}'
+            ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND ((createdAt >= ${noteConditionModel.createdAtStartOfDay} "
+                "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} ) OR (createdForDay >= ${noteConditionModel.createdAtStartOfDay} AND createdForDay <= ${noteConditionModel.createdAtEndOfDay}))" : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
             ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',

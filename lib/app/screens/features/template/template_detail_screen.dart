@@ -12,6 +12,8 @@ import '../../../../core/components/actions/common_buttons/CoreElevatedButton.da
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
+import '../../../library/common/converters/CommonConverters.dart';
+import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
@@ -168,21 +170,9 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
     }
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
   Widget _onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.template.createdAt!)}';
+        'You wrote at ${CommonConverters.toTimeString(time: widget.template.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -347,7 +337,14 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
 
     setDocuments();
     return CoreFullScreenDialog(
-      title: 'Detail',
+      title: Text(
+        'Detail',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       actions: AppBarActionButtonEnum.home,
       isConfirmToClose: false,
       homeLabel: 'Templates',
@@ -371,240 +368,296 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
       optionActionContent: Container(),
       bottomActionBar: const [Row()],
       bottomActionBarScrollable: const [Row()],
-      child: Padding(
-        padding: const EdgeInsets.all(0),
-        child: ListView(
-          children: <Widget>[
-            Slidable(
-              key: const ValueKey(0),
-              endActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  widget.template.deletedAt == null
-                      ? SlidableAction(
-                          flex: 1,
-                          onPressed: (context) {
-                            // _onDelete();
-                            _onDeleteTemplate(context).then((result) {
-                              if (result) {
-                                Provider.of<TemplateNotifier>(context,
-                                        listen: false)
-                                    .onCountAll();
+      child: _buildBody(context, settingNotifier),
+    );
+  }
 
-                                Navigator.pushAndRemoveUntil(
+  Widget _buildBody(BuildContext context, SettingNotifier settingNotifier) {
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Column(
+        children: <Widget>[
+          Slidable(
+            key: const ValueKey(0),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                widget.template.deletedAt == null
+                    ? SlidableAction(
+                        flex: 1,
+                        onPressed: (context) {
+                          // _onDelete();
+                          _onDeleteTemplate(context).then((result) {
+                            if (result) {
+                              Provider.of<TemplateNotifier>(context,
+                                      listen: false)
+                                  .onCountAll();
+
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const TemplateListScreen(
+                                            templateConditionModel: null)),
+                                (route) => false,
+                              );
+
+                              CoreNotification.show(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const TemplateListScreen(
-                                              templateConditionModel: null)),
-                                  (route) => false,
-                                );
+                                  CoreNotificationStatus.success,
+                                  CoreNotificationAction.delete,
+                                  'Template');
+                            } else {
+                              CoreNotification.show(
+                                  context,
+                                  CoreNotificationStatus.error,
+                                  CoreNotificationAction.delete,
+                                  'Template');
+                            }
+                          });
+                        },
+                        backgroundColor:
+                            settingNotifier.isSetBackgroundImage == true
+                                ? Colors.transparent
+                                : ThemeDataCenter.getBackgroundColor(context),
+                        foregroundColor:
+                            ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                                context),
+                        icon: Icons.delete,
+                      )
+                    : Container()
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
+              child: ExpandableNotifier(
+                initialExpanded: true,
+                child: Column(
+                  children: [
+                    widget.template.updatedAt == null &&
+                            widget.template.deletedAt == null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Tooltip(
+                              message: 'Created time',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Icon(Icons.create_rounded,
+                                      size: 13.0, color: Colors.white54),
+                                  const SizedBox(width: 5.0),
+                                  Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.template.createdAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                  ),
+                                  const SizedBox(width: 5.0),
+                                  widget.template.isFavourite != null
+                                      ? const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0)
+                                      : Container(),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Container(),
+                    widget.template.updatedAt != null &&
+                            widget.template.deletedAt == null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Tooltip(
+                              message: 'Updated time',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Icon(Icons.update_rounded,
+                                      size: 13.0,
+                                      color:
+                                          ThemeDataCenter.getTopCardLabelStyle(
+                                              context)),
+                                  const SizedBox(width: 5.0),
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.template.updatedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context))),
+                                  const SizedBox(width: 5.0),
+                                  widget.template.isFavourite != null
+                                      ? const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0)
+                                      : Container(),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Container(),
+                    widget.template.deletedAt != null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Tooltip(
+                              message: 'Deleted time',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Icon(Icons.delete_rounded,
+                                      size: 13.0,
+                                      color:
+                                          ThemeDataCenter.getTopCardLabelStyle(
+                                              context)),
+                                  const SizedBox(width: 5.0),
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.template.deletedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context))),
+                                  const SizedBox(width: 5.0),
+                                  widget.template.isFavourite != null
+                                      ? const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0)
+                                      : Container(),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Container(),
+                    Card(
+                      shadowColor: const Color(0xff1f1f1f),
+                      elevation: 2.0,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: ThemeDataCenter.getBorderCardColorStyle(
+                                context),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(
+                            // height: 150,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: widget.subject != null &&
+                                        settingNotifier
+                                            .isSetColorAccordingSubjectColor!
+                                    ? widget.subject!.color.toColor()
+                                    : Colors.lightGreen,
+                                shape: BoxShape.rectangle,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width -
+                                                115.0,
+                                        child: checkTitleEmpty()
+                                            ? flutter_quill.QuillEditor(
+                                                controller:
+                                                    _titleQuillController,
+                                                readOnly:
+                                                    true, // true for view only mode
+                                                autoFocus: false,
+                                                expands: false,
+                                                focusNode: _focusNode,
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        10.0, 10.0, 10.0, 10.0),
+                                                scrollController:
+                                                    _scrollController,
+                                                scrollable: false,
+                                                showCursor: false)
+                                            : _onGetTitle()),
+                                    widget.template.deletedAt == null
+                                        ? Tooltip(
+                                            message: 'Update',
+                                            child: CoreElevatedButton.iconOnly(
+                                              onPressed: () {
+                                                _onUpdate();
+                                              },
+                                              coreButtonStyle:
+                                                  CoreButtonStyle.dark(
+                                                      kitRadius: 6.0),
+                                              icon: const Icon(
+                                                  Icons.edit_note_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          )
+                                        : Column(
+                                            children: [
+                                              Tooltip(
+                                                message: 'Restore',
+                                                child:
+                                                    CoreElevatedButton.iconOnly(
+                                                  onPressed: () {
+                                                    _onRestoreTemplateFromTrash(
+                                                            context)
+                                                        .then((result) {
+                                                      if (result) {
+                                                        Provider.of<TemplateNotifier>(
+                                                                context,
+                                                                listen: false)
+                                                            .onCountAll();
 
-                                CoreNotification.show(
-                                    context,
-                                    CoreNotificationStatus.success,
-                                    CoreNotificationAction.delete,
-                                    'Template');
-                              } else {
-                                CoreNotification.show(
-                                    context,
-                                    CoreNotificationStatus.error,
-                                    CoreNotificationAction.delete,
-                                    'Template');
-                              }
-                            });
-                          },
-                          backgroundColor: const Color(0xFF202124),
-                          foregroundColor: const Color(0xffffb90f),
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        )
-                      : Container()
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
-                child: ExpandableNotifier(
-                  initialExpanded: true,
-                  child: Column(
-                    children: [
-                      widget.template.updatedAt == null &&
-                              widget.template.deletedAt == null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Tooltip(
-                                message: 'Created time',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    const Icon(Icons.create_rounded,
-                                        size: 13.0, color: Colors.white54),
-                                    const SizedBox(width: 5.0),
-                                    Text(
-                                      getTimeString(widget.template.createdAt!),
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.white54),
-                                    ),
-                                    const SizedBox(width: 5.0),
-                                    widget.template.isFavourite != null
-                                        ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545),
-                                            size: 26.0)
-                                        : Container(),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      widget.template.updatedAt != null &&
-                              widget.template.deletedAt == null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Tooltip(
-                                message: 'Updated time',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(Icons.update_rounded,
-                                        size: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)),
-                                    const SizedBox(width: 5.0),
-                                    Text(
-                                        getTimeString(
-                                            widget.template.updatedAt!),
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            color: ThemeDataCenter
-                                                .getTopCardLabelStyle(
-                                                    context))),
-                                    const SizedBox(width: 5.0),
-                                    widget.template.isFavourite != null
-                                        ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545),
-                                            size: 26.0)
-                                        : Container(),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      widget.template.deletedAt != null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Tooltip(
-                                message: 'Deleted time',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(Icons.delete_rounded,
-                                        size: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)),
-                                    const SizedBox(width: 5.0),
-                                    Text(
-                                        getTimeString(
-                                            widget.template.deletedAt!),
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            color: ThemeDataCenter
-                                                .getTopCardLabelStyle(
-                                                    context))),
-                                    const SizedBox(width: 5.0),
-                                    widget.template.isFavourite != null
-                                        ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545),
-                                            size: 26.0)
-                                        : Container(),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : Container(),
-                      Card(
-                        shadowColor: const Color(0xff1f1f1f),
-                        elevation: 2.0,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                              color: ThemeDataCenter.getBorderCardColorStyle(
-                                  context),
-                              width: 1.0),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                              // height: 150,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: widget.subject != null &&
-                                          settingNotifier
-                                              .isSetColorAccordingSubjectColor!
-                                      ? widget.subject!.color.toColor()
-                                      : Colors.lightGreen,
-                                  shape: BoxShape.rectangle,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              115.0,
-                                          child: checkTitleEmpty()
-                                              ? flutter_quill.QuillEditor(
-                                                  controller:
-                                                      _titleQuillController,
-                                                  readOnly:
-                                                      true, // true for view only mode
-                                                  autoFocus: false,
-                                                  expands: false,
-                                                  focusNode: _focusNode,
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          10.0,
-                                                          10.0,
-                                                          10.0,
-                                                          10.0),
-                                                  scrollController:
-                                                      _scrollController,
-                                                  scrollable: false,
-                                                  showCursor: false)
-                                              : _onGetTitle()),
-                                      widget.template.deletedAt == null
-                                          ? Tooltip(
-                                              message: 'Update',
-                                              child:
-                                                  CoreElevatedButton.iconOnly(
-                                                onPressed: () {
-                                                  _onUpdate();
-                                                },
-                                                coreButtonStyle:
-                                                    CoreButtonStyle.dark(
-                                                        kitRadius: 6.0),
-                                                icon: const Icon(
-                                                    Icons.edit_note_rounded,
-                                                    size: 26.0),
+                                                        Navigator
+                                                            .pushAndRemoveUntil(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  const TemplateListScreen(
+                                                                      templateConditionModel:
+                                                                          null)),
+                                                          (route) => false,
+                                                        );
+
+                                                        CoreNotification.show(
+                                                            context,
+                                                            CoreNotificationStatus
+                                                                .success,
+                                                            CoreNotificationAction
+                                                                .restore,
+                                                            'Template');
+                                                      } else {
+                                                        CoreNotification.show(
+                                                            context,
+                                                            CoreNotificationStatus
+                                                                .error,
+                                                            CoreNotificationAction
+                                                                .restore,
+                                                            'Template');
+                                                      }
+                                                    });
+                                                  },
+                                                  coreButtonStyle:
+                                                      CoreButtonStyle.info(
+                                                          kitRadius: 6.0),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .restore_from_trash_rounded,
+                                                      size: 26.0),
+                                                ),
                                               ),
-                                            )
-                                          : Column(
-                                              children: [
-                                                Tooltip(
-                                                  message: 'Restore',
-                                                  child: CoreElevatedButton
-                                                      .iconOnly(
-                                                    onPressed: () {
-                                                      _onRestoreTemplateFromTrash(
+                                              const SizedBox(height: 2.0),
+                                              Tooltip(
+                                                message: 'Delete forever',
+                                                child:
+                                                    CoreElevatedButton.iconOnly(
+                                                  onPressed: () async {
+                                                    if (await CoreHelperWidget
+                                                        .confirmFunction(
+                                                            context)) {
+                                                      _onDeleteTemplateForever(
                                                               context)
                                                           .then((result) {
                                                         if (result) {
@@ -629,7 +682,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                               CoreNotificationStatus
                                                                   .success,
                                                               CoreNotificationAction
-                                                                  .restore,
+                                                                  .delete,
                                                               'Template');
                                                         } else {
                                                           CoreNotification.show(
@@ -637,187 +690,128 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                               CoreNotificationStatus
                                                                   .error,
                                                               CoreNotificationAction
-                                                                  .restore,
+                                                                  .delete,
                                                               'Template');
                                                         }
                                                       });
-                                                    },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.info(
-                                                            kitRadius: 6.0),
-                                                    icon: const Icon(
-                                                        Icons
-                                                            .restore_from_trash_rounded,
-                                                        size: 26.0),
-                                                  ),
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                      CoreButtonStyle.danger(
+                                                          kitRadius: 6.0),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .delete_forever_rounded,
+                                                      size: 26.0),
                                                 ),
-                                                const SizedBox(height: 2.0),
-                                                Tooltip(
-                                                  message: 'Delete forever',
-                                                  child: CoreElevatedButton
-                                                      .iconOnly(
-                                                    onPressed: () async {
-                                                      if (await CoreHelperWidget
-                                                          .confirmFunction(
-                                                              context)) {
-                                                        _onDeleteTemplateForever(
-                                                                context)
-                                                            .then((result) {
-                                                          if (result) {
-                                                            Provider.of<TemplateNotifier>(
-                                                                    context,
-                                                                    listen:
-                                                                        false)
-                                                                .onCountAll();
-
-                                                            Navigator
-                                                                .pushAndRemoveUntil(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                  builder: (context) =>
-                                                                      const TemplateListScreen(
-                                                                          templateConditionModel:
-                                                                              null)),
-                                                              (route) => false,
-                                                            );
-
-                                                            CoreNotification.show(
-                                                                context,
-                                                                CoreNotificationStatus
-                                                                    .success,
-                                                                CoreNotificationAction
-                                                                    .delete,
-                                                                'Template');
-                                                          } else {
-                                                            CoreNotification.show(
-                                                                context,
-                                                                CoreNotificationStatus
-                                                                    .error,
-                                                                CoreNotificationAction
-                                                                    .delete,
-                                                                'Template');
-                                                          }
-                                                        });
-                                                      }
-                                                    },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.danger(
-                                                            kitRadius: 6.0),
-                                                    icon: const Icon(
-                                                        Icons
-                                                            .delete_forever_rounded,
-                                                        size: 26.0),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                    ],
-                                  ),
+                                              ),
+                                            ],
+                                          )
+                                  ],
                                 ),
                               ),
                             ),
-                            _buildSubject(),
-                            _buildLabels(),
-                            ScrollOnExpand(
-                              scrollOnExpand: true,
-                              scrollOnCollapse: false,
-                              child: ExpandablePanel(
-                                theme: const ExpandableThemeData(
-                                  headerAlignment:
-                                      ExpandablePanelHeaderAlignment.center,
-                                  tapBodyToCollapse: true,
-                                ),
-                                header: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "[${widget.template.id!}] ",
-                                        style: const TextStyle(
-                                            fontSize: 13.0,
-                                            color: Colors.black45),
-                                      ),
-                                      const Text(
-                                        "Content",
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            color: Colors.black45),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                collapsed: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                          _buildSubject(),
+                          _buildLabels(),
+                          ScrollOnExpand(
+                            scrollOnExpand: true,
+                            scrollOnCollapse: false,
+                            child: ExpandablePanel(
+                              theme: const ExpandableThemeData(
+                                headerAlignment:
+                                    ExpandablePanelHeaderAlignment.center,
+                                tapBodyToCollapse: true,
+                              ),
+                              header: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
                                   children: [
-                                    SizedBox(
-                                      height: 35,
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                          boxShadow: [],
-                                        ),
-                                        child: flutter_quill.QuillEditor(
-                                            controller:
-                                                _subDescriptionQuillController,
-                                            readOnly:
-                                                true, // true for view only mode
-                                            autoFocus: false,
-                                            expands: false,
-                                            focusNode: _focusNode,
-                                            padding: const EdgeInsets.all(4.0),
-                                            scrollController: _scrollController,
-                                            scrollable: false,
-                                            showCursor: false),
-                                      ),
-                                    ),
                                     Text(
-                                      '...',
-                                      style: GoogleFonts.montserrat(
-                                          fontStyle: FontStyle.italic,
-                                          fontSize: 14),
+                                      "[${widget.template.id!}] ",
+                                      style: const TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45),
+                                    ),
+                                    const Text(
+                                      "Content",
+                                      style: TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45),
                                     ),
                                   ],
                                 ),
-                                expanded: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    flutter_quill.QuillEditor(
-                                        controller: _descriptionQuillController,
-                                        readOnly:
-                                            true, // true for view only mode
-                                        autoFocus: false,
-                                        expands: false,
-                                        focusNode: _focusNode,
-                                        padding: const EdgeInsets.all(4.0),
-                                        scrollController: _scrollController,
-                                        scrollable: false,
-                                        showCursor: false),
-                                  ],
-                                ),
-                                builder: (_, collapsed, expanded) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 10, right: 10, bottom: 10),
-                                    child: Expandable(
-                                      collapsed: collapsed,
-                                      expanded: expanded,
-                                      theme: const ExpandableThemeData(
-                                          crossFadePoint: 0),
-                                    ),
-                                  );
-                                },
                               ),
+                              collapsed: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 35,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.rectangle,
+                                        boxShadow: [],
+                                      ),
+                                      child: flutter_quill.QuillEditor(
+                                          controller:
+                                              _subDescriptionQuillController,
+                                          readOnly:
+                                              true, // true for view only mode
+                                          autoFocus: false,
+                                          expands: false,
+                                          focusNode: _focusNode,
+                                          padding: const EdgeInsets.all(4.0),
+                                          scrollController: _scrollController,
+                                          scrollable: false,
+                                          showCursor: false),
+                                    ),
+                                  ),
+                                  Text(
+                                    '...',
+                                    style: GoogleFonts.montserrat(
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              expanded: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  flutter_quill.QuillEditor(
+                                      controller: _descriptionQuillController,
+                                      readOnly: true, // true for view only mode
+                                      autoFocus: false,
+                                      expands: false,
+                                      focusNode: _focusNode,
+                                      padding: const EdgeInsets.all(4.0),
+                                      scrollController: _scrollController,
+                                      scrollable: false,
+                                      showCursor: false),
+                                ],
+                              ),
+                              builder: (_, collapsed, expanded) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10, bottom: 10),
+                                  child: Expandable(
+                                    collapsed: collapsed,
+                                    expanded: expanded,
+                                    theme: const ExpandableThemeData(
+                                        crossFadePoint: 0),
+                                  ),
+                                );
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

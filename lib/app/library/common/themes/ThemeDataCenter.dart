@@ -1163,7 +1163,7 @@ class ThemeDataCenter {
     );
   }
 
-  static CoreButtonStyle getCoreScreenButtonStyle(BuildContext context) {
+  static CoreButtonStyle getCoreScreenButtonStyle({required BuildContext context, double? customPadding, double? customRadius}) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     if (settingNotifier.themeString == 'isSetThemeDefault' ||
@@ -1175,9 +1175,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff343a40),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
       return CoreButtonStyle(
@@ -1187,9 +1187,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xffffffff),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
       return CoreButtonStyle(
@@ -1199,9 +1199,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff2ab7ca),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
       return CoreButtonStyle(
@@ -1211,9 +1211,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff055b96),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
       return CoreButtonStyle(
@@ -1223,9 +1223,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff4a4e4b),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
       return CoreButtonStyle(
@@ -1235,9 +1235,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff2a4d69),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
       return CoreButtonStyle(
@@ -1247,9 +1247,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff009688),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
       return CoreButtonStyle(
@@ -1259,9 +1259,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xfff37736),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
       return CoreButtonStyle(
@@ -1271,9 +1271,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xfffaf0e6),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
       return CoreButtonStyle(
@@ -1283,9 +1283,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff1e1f26),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
       return CoreButtonStyle(
@@ -1295,9 +1295,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xffffcc5c),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
       return CoreButtonStyle(
@@ -1307,9 +1307,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff3c2f2f),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
       return CoreButtonStyle(
@@ -1319,9 +1319,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff4a4e4d),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
       return CoreButtonStyle(
@@ -1331,9 +1331,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xffd11141),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
       return CoreButtonStyle(
@@ -1343,9 +1343,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xffff5588),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
       return CoreButtonStyle(
@@ -1355,9 +1355,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xff29a8ab),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
       return CoreButtonStyle(
@@ -1367,9 +1367,9 @@ class ThemeDataCenter {
         kitBackgroundColor: const Color(0xffcc2a36),
         kitShadowColor: const Color(0xff191919),
         kitElevation: 2,
-        kitPaddingLTRB: const EdgeInsets.all(10),
+        kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
         kitFontSize: 14,
-        kitRadius: 6,
+        kitRadius: customRadius ?? 6,
       );
     }
     return CoreButtonStyle(
@@ -1379,9 +1379,9 @@ class ThemeDataCenter {
       kitBackgroundColor: const Color(0xff343a40),
       kitShadowColor: const Color(0xff191919),
       kitElevation: 2,
-      kitPaddingLTRB: const EdgeInsets.all(10),
+      kitPaddingLTRB: EdgeInsets.all(customPadding ?? 10),
       kitFontSize: 14,
-      kitRadius: 0,
+      kitRadius: customRadius ?? 6,
     );
   }
 

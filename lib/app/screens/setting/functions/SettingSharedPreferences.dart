@@ -24,6 +24,14 @@ class SettingSharedPreferences {
     await prefs.setBool('isActiveSound', isSet);
   }
 
+  Future<void> setIsSetBackgroundImage(bool isSet) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final bool? isSetBackgroundImage = prefs.getBool('isSetBackgroundImage');
+
+    await prefs.setBool('isSetBackgroundImage', isSet);
+  }
+
   Future<void> setIsExpandedNoteContent(bool isSet) async {
     final SharedPreferences prefs = await _prefs;
 
@@ -97,6 +105,14 @@ GETTER
     final bool? isActiveSound = prefs.getBool('isActiveSound');
 
     return isActiveSound;
+  }
+
+  Future<bool?> getIsSetBackgroundImage() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final bool? isSetBackgroundImage = prefs.getBool('isSetBackgroundImage');
+
+    return isSetBackgroundImage;
   }
 
   Future<bool?> getIsExpandedNoteContent() async {

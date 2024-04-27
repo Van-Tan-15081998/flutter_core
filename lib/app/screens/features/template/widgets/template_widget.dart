@@ -11,6 +11,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../setting/providers/setting_notifier.dart';
@@ -150,15 +151,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     }
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    return DateFormat('HH:mm  dd/MM/yyyy').format(dateTime);
-  }
-
   Widget onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.template.createdAt!)}';
+        'You wrote at ${CommonConverters.toTimeString(time: widget.template.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -323,7 +318,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                           labels: widget.labels,
                           subject: widget.subject)));
             },
-            backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+            backgroundColor: settingNotifier.isSetBackgroundImage == true
+                ? Colors.transparent
+                : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
             icon: Icons.remove_red_eye_rounded,
@@ -336,7 +333,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                       widget.onFavourite!();
                     }
                   },
-                  backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+                  backgroundColor: settingNotifier.isSetBackgroundImage == true
+                      ? Colors.transparent
+                      : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getFavouriteSlidableActionColorStyle(
                           context),
@@ -351,7 +350,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                       widget.onDelete!();
                     }
                   },
-                  backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+                  backgroundColor: settingNotifier.isSetBackgroundImage == true
+                      ? Colors.transparent
+                      : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getDeleteSlidableActionColorStyle(
                           context),
@@ -387,9 +388,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                               context)),
                                   const SizedBox(width: 5.0),
                                   Text(
-                                      getTimeString(widget.template.createdAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
+                                      CommonConverters.toTimeString(
+                                          time: widget.template.createdAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
                                           color: ThemeDataCenter
                                               .getTopCardLabelStyle(context))),
                                   const SizedBox(width: 5.0),
@@ -430,9 +431,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                               context)),
                                   const SizedBox(width: 5.0),
                                   Text(
-                                      getTimeString(widget.template.updatedAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
+                                      CommonConverters.toTimeString(
+                                          time: widget.template.updatedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
                                           color: ThemeDataCenter
                                               .getTopCardLabelStyle(context))),
                                   const SizedBox(width: 5.0),
@@ -472,9 +473,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                               context)),
                                   const SizedBox(width: 5.0),
                                   Text(
-                                      getTimeString(widget.template.deletedAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
+                                      CommonConverters.toTimeString(
+                                          time: widget.template.deletedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
                                           color: ThemeDataCenter
                                               .getTopCardLabelStyle(context))),
                                   const SizedBox(width: 5.0),

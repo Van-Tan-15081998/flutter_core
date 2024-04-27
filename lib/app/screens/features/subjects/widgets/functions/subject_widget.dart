@@ -7,8 +7,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../library/common/converters/CommonConverters.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../../../setting/providers/setting_notifier.dart';
@@ -83,18 +85,6 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     return await SubjectDatabaseManager.countNotes(widget.subject);
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
   @override
   Widget build(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
@@ -121,7 +111,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                       });
                     },
                     backgroundColor:
-                        ThemeDataCenter.getBackgroundColor(context),
+                    settingNotifier.isSetBackgroundImage == true
+                        ? Colors.transparent
+                        : ThemeDataCenter.getBackgroundColor(context),
                     foregroundColor:
                         ThemeDataCenter.getMoreSlidableActionColorStyle(
                             context),
@@ -137,7 +129,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                         builder: (context) =>
                             SubjectDetailScreen(subject: widget.subject)));
               },
-              backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+              backgroundColor: settingNotifier.isSetBackgroundImage == true
+                  ? Colors.transparent
+                  : ThemeDataCenter.getBackgroundColor(context),
               foregroundColor:
                   ThemeDataCenter.getViewSlidableActionColorStyle(context),
               icon: Icons.remove_red_eye_rounded,
@@ -151,7 +145,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                       }
                     },
                     backgroundColor:
-                        ThemeDataCenter.getBackgroundColor(context),
+                    settingNotifier.isSetBackgroundImage == true
+                        ? Colors.transparent
+                        : ThemeDataCenter.getBackgroundColor(context),
                     foregroundColor:
                         ThemeDataCenter.getDeleteSlidableActionColorStyle(
                             context),
@@ -185,12 +181,12 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                           ThemeDataCenter.getTopCardLabelStyle(
                                               context)),
                                   const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.subject.createdAt!),
-                                      style: TextStyle(
-                                        fontSize: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context),
-                                      )),
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.subject.createdAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context))),
                                 ],
                               ),
                             ),
@@ -221,9 +217,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                           ThemeDataCenter.getTopCardLabelStyle(
                                               context)),
                                   const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.subject.updatedAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.subject.updatedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
                                           color: ThemeDataCenter
                                               .getTopCardLabelStyle(context)))
                                 ],
@@ -252,9 +249,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                           ThemeDataCenter.getTopCardLabelStyle(
                                               context)),
                                   const SizedBox(width: 5.0),
-                                  Text(getTimeString(widget.subject.deletedAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.subject.deletedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(
                                           color: ThemeDataCenter
                                               .getTopCardLabelStyle(context)))
                                 ],
@@ -381,7 +379,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                             .update,
                                                                     subject: widget
                                                                         .subject,
-                                                                    redirectFromEnum: null,
+                                                                    redirectFromEnum:
+                                                                        null,
                                                                   )));
                                                     },
                                                     coreButtonStyle:
@@ -400,15 +399,17 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                              builder: (context) => SubjectCreateScreen(
-                                                                  parentSubject:
-                                                                      widget
-                                                                          .subject,
-                                                                  actionMode:
-                                                                      ActionModeEnum
-                                                                          .create,
-                                                                redirectFromEnum: null,
-                                                              )));
+                                                              builder: (context) =>
+                                                                  SubjectCreateScreen(
+                                                                    parentSubject:
+                                                                        widget
+                                                                            .subject,
+                                                                    actionMode:
+                                                                        ActionModeEnum
+                                                                            .create,
+                                                                    redirectFromEnum:
+                                                                        null,
+                                                                  )));
                                                     },
                                                     coreButtonStyle: ThemeDataCenter
                                                         .getCreateSubSubjectButtonStyle(

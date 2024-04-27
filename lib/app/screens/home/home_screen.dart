@@ -11,6 +11,7 @@ import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../core/components/notifications/CoreNotification.dart';
+import '../../library/common/dimensions/CommonDimensions.dart';
 import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
 import '../../library/enums/CommonEnums.dart';
@@ -167,458 +168,486 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container();
   }
 
-  Widget statisticHomeScreen(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
-            child: Card(
-              shadowColor: const Color(0xff1f1f1f),
-              elevation: 2.0,
-              shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                      color:
-                          ThemeDataCenter.getNoteBorderCardColorStyle(context),
-                      width: 1.0),
-                  borderRadius: BorderRadius.circular(5.0)),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    // height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
-                            context),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(
-                              Icons.note_alt_outlined,
-                              size: 26.0,
+  Widget _buildStatisticHomeScreen(
+      BuildContext context, SettingNotifier settingNotifier) {
+    return Column(
+      children: [
+        settingNotifier.isSetBackgroundImage == true
+            ? SizedBox(height: CommonDimensions.scaffoldAppBarHeight(context))
+            : Container(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+                  child: Card(
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: ThemeDataCenter.getNoteBorderCardColorStyle(
+                                context),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0)),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          // height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: ThemeDataCenter
+                                  .getTopBannerCardBackgroundColor(context),
+                              shape: BoxShape.rectangle,
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width - 125.0,
-                              child: const Text(
-                                'Notes',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Tooltip(
-                              message: 'View',
-                              child: CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const NoteListScreen(
-                                              noteConditionModel: null,
-                                            )),
-                                  );
-                                },
-                                coreButtonStyle:
-                                    ThemeDataCenter.getViewButtonStyle(context),
-                                child: const Text('View'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5.0),
-                        decoration: BoxDecoration(
-                          color: ThemeDataCenter
-                              .getBottomBannerCardBackgroundColor(context),
-                          shape: BoxShape.rectangle,
-                          boxShadow: [],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Icon(Icons.now_widgets_rounded,
-                                    color: Colors.black45),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                const Text(
-                                  'Total:',
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                Text(
-                                  context
-                                      .watch<NoteNotifier>()
-                                      .countAllNotes
-                                      .toString(),
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          ///
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
-            child: Card(
-              shadowColor: const Color(0xff1f1f1f),
-              elevation: 2.0,
-              shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                      color: ThemeDataCenter.getSubjectBorderCardColorStyle(
-                          context),
-                      width: 1.0),
-                  borderRadius: BorderRadius.circular(5.0)),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    // height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
-                            context),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(
-                              Icons.palette_outlined,
-                              size: 26.0,
-                            ),
-                            SizedBox(
-                                width:
-                                    MediaQuery.of(context).size.width - 125.0,
-                                child: const Text(
-                                  'Subjects',
-                                  style: TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w500),
-                                )),
-                            Tooltip(
-                              message: 'View',
-                              child: CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SubjectListScreen(
-                                        subjectConditionModel: null,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const Icon(
+                                    Icons.note_alt_outlined,
+                                    size: 26.0,
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width -
+                                        125.0,
+                                    child: const Text(
+                                      'Notes',
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                  );
-                                },
-                                coreButtonStyle:
-                                    ThemeDataCenter.getViewButtonStyle(context),
-                                child: const Text('View'),
+                                  ),
+                                  Tooltip(
+                                    message: 'View',
+                                    child: CoreElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const NoteListScreen(
+                                                    noteConditionModel: null,
+                                                  )),
+                                        );
+                                      },
+                                      coreButtonStyle:
+                                          ThemeDataCenter.getViewButtonStyle(
+                                              context),
+                                      child: const Text('View'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(5.0),
+                              decoration: BoxDecoration(
+                                color: ThemeDataCenter
+                                    .getBottomBannerCardBackgroundColor(
+                                        context),
+                                shape: BoxShape.rectangle,
+                                boxShadow: [],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Icon(Icons.now_widgets_rounded,
+                                          color: Colors.black45),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      const Text(
+                                        'Total:',
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                      Text(
+                                        context
+                                            .watch<NoteNotifier>()
+                                            .countAllNotes
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5.0),
-                        decoration: BoxDecoration(
-                          color: ThemeDataCenter
-                              .getBottomBannerCardBackgroundColor(context),
-                          shape: BoxShape.rectangle,
-                          boxShadow: [],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Icon(Icons.now_widgets_rounded,
-                                    color: Colors.black45),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                const Text(
-                                  'Total:',
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                Text(
-                                  context
-                                      .watch<SubjectNotifier>()
-                                      .countAllSubjects
-                                      .toString(),
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
 
-          ///
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
-            child: Card(
-              shadowColor: const Color(0xff1f1f1f),
-              elevation: 2.0,
-              shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                      color:
-                          ThemeDataCenter.getLabelBorderCardColorStyle(context),
-                      width: 1.0),
-                  borderRadius: BorderRadius.circular(5.0)),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    // height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
-                            context),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(
-                              Icons.label_important_outline,
-                              size: 26.0,
+                ///
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+                  child: Card(
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color:
+                                ThemeDataCenter.getSubjectBorderCardColorStyle(
+                                    context),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0)),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          // height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: ThemeDataCenter
+                                  .getTopBannerCardBackgroundColor(context),
+                              shape: BoxShape.rectangle,
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width - 125.0,
-                              child: const Text(
-                                'Labels',
-                                style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w500),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const Icon(
+                                    Icons.palette_outlined,
+                                    size: 26.0,
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          125.0,
+                                      child: const Text(
+                                        'Subjects',
+                                        style: TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w500),
+                                      )),
+                                  Tooltip(
+                                    message: 'View',
+                                    child: CoreElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const SubjectListScreen(
+                                              subjectConditionModel: null,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      coreButtonStyle:
+                                          ThemeDataCenter.getViewButtonStyle(
+                                              context),
+                                      child: const Text('View'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            Tooltip(
-                              message: 'View',
-                              child: CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LabelListScreen(
-                                              labelConditionModel: null,
-                                            )),
-                                  );
-                                },
-                                coreButtonStyle:
-                                    ThemeDataCenter.getViewButtonStyle(context),
-                                child: const Text('View'),
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(5.0),
+                              decoration: BoxDecoration(
+                                color: ThemeDataCenter
+                                    .getBottomBannerCardBackgroundColor(
+                                        context),
+                                shape: BoxShape.rectangle,
+                                boxShadow: [],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Icon(Icons.now_widgets_rounded,
+                                          color: Colors.black45),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      const Text(
+                                        'Total:',
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                      Text(
+                                        context
+                                            .watch<SubjectNotifier>()
+                                            .countAllSubjects
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5.0),
-                        decoration: BoxDecoration(
-                          color: ThemeDataCenter
-                              .getBottomBannerCardBackgroundColor(context),
-                          shape: BoxShape.rectangle,
-                          boxShadow: [],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Icon(Icons.now_widgets_rounded,
-                                    color: Colors.black45),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                const Text(
-                                  'Total:',
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                Text(
-                                  context
-                                      .watch<LabelNotifier>()
-                                      .countAllLabels
-                                      .toString(),
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+                ),
 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
-            child: Card(
-              shadowColor: const Color(0xff1f1f1f),
-              elevation: 2.0,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(
-                    color: ThemeDataCenter.getTemplateBorderCardColorStyle(
-                        context),
-                    width: 1.0),
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    // height: 150,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: ThemeDataCenter.getTopBannerCardBackgroundColor(
-                            context),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(
-                              Icons.my_library_books_rounded,
-                              size: 26.0,
+                ///
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+                  child: Card(
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: ThemeDataCenter.getLabelBorderCardColorStyle(
+                                context),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0)),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          // height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: ThemeDataCenter
+                                  .getTopBannerCardBackgroundColor(context),
+                              shape: BoxShape.rectangle,
                             ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width - 125.0,
-                              child: const Text(
-                                'Templates',
-                                style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.w500),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const Icon(
+                                    Icons.label_important_outline,
+                                    size: 26.0,
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width -
+                                        125.0,
+                                    child: const Text(
+                                      'Labels',
+                                      style: TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                  Tooltip(
+                                    message: 'View',
+                                    child: CoreElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LabelListScreen(
+                                                    labelConditionModel: null,
+                                                  )),
+                                        );
+                                      },
+                                      coreButtonStyle:
+                                          ThemeDataCenter.getViewButtonStyle(
+                                              context),
+                                      child: const Text('View'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            Tooltip(
-                              message: 'View',
-                              child: CoreElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const TemplateListScreen(
-                                              templateConditionModel: null,
-                                            )),
-                                  );
-                                },
-                                coreButtonStyle:
-                                    ThemeDataCenter.getViewButtonStyle(context),
-                                child: const Text('View'),
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(5.0),
+                              decoration: BoxDecoration(
+                                color: ThemeDataCenter
+                                    .getBottomBannerCardBackgroundColor(
+                                        context),
+                                shape: BoxShape.rectangle,
+                                boxShadow: [],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Icon(Icons.now_widgets_rounded,
+                                          color: Colors.black45),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      const Text(
+                                        'Total:',
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                      Text(
+                                        context
+                                            .watch<LabelNotifier>()
+                                            .countAllLabels
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  )
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5.0),
-                        decoration: BoxDecoration(
-                          color: ThemeDataCenter
-                              .getBottomBannerCardBackgroundColor(context),
-                          shape: BoxShape.rectangle,
-                          boxShadow: [],
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
+                  child: Card(
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getTemplateBorderCardColorStyle(
+                                  context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          // height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: ThemeDataCenter
+                                  .getTopBannerCardBackgroundColor(context),
+                              shape: BoxShape.rectangle,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const Icon(
+                                    Icons.my_library_books_rounded,
+                                    size: 26.0,
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width -
+                                        125.0,
+                                    child: const Text(
+                                      'Templates',
+                                      style: TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                  Tooltip(
+                                    message: 'View',
+                                    child: CoreElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const TemplateListScreen(
+                                                    templateConditionModel:
+                                                        null,
+                                                  )),
+                                        );
+                                      },
+                                      coreButtonStyle:
+                                          ThemeDataCenter.getViewButtonStyle(
+                                              context),
+                                      child: const Text('View'),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        child: Column(
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Icon(Icons.now_widgets_rounded,
-                                    color: Colors.black45),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                const Text(
-                                  'Total:',
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
-                                Text(
-                                  context
-                                      .watch<TemplateNotifier>()
-                                      .countAllTemplates
-                                      .toString(),
-                                  style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            )
+                            Container(
+                              padding: const EdgeInsets.all(5.0),
+                              decoration: BoxDecoration(
+                                color: ThemeDataCenter
+                                    .getBottomBannerCardBackgroundColor(
+                                        context),
+                                shape: BoxShape.rectangle,
+                                boxShadow: [],
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      const Icon(Icons.now_widgets_rounded,
+                                          color: Colors.black45),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      const Text(
+                                        'Total:',
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                      Text(
+                                        context
+                                            .watch<TemplateNotifier>()
+                                            .countAllTemplates
+                                            .toString(),
+                                        style: const TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+
+                _buildAdB(context)
+              ],
             ),
           ),
-
-          _buildAdB(context)
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -640,129 +669,160 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-      appBar: AppBar(
-        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        title: Text(
-          widget.title,
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 30,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(
-          color: Color(0xFF404040), // Set the color you desire
-        ),
-      ),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Color(0xFF202124),
-                ),
-                child: Text('Hi Notes',
-                    style: GoogleFonts.montserrat(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 30,
-                        color: const Color(0xFF404040),
-                        fontWeight: FontWeight.bold)),
+      extendBodyBehindAppBar:
+          settingNotifier.isSetBackgroundImage == true ? true : false,
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
+      appBar: _buildAppBar(context, settingNotifier),
+      drawer: _buildDrawer(context),
+      body: settingNotifier.isSetBackgroundImage == true
+          ? DecoratedBox(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        "assets/images/cartoon-background-image.jpg"),
+                    fit: BoxFit.cover),
+              ),
+              child: _buildStatisticHomeScreen(context, settingNotifier),
+            )
+          : _buildStatisticHomeScreen(context, settingNotifier),
+      // bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
+      //     ? null
+      //     : _buildBottomNavigationBar(context),
+      floatingActionButton: _buildFloatingActionCreateButton(context),
+    );
+  }
+
+  Widget _buildFloatingActionCreateButton(BuildContext context) {
+    return AvatarGlow(
+      glowRadiusFactor: 0.2,
+      curve: Curves.linearToEaseOut,
+      child: Tooltip(
+        message: 'Create note',
+        child: CoreElevatedButton.iconOnly(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const NoteCreateScreen(
+                      note: null,
+                      copyNote: null,
+                      subject: null,
+                      actionMode: ActionModeEnum.create)),
+            );
+          },
+          coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(
+              context: context, customRadius: 40.0),
+          icon: const SizedBox(
+            width: 50.0,
+            height: 50.0,
+            child: Center(
+              child: Icon(
+                Icons.add_rounded,
+                size: 35.0,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CoreElevatedButton(
-                coreButtonStyle:
-                    ThemeDataCenter.getCoreScreenButtonStyle(context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Settings',
-                        style: GoogleFonts.montserrat(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SettingScreen()),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CoreElevatedButton(
-                coreButtonStyle:
-                    ThemeDataCenter.getCoreScreenButtonStyle(context),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('User manual',
-                        style: GoogleFonts.montserrat(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600)),
-                  ],
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SettingScreen()),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: statisticHomeScreen(context),
-      bottomNavigationBar: CoreBottomNavigationBar(
-        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        child: IconTheme(
-          data: const IconThemeData(color: Colors.white),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              Tooltip(
-                message: 'Create note',
-                child: CoreElevatedButton.iconOnly(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const NoteCreateScreen(
-                              note: null,
-                              copyNote: null,
-                              subject: null,
-                              actionMode: ActionModeEnum.create)),
-                    );
-                  },
-                  coreButtonStyle:
-                      ThemeDataCenter.getCoreScreenButtonStyle(context),
-                  icon: SizedBox(
-                    width: 80.0,
-                    child: AvatarGlow(
-                      glowRadiusFactor: 0.3,
-                      curve: Curves.linearToEaseOut,
-                      child: const Icon(
-                        Icons.add,
-                        size: 30.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
+    return AppBar(
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
+      title: Text(
+        widget.title,
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 30,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
+      iconTheme: const IconThemeData(
+        color: Color(0xFF404040), // Set the color you desire
+      ),
+    );
+  }
+
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+    return CoreBottomNavigationBar(
+      // backgroundColor: ThemeDataCenter.getBackgroundColor(context),
+      backgroundColor: Colors.transparent,
+      child: _buildFloatingActionCreateButton(context),
+    );
+  }
+
+  Drawer _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color(0xFF202124),
+              ),
+              child: Text('Hi Notes',
+                  style: GoogleFonts.montserrat(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 30,
+                      color: const Color(0xFF404040),
+                      fontWeight: FontWeight.bold)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CoreElevatedButton(
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Settings',
+                      style: GoogleFonts.montserrat(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingScreen()),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CoreElevatedButton(
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('User manual',
+                      style: GoogleFonts.montserrat(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

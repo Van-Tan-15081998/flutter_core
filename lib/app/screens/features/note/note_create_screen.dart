@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
@@ -39,13 +40,17 @@ class NoteCreateScreen extends StatefulWidget {
 
   final SubjectModel? subject;
   final ActionModeEnum actionMode;
+  final ActionCreateNoteEnum? actionCreateNoteEnum;
+  final int? createdForDay;
 
   const NoteCreateScreen(
       {super.key,
       required this.note,
       required this.copyNote,
       required this.subject,
-      required this.actionMode});
+      required this.actionMode,
+      this.actionCreateNoteEnum,
+      this.createdForDay});
 
   @override
   State<NoteCreateScreen> createState() => _NoteCreateScreenState();
@@ -201,7 +206,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         _titleDocument = flutter_quill.Document.fromDelta(delta);
       }
 
-      if (widget.note!.description != null && widget.note!.description!.isNotEmpty) {
+      if (widget.note!.description != null &&
+          widget.note!.description!.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.note!.description!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
@@ -209,14 +215,16 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
       }
     } else if (widget.copyNote != null &&
         widget.actionMode == ActionModeEnum.copy) {
-      if (widget.copyNote!.title != null && widget.copyNote!.title!.isNotEmpty) {
+      if (widget.copyNote!.title != null &&
+          widget.copyNote!.title!.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.copyNote!.title!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _titleDocument = flutter_quill.Document.fromDelta(delta);
       }
 
-      if (widget.copyNote!.description != null && widget.copyNote!.description!.isNotEmpty) {
+      if (widget.copyNote!.description != null &&
+          widget.copyNote!.description!.isNotEmpty) {
         /// Set data for input
         List<dynamic> deltaMap = jsonDecode(widget.copyNote!.description!);
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
@@ -314,7 +322,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     super.dispose();
   }
 
-  Widget buildOptionActionContent(BuildContext context) {
+  Widget _buildOptionActionContent(BuildContext context) {
     if (isShowDialogSetEmoji) {
       return Container(
           margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
@@ -397,7 +405,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: const Color(0xff1f1f1f)),
+                              kitForegroundColorOption:
+                                  const Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.emojis[index],
@@ -455,7 +464,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreStyle: CoreStyle.outlined,
                               coreColor: CoreColor.turtles,
                               coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: const Color(0xff1f1f1f)),
+                              kitForegroundColorOption:
+                                  const Color(0xff1f1f1f)),
                           icon: Center(
                             child: Text(
                               CoreStoreIcons.natureAndAnimals[index],
@@ -1276,12 +1286,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
     return CoreFullScreenDialog(
       isShowOptionActionButton: true,
-      title: widget.note == null ? 'Create' : 'Update',
+      title: _buildTitle(context),
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
       isShowBottomActionButton: true,
       isShowGeneralActionButton: false,
-      optionActionContent: buildOptionActionContent(context),
+      optionActionContent: _buildOptionActionContent(context),
       onGoHome: () {},
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
@@ -1311,7 +1321,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 labels: labels,
                 subjectId: selectedSubject?.id,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
-                createdAtDayFormat: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).millisecondsSinceEpoch,
+                createdAtDayFormat: DateTime(DateTime.now().year, DateTime.now().month,
+                            DateTime.now().day)
+                        .millisecondsSinceEpoch,
+                createdForDay: widget.actionCreateNoteEnum ==
+                    ActionCreateNoteEnum.createForSelectedDay &&
+                    widget.createdForDay != null
+                    ? widget.createdForDay : null,
                 id: widget.note?.id);
 
             _onCreateNote(context, model).then((result) {
@@ -1342,6 +1358,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 subjectId: selectedSubject?.id,
                 isFavourite: widget.note?.isFavourite,
                 createdAt: widget.note?.createdAt,
+                createdAtDayFormat: widget.note?.createdAtDayFormat,
+                createdForDay: widget.note?.createdForDay,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.note?.id);
 
@@ -1659,6 +1677,59 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTitle(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          widget.note == null ? 'Create' : 'Update',
+          style: GoogleFonts.montserrat(
+              fontStyle: FontStyle.italic,
+              fontSize: 26,
+              color: const Color(0xFF404040),
+              fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(width: 5),
+        widget.actionCreateNoteEnum ==
+                    ActionCreateNoteEnum.createForSelectedDay &&
+                widget.createdForDay != null
+            ? Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'note for',
+                      style: TextStyle(
+                          color:
+                              ThemeDataCenter.getAloneTextColorStyle(context),
+                          fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            DateFormat('dd/MM/yyyy')
+                                .format(DateTime.fromMillisecondsSinceEpoch(
+                                    widget.createdForDay!))
+                                .toString(),
+                            style: TextStyle(
+                                color: ThemeDataCenter.getAloneTextColorStyle(
+                                    context),
+                                fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            : Container()
+      ],
     );
   }
 }

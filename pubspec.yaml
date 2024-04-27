@@ -88,6 +88,8 @@ flutter:
     - assets/audio/open-popup.mp3
     - assets/audio/minimal-pop-click.mp3
     - assets/audio/message-incoming.mp3
+    - assets/images/planet-background-image.jpg
+    - assets/images/cartoon-background-image.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

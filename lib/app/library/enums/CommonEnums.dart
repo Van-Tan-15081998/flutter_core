@@ -1,5 +1,7 @@
 enum ActionModeEnum { create, update, delete, copy }
 
+enum ActionCreateNoteEnum { create, createForSelectedDay }
+
 enum RedirectFromEnum {notes, subjects}
 
   enum TaskStatusEnum {

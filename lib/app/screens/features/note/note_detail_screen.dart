@@ -7,12 +7,15 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
+import '../../../library/common/converters/CommonConverters.dart';
+import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/models/label_model.dart';
@@ -171,21 +174,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
   Widget _onGetTitle() {
     String defaultTitle =
-        'You wrote at ${getTimeString(widget.note.createdAt!)}';
+        'You wrote at ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -352,7 +343,14 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
     setDocuments();
     return CoreFullScreenDialog(
-      title: 'Detail',
+      title: Text(
+        'Detail',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       actions: AppBarActionButtonEnum.home,
       isConfirmToClose: false,
       homeLabel: 'Notes',
@@ -376,277 +374,396 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       optionActionContent: Container(),
       bottomActionBar: const [Row()],
       bottomActionBarScrollable: const [Row()],
-      child: Padding(
-        padding: const EdgeInsets.all(0),
-        child: ListView(
-          children: <Widget>[
-            Slidable(
-              key: const ValueKey(0),
-              endActionPane: ActionPane(
-                motion: const ScrollMotion(),
-                children: [
-                  widget.note.deletedAt == null
-                      ? SlidableAction(
-                          flex: 1,
-                          onPressed: (context) {
-                            // _onDelete();
-                            _onDeleteNote(context).then((result) {
-                              if (result) {
-                                Provider.of<NoteNotifier>(context,
-                                        listen: false)
-                                    .onCountAll();
+      child: _buildBody(context, settingNotifier),
+    );
+  }
 
-                                Navigator.pushAndRemoveUntil(
+  Widget _buildBody(BuildContext context, SettingNotifier settingNotifier) {
+    return Padding(
+      padding: const EdgeInsets.all(0),
+      child: Column(
+        children: <Widget>[
+          Slidable(
+            key: const ValueKey(0),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                widget.note.deletedAt == null
+                    ? SlidableAction(
+                        flex: 1,
+                        onPressed: (context) {
+                          // _onDelete();
+                          _onDeleteNote(context).then((result) {
+                            if (result) {
+                              Provider.of<NoteNotifier>(context, listen: false)
+                                  .onCountAll();
+
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const NoteListScreen(
+                                        noteConditionModel: null)),
+                                (route) => false,
+                              );
+
+                              CoreNotification.show(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const NoteListScreen(
-                                              noteConditionModel: null)),
-                                  (route) => false,
-                                );
-
-                                CoreNotification.show(
-                                    context,
-                                    CoreNotificationStatus.success,
-                                    CoreNotificationAction.delete,
-                                    'Note');
-                              } else {
-                                CoreNotification.show(
-                                    context,
-                                    CoreNotificationStatus.error,
-                                    CoreNotificationAction.delete,
-                                    'Note');
-                              }
-                            });
-                          },
-                          backgroundColor:
-                              ThemeDataCenter.getBackgroundColor(context),
-                          foregroundColor:
-                              ThemeDataCenter.getDeleteSlidableActionColorStyle(
-                                  context),
-                          icon: Icons.delete,
-                          label: 'Delete',
-                        )
-                      : Container()
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
-                child: ExpandableNotifier(
-                  initialExpanded: true,
-                  child: Column(
-                    children: [
-                      widget.note.updatedAt == null &&
-                              widget.note.deletedAt == null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Tooltip(
-                                message: 'Created time',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  CoreNotificationStatus.success,
+                                  CoreNotificationAction.delete,
+                                  'Note');
+                            } else {
+                              CoreNotification.show(
+                                  context,
+                                  CoreNotificationStatus.error,
+                                  CoreNotificationAction.delete,
+                                  'Note');
+                            }
+                          });
+                        },
+                        backgroundColor:
+                            settingNotifier.isSetBackgroundImage == true
+                                ? Colors.transparent
+                                : ThemeDataCenter.getBackgroundColor(context),
+                        foregroundColor:
+                            ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                                context),
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      )
+                    : Container()
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
+              child: ExpandableNotifier(
+                initialExpanded: true,
+                child: Column(
+                  children: [
+                    widget.note.updatedAt == null &&
+                            widget.note.deletedAt == null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Icon(Icons.create_rounded,
-                                        size: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)),
-                                    const SizedBox(width: 5.0),
-                                    Text(
-                                      getTimeString(widget.note.createdAt!),
-                                      style: TextStyle(
-                                          fontSize: 13.0,
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context)),
-                                    ),
-                                    const SizedBox(width: 5.0),
-                                    widget.note.isFavourite != null
-                                        ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545),
-                                            size: 26.0)
+                                    widget.note.createdForDay != null
+                                        ? Tooltip(
+                                            message: 'Created for',
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Icon(
+                                                    Icons
+                                                        .directions_run_rounded,
+                                                    size: 14.0,
+                                                    color: ThemeDataCenter
+                                                        .getTopCardLabelStyle(
+                                                            context)),
+                                                const SizedBox(width: 5.0),
+                                                Text(
+                                                  CommonConverters.toTimeString(time: widget
+                                                      .note.createdForDay!, format: 'dd/MM/yyyy'),
+                                                  style: TextStyle(
+                                                      fontSize: 13.0,
+                                                      color: ThemeDataCenter
+                                                          .getTopCardLabelStyle(
+                                                              context)),
+                                                ),
+                                                const SizedBox(width: 5.0),
+                                              ],
+                                            ),
+                                          )
                                         : Container(),
+                                    Tooltip(
+                                      message: 'Created time',
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          Icon(Icons.create_rounded,
+                                              size: 13.0,
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context)),
+                                          const SizedBox(width: 5.0),
+                                          Text(
+                                            CommonConverters.toTimeString(
+                                                time: widget.note.createdAt!),
+                                            style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)),
+                                          ),
+                                          const SizedBox(width: 5.0),
+                                        ],
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                            )
-                          : Container(),
-                      widget.note.updatedAt != null &&
-                              widget.note.deletedAt == null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                                widget.note.isFavourite != null
+                                    ? const Icon(Icons.favorite,
+                                        color: Color(0xffdc3545), size: 26.0)
+                                    : Container(),
+                              ],
+                            ),
+                          )
+                        : Container(),
+                    widget.note.updatedAt != null &&
+                            widget.note.deletedAt == null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    widget.note.createdForDay != null
+                                        ? Tooltip(
+                                            message: 'Created for',
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Icon(
+                                                    Icons
+                                                        .directions_run_rounded,
+                                                    size: 14.0,
+                                                    color: ThemeDataCenter
+                                                        .getTopCardLabelStyle(
+                                                            context)),
+                                                const SizedBox(width: 5.0),
+                                                Text(
+                                                  CommonConverters.toTimeString(time: widget
+                                                      .note.createdForDay!, format: 'dd/MM/yyyy'),
+                                                  style: TextStyle(
+                                                      fontSize: 13.0,
+                                                      color: ThemeDataCenter
+                                                          .getTopCardLabelStyle(
+                                                              context)),
+                                                ),
+                                                const SizedBox(width: 5.0),
+                                              ],
+                                            ),
+                                          )
+                                        : Container(),
+                                    Tooltip(
+                                      message: 'Updated time',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.update_rounded,
+                                              size: 13.0,
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context)),
+                                          const SizedBox(width: 5.0),
+                                          Text(
+                                              CommonConverters.toTimeString(
+                                                  time: widget.note.updatedAt!),
+                                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                                          const SizedBox(width: 5.0),
+                                        ],
+                                      ),
+                                    ),
+                                    Tooltip(
+                                      message: 'Created time',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.create_rounded,
+                                              size: 13.0,
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context)),
+                                          const SizedBox(width: 5.0),
+                                          Text(
+                                              CommonConverters.toTimeString(
+                                                  time: widget.note.createdAt!),
+                                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                                          const SizedBox(width: 5.0),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                widget.note.isFavourite != null
+                                    ? const Icon(Icons.favorite,
+                                        color: Color(0xffdc3545), size: 26.0)
+                                    : Container(),
+                              ],
+                            ),
+                          )
+                        : Container(),
+                    widget.note.deletedAt != null
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                            child: Tooltip(
+                              message: 'Deleted time',
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Tooltip(
-                                        message: 'Updated time',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.update_rounded,
-                                                size: 13.0,
-                                                color: ThemeDataCenter
-                                                    .getTopCardLabelStyle(
-                                                        context)),
-                                            const SizedBox(width: 5.0),
-                                            Text(
-                                                getTimeString(
-                                                    widget.note.updatedAt!),
-                                                style: TextStyle(
-                                                    fontSize: 13.0,
-                                                    color: ThemeDataCenter
-                                                        .getTopCardLabelStyle(
-                                                            context))),
-                                            const SizedBox(width: 5.0),
-                                          ],
-                                        ),
-                                      ),
-                                      Tooltip(
-                                        message: 'Created time',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.create_rounded,
-                                                size: 13.0,
-                                                color: ThemeDataCenter
-                                                    .getTopCardLabelStyle(
-                                                        context)),
-                                            const SizedBox(width: 5.0),
-                                            Text(
-                                                getTimeString(
-                                                    widget.note.createdAt!),
-                                                style: TextStyle(
-                                                    fontSize: 13.0,
-                                                    color: ThemeDataCenter
-                                                        .getTopCardLabelStyle(
-                                                            context))),
-                                            const SizedBox(width: 5.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  Icon(Icons.delete_rounded,
+                                      size: 13.0,
+                                      color:
+                                          ThemeDataCenter.getTopCardLabelStyle(
+                                              context)),
+                                  const SizedBox(width: 5.0),
+                                  Text(
+                                      CommonConverters.toTimeString(
+                                          time: widget.note.deletedAt!),
+                                      style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                                  const SizedBox(width: 5.0),
                                   widget.note.isFavourite != null
                                       ? const Icon(Icons.favorite,
                                           color: Color(0xffdc3545), size: 26.0)
                                       : Container(),
                                 ],
                               ),
-                            )
-                          : Container(),
-                      widget.note.deletedAt != null
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                              child: Tooltip(
-                                message: 'Deleted time',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Icon(Icons.delete_rounded,
-                                        size: 13.0,
-                                        color: ThemeDataCenter
-                                            .getTopCardLabelStyle(context)),
-                                    const SizedBox(width: 5.0),
-                                    Text(getTimeString(widget.note.deletedAt!),
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            color: ThemeDataCenter
-                                                .getTopCardLabelStyle(
-                                                    context))),
-                                    const SizedBox(width: 5.0),
-                                    widget.note.isFavourite != null
-                                        ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545),
-                                            size: 26.0)
-                                        : Container(),
-                                  ],
-                                ),
+                            ),
+                          )
+                        : Container(),
+                    Card(
+                      shadowColor: const Color(0xff1f1f1f),
+                      elevation: 2.0,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: ThemeDataCenter.getBorderCardColorStyle(
+                                context),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(
+                            // height: 150,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: widget.subject != null &&
+                                        settingNotifier
+                                            .isSetColorAccordingSubjectColor!
+                                    ? widget.subject!.color.toColor()
+                                    : ThemeDataCenter
+                                        .getNoteTopBannerCardBackgroundColor(
+                                            context),
+                                shape: BoxShape.rectangle,
                               ),
-                            )
-                          : Container(),
-                      Card(
-                        shadowColor: const Color(0xff1f1f1f),
-                        elevation: 2.0,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                              color: ThemeDataCenter.getBorderCardColorStyle(
-                                  context),
-                              width: 1.0),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(
-                              // height: 150,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: widget.subject != null &&
-                                          settingNotifier
-                                              .isSetColorAccordingSubjectColor!
-                                      ? widget.subject!.color.toColor()
-                                      : ThemeDataCenter
-                                          .getNoteTopBannerCardBackgroundColor(
-                                              context),
-                                  shape: BoxShape.rectangle,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              115.0,
-                                          child: checkTitleEmpty()
-                                              ? flutter_quill.QuillEditor(
-                                                  controller:
-                                                      _titleQuillController,
-                                                  readOnly:
-                                                      true, // true for view only mode
-                                                  autoFocus: false,
-                                                  expands: false,
-                                                  focusNode: _focusNode,
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          10.0,
-                                                          10.0,
-                                                          10.0,
-                                                          10.0),
-                                                  scrollController:
-                                                      _scrollController,
-                                                  scrollable: false,
-                                                  showCursor: false)
-                                              : _onGetTitle()),
-                                      widget.note.deletedAt == null
-                                          ? Tooltip(
-                                              message: 'Update',
-                                              child:
-                                                  CoreElevatedButton.iconOnly(
-                                                onPressed: () {
-                                                  _onUpdate();
-                                                },
-                                                coreButtonStyle: ThemeDataCenter
-                                                    .getUpdateButtonStyle(
-                                                        context),
-                                                icon: const Icon(
-                                                    Icons.edit_note_rounded,
-                                                    size: 26.0),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width -
+                                                115.0,
+                                        child: checkTitleEmpty()
+                                            ? flutter_quill.QuillEditor(
+                                                controller:
+                                                    _titleQuillController,
+                                                readOnly:
+                                                    true, // true for view only mode
+                                                autoFocus: false,
+                                                expands: false,
+                                                focusNode: _focusNode,
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        10.0, 10.0, 10.0, 10.0),
+                                                scrollController:
+                                                    _scrollController,
+                                                scrollable: false,
+                                                showCursor: false)
+                                            : _onGetTitle()),
+                                    widget.note.deletedAt == null
+                                        ? Tooltip(
+                                            message: 'Update',
+                                            child: CoreElevatedButton.iconOnly(
+                                              onPressed: () {
+                                                _onUpdate();
+                                              },
+                                              coreButtonStyle: ThemeDataCenter
+                                                  .getUpdateButtonStyle(
+                                                      context),
+                                              icon: const Icon(
+                                                  Icons.edit_note_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          )
+                                        : Column(
+                                            children: [
+                                              Tooltip(
+                                                message: 'Restore',
+                                                child:
+                                                    CoreElevatedButton.iconOnly(
+                                                  onPressed: () {
+                                                    _onRestoreNoteFromTrash(
+                                                            context)
+                                                        .then((result) {
+                                                      if (result) {
+                                                        Provider.of<NoteNotifier>(
+                                                                context,
+                                                                listen: false)
+                                                            .onCountAll();
+
+                                                        Navigator
+                                                            .pushAndRemoveUntil(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (context) =>
+                                                                  const NoteListScreen(
+                                                                      noteConditionModel:
+                                                                          null)),
+                                                          (route) => false,
+                                                        );
+
+                                                        CoreNotification.show(
+                                                            context,
+                                                            CoreNotificationStatus
+                                                                .success,
+                                                            CoreNotificationAction
+                                                                .restore,
+                                                            'Note');
+                                                      } else {
+                                                        CoreNotification.show(
+                                                            context,
+                                                            CoreNotificationStatus
+                                                                .error,
+                                                            CoreNotificationAction
+                                                                .restore,
+                                                            'Note');
+                                                      }
+                                                    });
+                                                  },
+                                                  coreButtonStyle:
+                                                      ThemeDataCenter
+                                                          .getRestoreButtonStyle(
+                                                              context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .restore_from_trash_rounded,
+                                                      size: 26.0),
+                                                ),
                                               ),
-                                            )
-                                          : Column(
-                                              children: [
-                                                Tooltip(
-                                                  message: 'Restore',
-                                                  child: CoreElevatedButton
-                                                      .iconOnly(
-                                                    onPressed: () {
-                                                      _onRestoreNoteFromTrash(
+                                              const SizedBox(height: 2.0),
+                                              Tooltip(
+                                                message: 'Delete forever',
+                                                child:
+                                                    CoreElevatedButton.iconOnly(
+                                                  onPressed: () async {
+                                                    if (await CoreHelperWidget
+                                                        .confirmFunction(
+                                                            context)) {
+                                                      _onDeleteNoteForever(
                                                               context)
                                                           .then((result) {
                                                         if (result) {
@@ -671,7 +788,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                               CoreNotificationStatus
                                                                   .success,
                                                               CoreNotificationAction
-                                                                  .restore,
+                                                                  .delete,
                                                               'Note');
                                                         } else {
                                                           CoreNotification.show(
@@ -679,188 +796,128 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                               CoreNotificationStatus
                                                                   .error,
                                                               CoreNotificationAction
-                                                                  .restore,
+                                                                  .delete,
                                                               'Note');
                                                         }
                                                       });
-                                                    },
-                                                    coreButtonStyle:
-                                                        ThemeDataCenter
-                                                            .getRestoreButtonStyle(
-                                                                context),
-                                                    icon: const Icon(
-                                                        Icons
-                                                            .restore_from_trash_rounded,
-                                                        size: 26.0),
-                                                  ),
+                                                    }
+                                                  },
+                                                  coreButtonStyle: ThemeDataCenter
+                                                      .getDeleteForeverButtonStyle(
+                                                          context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .delete_forever_rounded,
+                                                      size: 26.0),
                                                 ),
-                                                const SizedBox(height: 2.0),
-                                                Tooltip(
-                                                  message: 'Delete forever',
-                                                  child: CoreElevatedButton
-                                                      .iconOnly(
-                                                    onPressed: () async {
-                                                      if (await CoreHelperWidget
-                                                          .confirmFunction(
-                                                              context)) {
-                                                        _onDeleteNoteForever(
-                                                                context)
-                                                            .then((result) {
-                                                          if (result) {
-                                                            Provider.of<NoteNotifier>(
-                                                                    context,
-                                                                    listen:
-                                                                        false)
-                                                                .onCountAll();
-
-                                                            Navigator
-                                                                .pushAndRemoveUntil(
-                                                              context,
-                                                              MaterialPageRoute(
-                                                                  builder: (context) =>
-                                                                      const NoteListScreen(
-                                                                          noteConditionModel:
-                                                                              null)),
-                                                              (route) => false,
-                                                            );
-
-                                                            CoreNotification.show(
-                                                                context,
-                                                                CoreNotificationStatus
-                                                                    .success,
-                                                                CoreNotificationAction
-                                                                    .delete,
-                                                                'Note');
-                                                          } else {
-                                                            CoreNotification.show(
-                                                                context,
-                                                                CoreNotificationStatus
-                                                                    .error,
-                                                                CoreNotificationAction
-                                                                    .delete,
-                                                                'Note');
-                                                          }
-                                                        });
-                                                      }
-                                                    },
-                                                    coreButtonStyle: ThemeDataCenter
-                                                        .getDeleteForeverButtonStyle(
-                                                            context),
-                                                    icon: const Icon(
-                                                        Icons
-                                                            .delete_forever_rounded,
-                                                        size: 26.0),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                    ],
-                                  ),
+                                              ),
+                                            ],
+                                          )
+                                  ],
                                 ),
                               ),
                             ),
-                            _buildSubject(),
-                            _buildLabels(),
-                            ScrollOnExpand(
-                              scrollOnExpand: true,
-                              scrollOnCollapse: false,
-                              child: ExpandablePanel(
-                                theme: const ExpandableThemeData(
-                                  headerAlignment:
-                                      ExpandablePanelHeaderAlignment.center,
-                                  tapBodyToCollapse: true,
-                                ),
-                                header: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "[${widget.note.id!}] ",
-                                        style: const TextStyle(
-                                            fontSize: 13.0,
-                                            color: Colors.black45),
-                                      ),
-                                      const Text(
-                                        "Content",
-                                        style: TextStyle(
-                                            fontSize: 13.0,
-                                            color: Colors.black45),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                collapsed: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                          _buildSubject(),
+                          _buildLabels(),
+                          ScrollOnExpand(
+                            scrollOnExpand: true,
+                            scrollOnCollapse: false,
+                            child: ExpandablePanel(
+                              theme: const ExpandableThemeData(
+                                headerAlignment:
+                                    ExpandablePanelHeaderAlignment.center,
+                                tapBodyToCollapse: true,
+                              ),
+                              header: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
                                   children: [
-                                    SizedBox(
-                                      height: 35,
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          shape: BoxShape.rectangle,
-                                          boxShadow: [],
-                                        ),
-                                        child: flutter_quill.QuillEditor(
-                                            controller:
-                                                _subDescriptionQuillController,
-                                            readOnly:
-                                                true, // true for view only mode
-                                            autoFocus: false,
-                                            expands: false,
-                                            focusNode: _focusNode,
-                                            padding: const EdgeInsets.all(4.0),
-                                            scrollController: _scrollController,
-                                            scrollable: false,
-                                            showCursor: false),
-                                      ),
-                                    ),
                                     Text(
-                                      '...',
-                                      style: GoogleFonts.montserrat(
-                                          fontStyle: FontStyle.italic,
-                                          fontSize: 14),
+                                      "[${widget.note.id!}] ",
+                                      style: const TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45),
+                                    ),
+                                    const Text(
+                                      "Content",
+                                      style: TextStyle(
+                                          fontSize: 13.0,
+                                          color: Colors.black45),
                                     ),
                                   ],
                                 ),
-                                expanded: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    flutter_quill.QuillEditor(
-                                        controller: _descriptionQuillController,
-                                        readOnly:
-                                            true, // true for view only mode
-                                        autoFocus: false,
-                                        expands: false,
-                                        focusNode: _focusNode,
-                                        padding: const EdgeInsets.all(4.0),
-                                        scrollController: _scrollController,
-                                        scrollable: false,
-                                        showCursor: false),
-                                  ],
-                                ),
-                                builder: (_, collapsed, expanded) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 10, right: 10, bottom: 10),
-                                    child: Expandable(
-                                      collapsed: collapsed,
-                                      expanded: expanded,
-                                      theme: const ExpandableThemeData(
-                                          crossFadePoint: 0),
-                                    ),
-                                  );
-                                },
                               ),
+                              collapsed: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 35,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.rectangle,
+                                        boxShadow: [],
+                                      ),
+                                      child: flutter_quill.QuillEditor(
+                                          controller:
+                                              _subDescriptionQuillController,
+                                          readOnly:
+                                              true, // true for view only mode
+                                          autoFocus: false,
+                                          expands: false,
+                                          focusNode: _focusNode,
+                                          padding: const EdgeInsets.all(4.0),
+                                          scrollController: _scrollController,
+                                          scrollable: false,
+                                          showCursor: false),
+                                    ),
+                                  ),
+                                  Text(
+                                    '...',
+                                    style: GoogleFonts.montserrat(
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                              expanded: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  flutter_quill.QuillEditor(
+                                      controller: _descriptionQuillController,
+                                      readOnly: true, // true for view only mode
+                                      autoFocus: false,
+                                      expands: false,
+                                      focusNode: _focusNode,
+                                      padding: const EdgeInsets.all(4.0),
+                                      scrollController: _scrollController,
+                                      scrollable: false,
+                                      showCursor: false),
+                                ],
+                              ),
+                              builder: (_, collapsed, expanded) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10, bottom: 10),
+                                  child: Expandable(
+                                    collapsed: collapsed,
+                                    expanded: expanded,
+                                    theme: const ExpandableThemeData(
+                                        crossFadePoint: 0),
+                                  ),
+                                );
+                              },
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

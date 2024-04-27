@@ -28,6 +28,7 @@ class _SettingScreenState extends State<SettingScreen> {
   bool isExpandedNoteContent = false;
   bool isExpandedSubjectActions = false;
   bool isExpandedTemplateContent = false;
+  bool isSetBackgroundImage = false;
 
   String? themeString;
   bool isSetThemeDefault = false;
@@ -1578,6 +1579,7 @@ class _SettingScreenState extends State<SettingScreen> {
         settingNotifier.isExpandedSubjectActions ?? false;
     isExpandedTemplateContent =
         settingNotifier.isExpandedTemplateContent ?? false;
+    isSetBackgroundImage = settingNotifier.isSetBackgroundImage ?? false;
 
     themeString = settingNotifier.themeString;
     switch (themeString) {
@@ -1687,7 +1689,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 );
               },
               coreButtonStyle:
-                  ThemeDataCenter.getCoreScreenButtonStyle(context),
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
             ),
           )
         ],
@@ -1897,7 +1899,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     value: isActiveSound,
                     onChanged: (bool value) {
                       setState(() {
-                        settingNotifier.setIsActiveSound(value!).then((success) {
+                        settingNotifier.setIsActiveSound(value).then((success) {
                           if (success) {
                             setState(() {
                               isActiveSound = value;
@@ -1914,6 +1916,42 @@ class _SettingScreenState extends State<SettingScreen> {
                     },
                   );
                 }),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return SwitchListTile(
+                        dense: true,
+                        contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+                        title: Row(
+                          children: [
+                            Flexible(
+                              child: Text('Set background image',
+                                  style: itemLabelTextStyle(context)),
+                            ),
+                          ],
+                        ),
+                        value: isSetBackgroundImage,
+                        onChanged: (bool value) {
+                          setState(() {
+                            settingNotifier.setIsSetBackgroundImage(value).then((success) {
+                              if (success) {
+                                setState(() {
+                                  isSetBackgroundImage = value;
+                                });
+
+                                CoreNotification.show(
+                                    context,
+                                    CoreNotificationStatus.success,
+                                    CoreNotificationAction.update,
+                                    'Setting');
+                              }
+                            });
+                          });
+                        },
+                      );
+                    }),
               ),
               Container(
                 decoration: BoxDecoration(

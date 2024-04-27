@@ -171,7 +171,14 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
     final subjectNotifier = Provider.of<SubjectNotifier>(context);
 
     return CoreFullScreenDialog(
-      title: widget.subject == null ? 'Create' : 'Update',
+      title: Text(
+        widget.subject == null ? 'Create' : 'Update',
+        style: GoogleFonts.montserrat(
+            fontStyle: FontStyle.italic,
+            fontSize: 26,
+            color: const Color(0xFF404040),
+            fontWeight: FontWeight.bold),
+      ),
       isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -198,14 +205,12 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                     CoreNotificationAction.create, 'Subject');
 
                 if (widget.redirectFromEnum == RedirectFromEnum.notes) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NoteListScreen(
-                            noteConditionModel: null,
-                            isOpenSubjectsForFilter: true)),
-                    (route) => false,
-                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const NoteListScreen(
+                              noteConditionModel: null,
+                              isOpenSubjectsForFilter: true)));
                 } else {
                   Navigator.pushAndRemoveUntil(
                     context,

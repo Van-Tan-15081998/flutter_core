@@ -9,15 +9,17 @@ class SettingNotifier with ChangeNotifier {
   bool? _isExpandedNoteContent;
   bool? _isExpandedSubjectActions;
   bool? _isExpandedTemplateContent;
+  bool? _isSetBackgroundImage;
 
   bool? get isSetColorAccordingSubjectColor => _isSetColorAccordingSubjectColor;
   bool? get isActiveSound => _isActiveSound;
   bool? get isExpandedNoteContent => _isExpandedNoteContent;
   bool? get isExpandedSubjectActions => _isExpandedSubjectActions;
   bool? get isExpandedTemplateContent => _isExpandedTemplateContent;
+  bool? get isSetBackgroundImage => _isSetBackgroundImage;
 
   String? _themeString;
-  String? get themeString =>  _themeString;
+  String? get themeString => _themeString;
 
   SettingNotifier() {
     init();
@@ -30,6 +32,8 @@ class SettingNotifier with ChangeNotifier {
         await getIsSetColorAccordingSubjectColor();
 
     _isActiveSound = await getIsActiveSound();
+
+    _isSetBackgroundImage = await getIsSetBackgroundImage();
 
     _isExpandedNoteContent = await getIsExpandedNoteContent();
 
@@ -61,7 +65,7 @@ class SettingNotifier with ChangeNotifier {
   Future<bool?> getIsActiveSound() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getIsActiveSound();
 
     if (result == null) {
@@ -75,10 +79,27 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
+  Future<bool?> getIsSetBackgroundImage() async {
+    bool? result;
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    result = await settingSharedPreferences.getIsSetBackgroundImage();
+
+    if (result == null) {
+      // Set false
+      await settingSharedPreferences.setIsSetBackgroundImage(false);
+
+      // Get again
+      result = await getIsSetBackgroundImage();
+    }
+
+    return result;
+  }
+
   Future<bool?> getIsExpandedNoteContent() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getIsExpandedNoteContent();
 
     if (result == null) {
@@ -95,7 +116,7 @@ class SettingNotifier with ChangeNotifier {
   Future<bool?> getIsExpandedSubjectActions() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getIsExpandedSubjectActions();
 
     if (result == null) {
@@ -112,7 +133,7 @@ class SettingNotifier with ChangeNotifier {
   Future<bool?> getIsExpandedTemplateContent() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getIsExpandedTemplateContent();
 
     if (result == null) {
@@ -129,7 +150,7 @@ class SettingNotifier with ChangeNotifier {
   Future<String?> getThemeString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getThemeString();
 
     if (result == null) {
@@ -171,7 +192,7 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setIsActiveSound(isSet);
 
     result = await settingSharedPreferences.getIsActiveSound();
@@ -185,12 +206,31 @@ class SettingNotifier with ChangeNotifier {
     return false;
   }
 
+  Future<bool> setIsSetBackgroundImage(bool isSet) async {
+    bool? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    await settingSharedPreferences.setIsSetBackgroundImage(isSet);
+
+    result = await settingSharedPreferences.getIsSetBackgroundImage();
+
+    if (result != null) {
+      _isSetBackgroundImage = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
   Future<bool> setIsExpandedNoteContent(bool isSet) async {
     bool? result;
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setIsExpandedNoteContent(isSet);
 
     result = await settingSharedPreferences.getIsExpandedNoteContent();
@@ -209,7 +249,7 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setIsExpandedSubjectActions(isSet);
 
     result = await settingSharedPreferences.getIsExpandedSubjectActions();
@@ -228,7 +268,7 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setIsExpandedTemplateContent(isSet);
 
     result = await settingSharedPreferences.getIsExpandedTemplateContent();
@@ -247,7 +287,7 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setThemeString(themeStr);
 
     result = await settingSharedPreferences.getThemeString();
