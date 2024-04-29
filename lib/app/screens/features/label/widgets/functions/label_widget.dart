@@ -57,11 +57,15 @@ class _LabelWidgetState extends State<LabelWidget> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          LabelDetailScreen(label: widget.label)));
+                      builder: (context) => LabelDetailScreen(
+                            label: widget.label,
+                            redirectFrom: null,
+                          )));
             },
             backgroundColor: settingNotifier.isSetBackgroundImage == true
-                ? Colors.transparent
+                ? settingNotifier.isSetBackgroundImage == true
+                    ? Colors.white.withOpacity(0.30)
+                    : Colors.transparent
                 : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
@@ -76,7 +80,9 @@ class _LabelWidgetState extends State<LabelWidget> {
                     }
                   },
                   backgroundColor: settingNotifier.isSetBackgroundImage == true
-                      ? Colors.transparent
+                      ? settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.30)
+                          : Colors.transparent
                       : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getDeleteSlidableActionColorStyle(
@@ -100,13 +106,34 @@ class _LabelWidgetState extends State<LabelWidget> {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(Icons.create_rounded,
-                              size: 13.0,
-                              color: ThemeDataCenter.getTopCardLabelStyle(
-                                  context)),
-                          const SizedBox(width: 5.0),
-                          Text(CommonConverters.toTimeString(time: widget.label.createdAt!),
-                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.create_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.createdAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context))),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -121,13 +148,34 @@ class _LabelWidgetState extends State<LabelWidget> {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(Icons.update_rounded,
-                              size: 13.0,
-                              color: ThemeDataCenter.getTopCardLabelStyle(
-                                  context)),
-                          const SizedBox(width: 5.0),
-                          Text(CommonConverters.toTimeString(time: widget.label.updatedAt!),
-                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.update_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.updatedAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)))
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -142,13 +190,34 @@ class _LabelWidgetState extends State<LabelWidget> {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(Icons.delete_rounded,
-                              size: 13.0,
-                              color: ThemeDataCenter.getTopCardLabelStyle(
-                                  context)),
-                          const SizedBox(width: 5.0),
-                          Text(CommonConverters.toTimeString(time: widget.label.deletedAt!),
-                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.deletedAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)))
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),

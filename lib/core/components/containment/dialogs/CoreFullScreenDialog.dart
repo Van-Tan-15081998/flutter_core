@@ -37,6 +37,8 @@ class CoreFullScreenDialog extends StatefulWidget {
 
   String? homeLabel;
 
+  final Widget? appbarLeading;
+
   final Function? onSubmit;
   final Function? onUndo;
   final Function? onRedo;
@@ -57,6 +59,7 @@ class CoreFullScreenDialog extends StatefulWidget {
       required this.onRedo,
       required this.onBack,
       required this.onGoHome,
+      required this.appbarLeading,
       this.homeLabel,
       required this.isShowGeneralActionButton,
       required this.isShowOptionActionButton,
@@ -154,10 +157,11 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
       appBar: _buildAppBar(context, settingNotifier),
       body: settingNotifier.isSetBackgroundImage == true
           ? DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
                     image: AssetImage(
-                        "assets/images/cartoon-background-image.jpg"),
+                        settingNotifier.backgroundImageSourceString ??
+                            CommonStyles.backgroundImageSourceStringDefault()),
                     fit: BoxFit.cover),
               ),
               child: Column(
@@ -231,10 +235,14 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                   if (widget.isConfirmToClose!) {
                                     if (await CoreHelperWidget.confirmFunction(
                                         context)) {
-                                      Navigator.pop(context);
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
                                     }
                                   } else {
-                                    Navigator.pop(context);
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
                                   }
                                 },
                                 coreButtonStyle: CoreButtonStyle.options(
@@ -312,14 +320,22 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
+      ),
+      leading: widget.appbarLeading ?? IconButton(
+        style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+        icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
       title: widget.title,
       actions: [_buildAppBarActionButtons()],
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      iconTheme: const IconThemeData(
-        color: Color(0xFF404040), // Set the color you desire
-      ),
     );
   }
 }

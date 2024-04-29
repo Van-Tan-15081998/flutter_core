@@ -14,9 +14,11 @@ import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dar
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../core/stores/icons/CoreStoreIcons.dart';
+import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/enums/CommonEnums.dart';
+import '../../setting/providers/setting_notifier.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
 import '../subjects/databases/subject_db_manager.dart';
@@ -1213,16 +1215,16 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final templateNotifier = Provider.of<TemplateNotifier>(context);
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      appbarLeading: null,
       isShowOptionActionButton: true,
       title: Text(
-        widget.template == null ? 'Create' : 'Update',
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 26,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
+        widget.template == null ?
+        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.create') :
+        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.update'),
+        style: CommonStyles.screenTitleTextStyle(fontSize: 26.0, color: ThemeDataCenter.getScreenTitleTextColor(context))
       ),
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -1269,7 +1271,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const TemplateListScreen(
-                          templateConditionModel: null)),
+                          templateConditionModel: null, redirectFrom: null)),
                   (route) => false,
                 );
               } else {
@@ -1303,6 +1305,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                   template: result,
                                   labels: selectedTemplateLabels,
                                   subject: selectedSubject,
+                              redirectFrom: RedirectFromEnum.templateUpdate,
                                 )),
                         (route) => false);
                   }
@@ -1368,22 +1371,34 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
-                      child: Text(
-                        'Title:',
-                        style: GoogleFonts.montserrat(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                context)),
+                    Container(
+                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent
+                      ),
+                      child: Padding(
+                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        child: Text(
+                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.title').addColon().toString(),
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context)),
+                        ),
                       ),
                     ),
                   ],
                 ),
                 Container(
                   decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
                       border: Border.all(
                         color: const Color(0xFF404040),
                         width: 1.0,
@@ -1391,9 +1406,9 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
-                    decoration: const BoxDecoration(
-                        color: Color(0xFFF7F7F7),
-                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    decoration: BoxDecoration(
+                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
+                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
                     constraints: const BoxConstraints(maxHeight: 60.0),
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.all(6.0),
@@ -1421,23 +1436,35 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
-                      child: Text(
-                        key: _detailContentKeyForScroll,
-                        'Content:',
-                        style: GoogleFonts.montserrat(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                context)),
+                    Container(
+                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent
+                      ),
+                      child: Padding(
+                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        child: Text(
+                          key: _detailContentKeyForScroll,
+                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.content').addColon().toString(),
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context)),
+                        ),
                       ),
                     ),
                   ],
                 ),
                 Container(
                   decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
                       border: Border.all(
                         color: const Color(0xFF404040),
                         width: 1.0,
@@ -1445,9 +1472,9 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                       borderRadius:
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
-                    decoration: const BoxDecoration(
-                        color: Color(0xFFF7F7F7),
-                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    decoration: BoxDecoration(
+                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
+                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
                     constraints: BoxConstraints(
                         minHeight: 150.0,
                         maxHeight: _detailContentContainerHeight),
@@ -1477,14 +1504,26 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'Subject:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                              context)),
+                    Container(
+                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent
+                      ),
+                      child: Padding(
+                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        child: Text(
+                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.subject').addColon().toString(),
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -1496,46 +1535,54 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                           snapshot.data!.isNotEmpty) {
                         _setSelectedSubject();
 
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: DropdownButtonFormField(
-                                    isExpanded: true,
-                                    decoration: InputDecoration(
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Color(0xff343a40), width: 2),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
+                        return Container(
+                          decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(12)),
+                              color: settingNotifier.isSetBackgroundImage == true
+                                  ? Colors.white.withOpacity(0.65)
+                                  : Colors.transparent
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: DropdownButtonFormField(
+                                      isExpanded: true,
+                                      decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Color(0xff343a40), width: 2),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              color: Color(0xff343a40), width: 2),
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        filled: true,
+                                        fillColor: Colors.white,
                                       ),
-                                      border: OutlineInputBorder(
-                                        borderSide: const BorderSide(
-                                            color: Color(0xff343a40), width: 2),
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                    ),
-                                    dropdownColor: Colors.white,
-                                    value: selectedSubject,
-                                    onChanged: (SubjectModel? newValue) {
-                                      setState(() {
-                                        selectedSubject = newValue;
-                                      });
-                                    },
-                                    items: snapshot.data!.map((item) {
-                                      return DropdownMenuItem(
-                                        value: item,
-                                        child: Text(item.title,
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 1),
-                                      );
-                                    }).toList()),
-                              ),
-                            ],
+                                      dropdownColor: Colors.white,
+                                      value: selectedSubject,
+                                      onChanged: (SubjectModel? newValue) {
+                                        setState(() {
+                                          selectedSubject = newValue;
+                                        });
+                                      },
+                                      items: snapshot.data!.map((item) {
+                                        return DropdownMenuItem(
+                                          value: item,
+                                          child: Text(item.title,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1),
+                                        );
+                                      }).toList()),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       } else if (snapshot.hasError) {
@@ -1552,39 +1599,66 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text(
-                      'Labels:',
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                              context)),
+                    Container(
+                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent
+                      ),
+                      child: Padding(
+                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        child: Text(
+                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.label').addColon().toString(),
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                CoreElevatedButton.icon(
-                  icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
-                  label: Text('Choose labels',
-                      style: CommonStyles.buttonTextStyle),
-                  onPressed: () {
-                    if (_titleFocusNode.hasFocus) {
-                      _titleFocusNode.unfocus();
-                    }
-                    if (_detailContentFocusNode.hasFocus) {
-                      _detailContentFocusNode.unfocus();
-                    }
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        CoreElevatedButton.icon(
+                          icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
+                          label: Text('Choose labels',
+                              style: CommonStyles.buttonTextStyle),
+                          onPressed: () {
+                            if (_titleFocusNode.hasFocus) {
+                              _titleFocusNode.unfocus();
+                            }
+                            if (_detailContentFocusNode.hasFocus) {
+                              _detailContentFocusNode.unfocus();
+                            }
 
-                    setState(() {
-                      isShowDialogSetLabel = true;
-                    });
-                  },
-                  coreButtonStyle: CoreButtonStyle.options(
-                      coreStyle: CoreStyle.outlined,
-                      coreColor: CoreColor.dark,
-                      coreRadius: CoreRadius.radius_6,
-                      kitForegroundColorOption: const Color(0xff1f1f1f),
-                      coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                            setState(() {
+                              isShowDialogSetLabel = true;
+                            });
+                          },
+                          coreButtonStyle: CoreButtonStyle.options(
+                              coreStyle: CoreStyle.outlined,
+                              coreColor: CoreColor.dark,
+                              coreRadius: CoreRadius.radius_6,
+                              kitForegroundColorOption: const Color(0xff1f1f1f),
+                              coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 _buildLabels(),
                 const SizedBox(

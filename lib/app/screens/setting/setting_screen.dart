@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_core_v3/app/library/common/languages/CommonLanguages.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/notifications/CoreNotification.dart';
+import '../../library/common/dimensions/CommonDimensions.dart';
+import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
 import '../home/home_screen.dart';
 import 'providers/setting_notifier.dart';
@@ -15,20 +20,22 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-
   TextStyle itemLabelTextStyle(BuildContext context) {
     return TextStyle(
-      color: ThemeDataCenter.getAloneTextColorStyle(context),
-      fontSize: 18.0,
-      fontWeight: FontWeight.w400
-    );
+        color: ThemeDataCenter.getAloneTextColorStyle(context),
+        fontSize: 18.0,
+        fontWeight: FontWeight.w400);
   }
+
   bool isSetColorAccordingSubjectColor = false;
   bool isActiveSound = false;
   bool isExpandedNoteContent = false;
   bool isExpandedSubjectActions = false;
   bool isExpandedTemplateContent = false;
   bool isSetBackgroundImage = false;
+  String? backgroundImageSourceString;
+
+  String? languageString;
 
   String? themeString;
   bool isSetThemeDefault = false;
@@ -73,15 +80,25 @@ class _SettingScreenState extends State<SettingScreen> {
                     Row(
                       children: [
                         Container(
-                            width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                            width: 20.0,
+                            height: 8.0,
+                            color: const Color(0xff1f1f1f)),
                         Container(
-                            width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                            width: 20.0,
+                            height: 8.0,
+                            color: const Color(0xff1f1f1f)),
                         Container(
-                            width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                            width: 20.0,
+                            height: 8.0,
+                            color: const Color(0xff1f1f1f)),
                         Container(
-                            width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                            width: 20.0,
+                            height: 8.0,
+                            color: const Color(0xff1f1f1f)),
                         Container(
-                            width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                            width: 20.0,
+                            height: 8.0,
+                            color: const Color(0xff1f1f1f)),
                       ],
                     )
                   ],
@@ -150,11 +167,20 @@ class _SettingScreenState extends State<SettingScreen> {
                 const SizedBox(height: 5.0),
                 Row(
                   children: [
-                    Container(width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                    Container(
+                        width: 20.0,
+                        height: 8.0,
+                        color: const Color(0xff1f1f1f)),
                     Container(width: 20.0, height: 8.0, color: Colors.white),
-                    Container(width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                    Container(
+                        width: 20.0,
+                        height: 8.0,
+                        color: const Color(0xff1f1f1f)),
                     Container(width: 20.0, height: 8.0, color: Colors.white),
-                    Container(width: 20.0, height: 8.0, color: const Color(0xff1f1f1f)),
+                    Container(
+                        width: 20.0,
+                        height: 8.0,
+                        color: const Color(0xff1f1f1f)),
                   ],
                 )
               ],
@@ -491,8 +517,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Number 3',
-                          style: itemLabelTextStyle(context)),
+                      child:
+                          Text('Number 3', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -946,8 +972,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child:
-                          Text('Beach', style: itemLabelTextStyle(context)),
+                      child: Text('Beach', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1310,8 +1335,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child:
-                          Text('Pinks', style: itemLabelTextStyle(context)),
+                      child: Text('Pinks', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1569,6 +1593,12 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
     isSetColorAccordingSubjectColor =
@@ -1582,6 +1612,9 @@ class _SettingScreenState extends State<SettingScreen> {
     isSetBackgroundImage = settingNotifier.isSetBackgroundImage ?? false;
 
     themeString = settingNotifier.themeString;
+    backgroundImageSourceString = settingNotifier.backgroundImageSourceString;
+    languageString = settingNotifier.languageString;
+
     switch (themeString) {
       case 'isSetThemeDefault':
         {
@@ -1671,328 +1704,805 @@ class _SettingScreenState extends State<SettingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-      appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.iconOnly(
-              icon: const Icon(Icons.home_rounded, size: 25.0),
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const HomeScreen(
-                            title: 'Hi Notes',
-                          )),
-                  (route) => false,
-                );
-              },
-              coreButtonStyle:
-                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            ),
-          )
-        ],
-        backgroundColor: ThemeDataCenter.getBackgroundColor(context),
-        title: Text(
-          'Setting',
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 30,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(
-          color: Color(0xFF404040),
-        ),
-      ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                    color: const Color(0xFF202124),
-                    borderRadius: BorderRadius.circular(4.0)),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 10, 0, 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Display',
-                          style: GoogleFonts.montserrat(
-                              fontStyle: FontStyle.italic,
-                              fontSize: 20,
-                              color: ThemeDataCenter.getAloneTextColorStyle(context),
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
+      extendBodyBehindAppBar:
+          settingNotifier.isSetBackgroundImage == true ? true : false,
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
+      appBar: _buildAppBar(context, settingNotifier),
+      body: settingNotifier.isSetBackgroundImage == true
+          ? DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        settingNotifier.backgroundImageSourceString ??
+                            CommonStyles.backgroundImageSourceStringDefault()),
+                    fit: BoxFit.cover),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return SwitchListTile(
-                    contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                    title: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                              'Set note and template background color according to subject color',
-                              style: itemLabelTextStyle(context)),
-                        ),
-                      ],
-                    ),
-                    value: isSetColorAccordingSubjectColor,
-                    onChanged: (bool value) {
-                      setState(() {
-                        settingNotifier
-                            .setIsSetColorAccordingSubjectColor(value)
-                            .then((success) {
-                          if (success) {
-                            setState(() {
-                              isSetColorAccordingSubjectColor = value;
-                            });
+              child: _buildBody(context, settingNotifier),
+            )
+          : _buildBody(context, settingNotifier),
+    );
+  }
 
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.update,
-                                'Setting');
-                          }
-                        });
-                      });
-                    },
-                  );
-                }),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return SwitchListTile(
-                    contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                    title: Row(
-                      children: [
-                        Flexible(
-                          child: Text('Note content expanded',
-                              style: itemLabelTextStyle(context)),
-                        ),
-                      ],
+  Widget _buildBody(BuildContext context, SettingNotifier settingNotifier) {
+    return Column(
+      children: [
+        settingNotifier.isSetBackgroundImage == true
+            ? SizedBox(height: CommonDimensions.scaffoldAppBarHeight(context))
+            : Container(),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Card(
+                    color: Colors.transparent,
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getBorderCardColorStyle(context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(6.0),
                     ),
-                    value: isExpandedNoteContent,
-                    onChanged: (bool value) {
-                      setState(() {
-                        settingNotifier
-                            .setIsExpandedNoteContent(value)
-                            .then((success) {
-                          if (success) {
-                            setState(() {
-                              isExpandedNoteContent = value;
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.update,
-                                'Setting');
-                          }
-                        });
-                      });
-                    },
-                  );
-                }),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return SwitchListTile(
-                    contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                    title: Row(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
                       children: [
-                        Flexible(
-                          child: Text('Template content expanded',
-                              style: itemLabelTextStyle(context)),
-                        ),
-                      ],
-                    ),
-                    value: isExpandedTemplateContent,
-                    onChanged: (bool value) {
-                      setState(() {
-                        settingNotifier
-                            .setIsExpandedTemplateContent(value)
-                            .then((success) {
-                          if (success) {
-                            setState(() {
-                              isExpandedTemplateContent = value;
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.update,
-                                'Setting');
-                          }
-                        });
-                      });
-                    },
-                  );
-                }),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return SwitchListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                    title: Row(
-                      children: [
-                        Flexible(
-                          child: Text('Subject actions expanded',
-                              style: itemLabelTextStyle(context)),
-                        ),
-                      ],
-                    ),
-                    value: isExpandedSubjectActions,
-                    onChanged: (bool value) {
-                      setState(() {
-                        settingNotifier
-                            .setIsExpandedSubjectActions(value)
-                            .then((success) {
-                          if (success) {
-                            setState(() {
-                              isExpandedSubjectActions = value;
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.update,
-                                'Setting');
-                          }
-                        });
-                      });
-                    },
-                  );
-                }),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return SwitchListTile(
-                    dense: true,
-                    contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                    title: Row(
-                      children: [
-                        Flexible(
-                          child: Text('Sounds',
-                              style: itemLabelTextStyle(context)),
-                        ),
-                      ],
-                    ),
-                    value: isActiveSound,
-                    onChanged: (bool value) {
-                      setState(() {
-                        settingNotifier.setIsActiveSound(value).then((success) {
-                          if (success) {
-                            setState(() {
-                              isActiveSound = value;
-                            });
-
-                            CoreNotification.show(
-                                context,
-                                CoreNotificationStatus.success,
-                                CoreNotificationAction.update,
-                                'Setting');
-                          }
-                        });
-                      });
-                    },
-                  );
-                }),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return SwitchListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-                        title: Row(
-                          children: [
-                            Flexible(
-                              child: Text('Set background image',
-                                  style: itemLabelTextStyle(context)),
+                        StickyHeader(
+                          header: SizedBox(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: Color(0xFF202124),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(4, 10, 0, 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Display',
+                                        style: GoogleFonts.montserrat(
+                                            fontStyle: FontStyle.italic,
+                                            fontSize: 20,
+                                            color: Colors.white54,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
-                        value: isSetBackgroundImage,
-                        onChanged: (bool value) {
-                          setState(() {
-                            settingNotifier.setIsSetBackgroundImage(value).then((success) {
-                              if (success) {
-                                setState(() {
-                                  isSetBackgroundImage = value;
-                                });
+                          ),
+                          content: Container(
+                            decoration: BoxDecoration(
+                              color: settingNotifier.isSetBackgroundImage ==
+                                      true
+                                  ? Colors.white.withOpacity(0.85)
+                                  : ThemeDataCenter
+                                      .getTableCalendarBackgroundColor(context),
+                            ),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  'Set note and template background color according to subject color',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isSetColorAccordingSubjectColor,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsSetColorAccordingSubjectColor(
+                                                      value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isSetColorAccordingSubjectColor =
+                                                          value;
+                                                    });
 
-                                CoreNotification.show(
-                                    context,
-                                    CoreNotificationStatus.success,
-                                    CoreNotificationAction.update,
-                                    'Setting');
-                              }
-                            });
-                          });
-                        },
-                      );
-                    }),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                    color: const Color(0xFF202124),
-                    borderRadius: BorderRadius.circular(4.0)),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 10, 0, 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Themes',
-                          style: GoogleFonts.montserrat(
-                              fontStyle: FontStyle.italic,
-                              fontSize: 20,
-                              color: ThemeDataCenter.getAloneTextColorStyle(context),
-                              fontWeight: FontWeight.w600)),
-                    ],
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  'Note content expanded',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isExpandedNoteContent,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsExpandedNoteContent(
+                                                      value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isExpandedNoteContent =
+                                                          value;
+                                                    });
+
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  'Template content expanded',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isExpandedTemplateContent,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsExpandedTemplateContent(
+                                                      value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isExpandedTemplateContent =
+                                                          value;
+                                                    });
+
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        dense: true,
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  'Subject actions expanded',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isExpandedSubjectActions,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsExpandedSubjectActions(
+                                                      value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isExpandedSubjectActions =
+                                                          value;
+                                                    });
+
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        dense: true,
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text('Sounds',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isActiveSound,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsActiveSound(value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isActiveSound = value;
+                                                    });
+
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        dense: true,
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  'Set background image',
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isSetBackgroundImage,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsSetBackgroundImage(
+                                                      value)
+                                                  .then(
+                                                (success) async {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isSetBackgroundImage =
+                                                          value;
+                                                    });
+
+                                                    CoreNotification.show(
+                                                        context,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CoreNotificationAction
+                                                            .update,
+                                                        'Setting');
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                isSetBackgroundImage
+                                    ? SizedBox(
+                                        height: 230.0,
+                                        child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: CommonStyles
+                                                  .backgroundImageSourceStringList()
+                                              .length,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(4.0),
+                                              child: Stack(
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(
+                                                        () {
+                                                          settingNotifier
+                                                              .setBackgroundImageSourceString(
+                                                                  CommonStyles
+                                                                          .backgroundImageSourceStringList()[
+                                                                      index])
+                                                              .then(
+                                                            (success) async {
+                                                              if (success) {
+                                                                setState(() {
+                                                                  backgroundImageSourceString =
+                                                                      CommonStyles
+                                                                              .backgroundImageSourceStringList()[
+                                                                          index];
+                                                                });
+
+                                                                CoreNotification.show(
+                                                                    context,
+                                                                    CoreNotificationStatus
+                                                                        .success,
+                                                                    CoreNotificationAction
+                                                                        .update,
+                                                                    'Setting');
+                                                              }
+                                                            },
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                    child: Card(
+                                                      elevation:
+                                                          4, // Độ nổi của thẻ
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                10), // Bo tròn góc của thẻ
+                                                      ),
+                                                      child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          child: Container(
+                                                            height: 180.0,
+                                                            width: 100.0,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              image: DecorationImage(
+                                                                  image: AssetImage(
+                                                                      CommonStyles
+                                                                              .backgroundImageSourceStringList()[
+                                                                          index]),
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          )),
+                                                    ),
+                                                  ),
+                                                  backgroundImageSourceString !=
+                                                              null &&
+                                                          backgroundImageSourceString ==
+                                                              CommonStyles
+                                                                      .backgroundImageSourceStringList()[
+                                                                  index]
+                                                      ? const Positioned(
+                                                          top: 0,
+                                                          right: 0,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .end,
+                                                            children: [
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(
+                                                                            8.0),
+                                                                child: FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .circleCheck,
+                                                                  color: Colors
+                                                                      .lightGreenAccent,
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        )
+                                                      : Container()
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 25.0),
+                  Card(
+                    color: Colors.transparent,
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getBorderCardColorStyle(context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        StickyHeader(
+                          header: SizedBox(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: Color(0xFF202124),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(4, 10, 0, 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Languages',
+                                        style: GoogleFonts.montserrat(
+                                            fontStyle: FontStyle.italic,
+                                            fontSize: 20,
+                                            color: Colors.white54,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          content: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.85)
+                                        : ThemeDataCenter
+                                            .getTableCalendarBackgroundColor(
+                                                context),
+                              ),
+                              child: SizedBox(
+                                height: 450,
+                                child: GridView.count(
+                                    primary: false,
+                                    padding: const EdgeInsets.all(20),
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    crossAxisCount: 3,
+                                    children:  List.generate(
+                                        CommonLanguages.languageStringList()
+                                            .length,
+                                        (index) => Padding(
+                                              padding: const EdgeInsets.all(4.0),
+                                              child: Stack(
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () {
+                                                      setState(
+                                                        () {
+                                                          settingNotifier
+                                                              .setLanguageString(
+                                                                  CommonLanguages
+                                                                          .languageStringList()[
+                                                                      index])
+                                                              .then(
+                                                            (success) async {
+                                                              if (success) {
+                                                                setState(() {
+                                                                  languageString =
+                                                                      CommonLanguages
+                                                                              .languageStringList()[
+                                                                          index];
+                                                                });
+
+                                                                CoreNotification.show(
+                                                                    context,
+                                                                    CoreNotificationStatus
+                                                                        .success,
+                                                                    CoreNotificationAction
+                                                                        .update,
+                                                                    'Setting');
+                                                              }
+                                                            },
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                    child: Card(
+                                                      elevation:
+                                                          4, // Độ nổi của thẻ
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                10), // Bo tròn góc của thẻ
+                                                      ),
+                                                      child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                          child: Container(
+                                                            height: 60.0,
+                                                            width: 100.0,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              image: DecorationImage(
+                                                                  image: AssetImage(
+                                                                      CommonLanguages.flagLanguageSourceString(
+                                                                          CommonLanguages.languageStringList()[
+                                                                              index])),
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          )),
+                                                    ),
+                                                  ),
+                                                  languageString != null &&
+                                                          languageString ==
+                                                              CommonLanguages
+                                                                      .languageStringList()[
+                                                                  index]
+                                                      ? const Positioned(
+                                                          top: 0,
+                                                          right: 0,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .end,
+                                                            children: [
+                                                              Padding(
+                                                                padding:
+                                                                    EdgeInsets
+                                                                        .all(8.0),
+                                                                child: FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .circleCheck,
+                                                                  color: Colors
+                                                                      .lightGreenAccent,
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        )
+                                                      : Container()
+                                                ],
+                                              ),
+                                            ))),
+                              )),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25.0),
+                  Card(
+                    color: Colors.transparent,
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getBorderCardColorStyle(context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        StickyHeader(
+                          header: SizedBox(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: Color(0xFF202124),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(4, 10, 0, 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Themes',
+                                        style: GoogleFonts.montserrat(
+                                            fontStyle: FontStyle.italic,
+                                            fontSize: 20,
+                                            color: Colors.white54,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          content: Container(
+                            decoration: BoxDecoration(
+                              color: settingNotifier.isSetBackgroundImage ==
+                                      true
+                                  ? Colors.white.withOpacity(0.85)
+                                  : ThemeDataCenter
+                                      .getTableCalendarBackgroundColor(context),
+                            ),
+                            child: Column(
+                              children: [
+                                setThemeDefault(settingNotifier),
+                                setThemeBlackAndWhite(settingNotifier),
+                                setThemeBeachTowels(settingNotifier),
+                                setThemeBeautifulBlues(settingNotifier),
+                                setThemeMoonlightBytes(settingNotifier),
+                                setThemeNumber3(settingNotifier),
+                                setThemeAndroidLollipop(settingNotifier),
+                                setThemeRainbowDash(settingNotifier),
+                                setThemeShadesOfWhite(settingNotifier),
+                                setThemeBlueberryBasket(settingNotifier),
+                                setThemeBeach(settingNotifier),
+                                setThemeCappuccino(settingNotifier),
+                                setThemeGreyLavenderColors(settingNotifier),
+                                setThemeMetroUIColors(settingNotifier),
+                                setThemePinks(settingNotifier),
+                                setThemeNeverDoubt(settingNotifier),
+                                setThemeProgramCatalog(settingNotifier),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              setThemeDefault(settingNotifier),
-              setThemeBlackAndWhite(settingNotifier),
-              setThemeBeachTowels(settingNotifier),
-              setThemeBeautifulBlues(settingNotifier),
-              setThemeMoonlightBytes(settingNotifier),
-              setThemeNumber3(settingNotifier),
-              setThemeAndroidLollipop(settingNotifier),
-              setThemeRainbowDash(settingNotifier),
-              setThemeShadesOfWhite(settingNotifier),
-              setThemeBlueberryBasket(settingNotifier),
-              setThemeBeach(settingNotifier),
-              setThemeCappuccino(settingNotifier),
-              setThemeGreyLavenderColors(settingNotifier),
-              setThemeMetroUIColors(settingNotifier),
-              setThemePinks(settingNotifier),
-              setThemeNeverDoubt(settingNotifier),
-              setThemeProgramCatalog(settingNotifier),
-            ],
+            ),
           ),
         ),
+      ],
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
+    return AppBar(
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
       ),
+      leading: IconButton(
+        icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+          child: CoreElevatedButton.iconOnly(
+            icon: const Icon(Icons.home_rounded, size: 25.0),
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const HomeScreen(
+                          title: 'Hi Notes',
+                        )),
+                (route) => false,
+              );
+            },
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          ),
+        )
+      ],
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
+      title: Text('Setting',
+          style: CommonStyles.screenTitleTextStyle(
+              color: ThemeDataCenter.getScreenTitleTextColor(context))),
     );
   }
 }

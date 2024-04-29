@@ -15,6 +15,7 @@ import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/dimensions/CommonDimensions.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
@@ -29,7 +30,9 @@ import 'label_create_screen.dart';
 
 class LabelListScreen extends StatefulWidget {
   final LabelConditionModel? labelConditionModel;
-  const LabelListScreen({super.key, required this.labelConditionModel});
+  final RedirectFromEnum? redirectFrom;
+
+  const LabelListScreen({super.key, required this.labelConditionModel, required this.redirectFrom});
 
   @override
   State<LabelListScreen> createState() => _LabelListScreenState();
@@ -273,38 +276,76 @@ class _LabelListScreenState extends State<LabelListScreen> {
     super.dispose();
   }
 
+  void _onPopAction(BuildContext context) {
+    if (widget.redirectFrom == null) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              title: 'Hi Notes',
+            )),
+            (route) => false,
+      );
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget? _buildAppbarLeading(BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final labelNotifier = Provider.of<LabelNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
-    return Scaffold(
-      extendBodyBehindAppBar:
-          settingNotifier.isSetBackgroundImage == true ? true : false,
-      backgroundColor: settingNotifier.isSetBackgroundImage == true
-          ? Colors.transparent
-          : ThemeDataCenter.getBackgroundColor(context),
-      appBar: _buildAppBar(context, settingNotifier),
-      body: settingNotifier.isSetBackgroundImage == true
-          ? DecoratedBox(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(
-                        "assets/images/cartoon-background-image.jpg"),
-                    fit: BoxFit.cover),
-              ),
-              child: _buildBody(context, labelNotifier, settingNotifier),
-            )
-          : _buildBody(context, labelNotifier, settingNotifier),
-      bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
-      floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.miniCenterDocked,
+    return WillPopScope(
+      onWillPop: () async {
+        _onPopAction(context);
+        return Navigator.canPop(context);
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar:
+            settingNotifier.isSetBackgroundImage == true ? true : false,
+        backgroundColor: settingNotifier.isSetBackgroundImage == true
+            ? Colors.transparent
+            : ThemeDataCenter.getBackgroundColor(context),
+        appBar: _buildAppBar(context, settingNotifier),
+        body: settingNotifier.isSetBackgroundImage == true
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(
+                          settingNotifier.backgroundImageSourceString ?? CommonStyles.backgroundImageSourceStringDefault()),
+                      fit: BoxFit.cover),
+                ),
+                child: _buildBody(context, labelNotifier, settingNotifier),
+              )
+            : _buildBody(context, labelNotifier, settingNotifier),
+        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
+        floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
+        floatingActionButtonLocation:
+        FloatingActionButtonLocation.miniCenterDocked,
+      ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
+      ),
+      leading: _buildAppbarLeading(context, settingNotifier),
       actions: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
@@ -330,12 +371,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
       title: Row(
         children: [
           Text(
-            'Labels',
-            style: GoogleFonts.montserrat(
-                fontStyle: FontStyle.italic,
-                fontSize: 28,
-                color: const Color(0xFF404040),
-                fontWeight: FontWeight.bold),
+              CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.labels'),
+            style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context))
           ),
           _isFiltering()
               ? Tooltip(
@@ -357,9 +394,6 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 )
               : Container()
         ],
-      ),
-      iconTheme: const IconThemeData(
-        color: Color(0xFF404040), // Set the color you desire
       ),
     );
   }

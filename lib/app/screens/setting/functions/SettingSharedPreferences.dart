@@ -85,6 +85,21 @@ class SettingSharedPreferences {
     await prefs.setString('themeString', themeStr);
   }
 
+  Future<void> setBackgroundImageSourceString(String backgroundImageSourceStr) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? backgroundImageSourceString = prefs.getString('backgroundImageSourceString');
+
+    await prefs.setString('backgroundImageSourceString', backgroundImageSourceStr);
+  }
+
+  Future<void> setLanguageString(String languageStr) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? languageString = prefs.getString('languageString');
+
+    await prefs.setString('languageString', languageStr);
+  }
 
 /*
 GETTER
@@ -145,5 +160,21 @@ GETTER
     final String? themeString = prefs.getString('themeString');
 
     return themeString;
+  }
+
+  Future<String?> getBackgroundImageSourceString() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? backgroundImageSourceString = prefs.getString('backgroundImageSourceString');
+
+    return backgroundImageSourceString;
+  }
+
+  Future<String?> getLanguageString() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? languageString = prefs.getString('languageString');
+
+    return languageString;
   }
 }

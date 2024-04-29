@@ -12,6 +12,7 @@ import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart'
 import '../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../core/components/notifications/CoreNotification.dart';
 import '../../library/common/dimensions/CommonDimensions.dart';
+import '../../library/common/languages/CommonLanguages.dart';
 import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
 import '../../library/enums/CommonEnums.dart';
@@ -81,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAdB(BuildContext context) {
+  Widget _buildAdB(BuildContext context, SettingNotifier settingNotifier) {
     if (isAdLoaded) {
       return FadeIn(
         duration: const Duration(milliseconds: 200),
@@ -120,9 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width - 125.0,
-                            child: const Text(
-                              'Advertisement',
-                              style: TextStyle(
+                            child: Text(
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.advertisements'),
+                              style: const TextStyle(
                                   fontSize: 18.0, fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -215,9 +219,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                     width: MediaQuery.of(context).size.width -
                                         125.0,
-                                    child: const Text(
-                                      'Notes',
-                                      style: TextStyle(
+                                    child: Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'screen.title.notes'),
+                                      style: const TextStyle(
                                         fontSize: 18.0,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -233,13 +242,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                               builder: (context) =>
                                                   const NoteListScreen(
                                                     noteConditionModel: null,
+                                                    isOpenSubjectsForFilter:
+                                                        null,
+                                                    redirectFrom: null,
                                                   )),
                                         );
                                       },
                                       coreButtonStyle:
                                           ThemeDataCenter.getViewButtonStyle(
                                               context),
-                                      child: const Text('View'),
+                                      child: Text(CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'button.title.open')),
                                     ),
                                   ),
                                 ],
@@ -269,10 +286,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(
                                         width: 10.0,
                                       ),
-                                      const Text(
-                                        'Total:',
-                                        style: TextStyle(fontSize: 16.0),
+                                      Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'card.title.total'),
+                                        style: const TextStyle(fontSize: 16.0),
                                       ),
+                                      const SizedBox(width: 5.0),
                                       Text(
                                         context
                                             .watch<NoteNotifier>()
@@ -332,9 +355,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                       width: MediaQuery.of(context).size.width -
                                           125.0,
-                                      child: const Text(
-                                        'Subjects',
-                                        style: TextStyle(
+                                      child: Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'screen.title.subjects'),
+                                        style: const TextStyle(
                                             fontSize: 18.0,
                                             fontWeight: FontWeight.w500),
                                       )),
@@ -348,6 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             builder: (context) =>
                                                 const SubjectListScreen(
                                               subjectConditionModel: null,
+                                              redirectFrom: null,
                                             ),
                                           ),
                                         );
@@ -355,7 +384,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       coreButtonStyle:
                                           ThemeDataCenter.getViewButtonStyle(
                                               context),
-                                      child: const Text('View'),
+                                      child: Text(CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'button.title.open')),
                                     ),
                                   ),
                                 ],
@@ -385,10 +419,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(
                                         width: 10.0,
                                       ),
-                                      const Text(
-                                        'Total:',
-                                        style: TextStyle(fontSize: 16.0),
+                                      Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'card.title.total'),
+                                        style: const TextStyle(fontSize: 16.0),
                                       ),
+                                      const SizedBox(width: 5.0),
                                       Text(
                                         context
                                             .watch<SubjectNotifier>()
@@ -447,9 +487,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                     width: MediaQuery.of(context).size.width -
                                         125.0,
-                                    child: const Text(
-                                      'Labels',
-                                      style: TextStyle(
+                                    child: Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'screen.title.labels'),
+                                      style: const TextStyle(
                                           fontSize: 18.0,
                                           fontWeight: FontWeight.w500),
                                     ),
@@ -464,13 +509,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                               builder: (context) =>
                                                   const LabelListScreen(
                                                     labelConditionModel: null,
+                                                    redirectFrom: null,
                                                   )),
                                         );
                                       },
                                       coreButtonStyle:
                                           ThemeDataCenter.getViewButtonStyle(
                                               context),
-                                      child: const Text('View'),
+                                      child: Text(CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'button.title.open')),
                                     ),
                                   ),
                                 ],
@@ -500,10 +551,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(
                                         width: 10.0,
                                       ),
-                                      const Text(
-                                        'Total:',
-                                        style: TextStyle(fontSize: 16.0),
+                                      Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'card.title.total'),
+                                        style: const TextStyle(fontSize: 16.0),
                                       ),
+                                      const SizedBox(width: 5.0),
                                       Text(
                                         context
                                             .watch<LabelNotifier>()
@@ -563,9 +620,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(
                                     width: MediaQuery.of(context).size.width -
                                         125.0,
-                                    child: const Text(
-                                      'Templates',
-                                      style: TextStyle(
+                                    child: Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'screen.title.templates'),
+                                      style: const TextStyle(
                                           fontSize: 18.0,
                                           fontWeight: FontWeight.w500),
                                     ),
@@ -581,13 +643,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   const TemplateListScreen(
                                                     templateConditionModel:
                                                         null,
+                                                    redirectFrom: null,
                                                   )),
                                         );
                                       },
                                       coreButtonStyle:
                                           ThemeDataCenter.getViewButtonStyle(
                                               context),
-                                      child: const Text('View'),
+                                      child: Text(CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'button.title.open')),
                                     ),
                                   ),
                                 ],
@@ -617,10 +685,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                       const SizedBox(
                                         width: 10.0,
                                       ),
-                                      const Text(
-                                        'Total:',
-                                        style: TextStyle(fontSize: 16.0),
+                                      Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'card.title.total'),
+                                        style: const TextStyle(fontSize: 16.0),
                                       ),
+                                      const SizedBox(width: 5.0),
                                       Text(
                                         context
                                             .watch<TemplateNotifier>()
@@ -642,7 +716,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                _buildAdB(context)
+                _buildAdB(context, settingNotifier)
               ],
             ),
           ),
@@ -678,10 +752,11 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: _buildDrawer(context),
       body: settingNotifier.isSetBackgroundImage == true
           ? DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
                     image: AssetImage(
-                        "assets/images/cartoon-background-image.jpg"),
+                        settingNotifier.backgroundImageSourceString ??
+                            CommonStyles.backgroundImageSourceStringDefault()),
                     fit: BoxFit.cover),
               ),
               child: _buildStatisticHomeScreen(context, settingNotifier),
@@ -706,10 +781,12 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(
                   builder: (context) => const NoteCreateScreen(
-                      note: null,
-                      copyNote: null,
-                      subject: null,
-                      actionMode: ActionModeEnum.create)),
+                        note: null,
+                        copyNote: null,
+                        subject: null,
+                        actionMode: ActionModeEnum.create,
+                        redirectFrom: RedirectFromEnum.home,
+                      )),
             );
           },
           coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(
@@ -731,19 +808,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
+      ),
+      leading: Builder(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              style: CommonStyles.appbarLeadingBackButtonStyle(
+                  whiteBlur:
+                      settingNotifier.isSetBackgroundImage == true ? true : false),
+              icon: const FaIcon(FontAwesomeIcons.barsStaggered),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+          );
+        }
+      ),
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Text(
-        widget.title,
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 30,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
-      ),
-      iconTheme: const IconThemeData(
-        color: Color(0xFF404040), // Set the color you desire
+      elevation: 0,
+      title: Row(
+        children: [
+          Text(widget.title,
+              style: CommonStyles.screenTitleTextStyle(
+                  fontSize: 30.0,
+                  color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        ],
       ),
     );
   }

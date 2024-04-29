@@ -14,3 +14,9 @@ extension ColorExtension on String {
     }
   }
 }
+
+extension AddColon on String {
+  addColon() {
+    return "$this:";
+  }
+}

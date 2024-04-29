@@ -3,6 +3,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
@@ -11,6 +12,7 @@ import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
@@ -27,8 +29,10 @@ import 'subject_list_screen.dart';
 
 class SubjectDetailScreen extends StatefulWidget {
   final SubjectModel subject;
+  final RedirectFromEnum? redirectFrom;
 
-  const SubjectDetailScreen({super.key, required this.subject});
+  const SubjectDetailScreen(
+      {super.key, required this.subject, required this.redirectFrom});
 
   @override
   State<SubjectDetailScreen> createState() => _SubjectDetailScreenState();
@@ -76,44 +80,79 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
     );
   }
 
+  void _onPopAction(BuildContext context) {
+    if (widget.redirectFrom == RedirectFromEnum.subjectUpdate) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const SubjectListScreen(
+                subjectConditionModel: null, redirectFrom: null)),
+        (route) => false,
+      );
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjectNotifier = Provider.of<SubjectNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
-    return CoreFullScreenDialog(
-        title: Text(
-          'Detail',
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 26,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
-        ),
-        actions: AppBarActionButtonEnum.home,
-        isConfirmToClose: false,
-        homeLabel: 'Subjects',
-        onGoHome: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const SubjectListScreen(
-                      subjectConditionModel: null,
-                    )),
-            (route) => false,
-          );
-        },
-        onSubmit: null,
-        onRedo: null,
-        onUndo: null,
-        onBack: null,
-        isShowBottomActionButton: false,
-        isShowGeneralActionButton: false,
-        isShowOptionActionButton: true,
-        optionActionContent: Container(),
-        bottomActionBar: const [Row()],
-        bottomActionBarScrollable: const [Row()],
-        child: _buildBody(context, subjectNotifier, settingNotifier));
+    return WillPopScope(
+      onWillPop: () async {
+        _onPopAction(context);
+        return Navigator.canPop(context);
+      },
+      child: CoreFullScreenDialog(
+          appbarLeading: _buildAppbarLeading(context, settingNotifier),
+          title: Text(
+              CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'screen.title.detail'),
+              style: CommonStyles.screenTitleTextStyle(
+                  fontSize: 26.0,
+                  color: ThemeDataCenter.getScreenTitleTextColor(context))),
+          actions: AppBarActionButtonEnum.home,
+          isConfirmToClose: false,
+          homeLabel: 'Subjects',
+          onGoHome: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const SubjectListScreen(
+                      subjectConditionModel: null, redirectFrom: null)),
+              (route) => false,
+            );
+          },
+          onSubmit: null,
+          onRedo: null,
+          onUndo: null,
+          onBack: null,
+          isShowBottomActionButton: false,
+          isShowGeneralActionButton: false,
+          isShowOptionActionButton: true,
+          optionActionContent: Container(),
+          bottomActionBar: const [Row()],
+          bottomActionBarScrollable: const [Row()],
+          child: _buildBody(context, subjectNotifier, settingNotifier)),
+    );
   }
 
   Widget _buildBody(BuildContext context, SubjectNotifier subjectNotifier,
@@ -144,8 +183,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const SubjectListScreen(
-                                  subjectConditionModel: null,
-                                ),
+                                    subjectConditionModel: null,
+                                    redirectFrom: null),
                               ),
                             );
                           } else {
@@ -159,7 +198,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                       },
                       backgroundColor:
                           settingNotifier.isSetBackgroundImage == true
-                              ? Colors.transparent
+                              ? settingNotifier.isSetBackgroundImage == true
+                                  ? Colors.white.withOpacity(0.30)
+                                  : Colors.transparent
                               : ThemeDataCenter.getBackgroundColor(context),
                       foregroundColor:
                           ThemeDataCenter.getDeleteSlidableActionColorStyle(
@@ -184,15 +225,37 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Icon(Icons.create_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(
-                                    CommonConverters.toTimeString(
-                                        time: widget.subject.createdAt!),
-                                    style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                                Container(
+                                  padding:
+                                      settingNotifier.isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6.0)),
+                                      color: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.create_rounded,
+                                          size: 13.0,
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context)),
+                                      const SizedBox(width: 5.0),
+                                      Text(
+                                          CommonConverters.toTimeString(
+                                              time: widget.subject.createdAt!),
+                                          style: CommonStyles.dateTimeTextStyle(
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context))),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -208,15 +271,37 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Icon(Icons.update_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(
-                                    CommonConverters.toTimeString(
-                                        time: widget.subject.updatedAt!),
-                                    style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                                Container(
+                                  padding:
+                                      settingNotifier.isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6.0)),
+                                      color: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.update_rounded,
+                                          size: 13.0,
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context)),
+                                      const SizedBox(width: 5.0),
+                                      Text(
+                                          CommonConverters.toTimeString(
+                                              time: widget.subject.updatedAt!),
+                                          style: CommonStyles.dateTimeTextStyle(
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context)))
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -231,15 +316,37 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Icon(Icons.delete_rounded,
-                                    size: 13.0,
-                                    color: ThemeDataCenter.getTopCardLabelStyle(
-                                        context)),
-                                const SizedBox(width: 5.0),
-                                Text(
-                                    CommonConverters.toTimeString(
-                                        time: widget.subject.deletedAt!),
-                                    style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                                Container(
+                                  padding:
+                                      settingNotifier.isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6.0)),
+                                      color: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.delete_rounded,
+                                          size: 13.0,
+                                          color: ThemeDataCenter
+                                              .getTopCardLabelStyle(context)),
+                                      const SizedBox(width: 5.0),
+                                      Text(
+                                          CommonConverters.toTimeString(
+                                              time: widget.subject.deletedAt!),
+                                          style: CommonStyles.dateTimeTextStyle(
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(
+                                                      context)))
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -388,8 +495,14 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       MaterialPageRoute(
                                                           builder: (context) =>
                                                               NoteListScreen(
-                                                                  noteConditionModel:
-                                                                      noteConditionModel)));
+                                                                noteConditionModel:
+                                                                    noteConditionModel,
+                                                                isOpenSubjectsForFilter:
+                                                                    true,
+                                                                redirectFrom:
+                                                                    RedirectFromEnum
+                                                                        .subjectDetail,
+                                                              )));
                                                 },
                                                 coreButtonStyle: ThemeDataCenter
                                                     .getViewNotesButtonStyle(
@@ -408,14 +521,17 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       MaterialPageRoute(
                                                           builder: (context) =>
                                                               NoteCreateScreen(
-                                                                  note: null,
-                                                                  copyNote:
-                                                                      null,
-                                                                  subject: widget
-                                                                      .subject,
-                                                                  actionMode:
-                                                                      ActionModeEnum
-                                                                          .create)));
+                                                                note: null,
+                                                                copyNote: null,
+                                                                subject: widget
+                                                                    .subject,
+                                                                actionMode:
+                                                                    ActionModeEnum
+                                                                        .create,
+                                                                redirectFrom:
+                                                                    RedirectFromEnum
+                                                                        .subjectCreateNote,
+                                                              )));
                                                 },
                                                 coreButtonStyle: ThemeDataCenter
                                                     .getCreateNoteButtonStyle(
@@ -442,9 +558,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           SubjectListScreen(
-                                                        subjectConditionModel:
-                                                            subjectConditionModel,
-                                                      ),
+                                                              subjectConditionModel:
+                                                                  subjectConditionModel,
+                                                              redirectFrom:
+                                                                  null),
                                                     ),
                                                   );
                                                 },
@@ -474,9 +591,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           SubjectListScreen(
-                                                        subjectConditionModel:
-                                                            subjectConditionModel,
-                                                      ),
+                                                              subjectConditionModel:
+                                                                  subjectConditionModel,
+                                                              redirectFrom:
+                                                                  null),
                                                     ),
                                                   );
                                                 },
@@ -511,9 +629,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           const SubjectListScreen(
-                                                        subjectConditionModel:
-                                                            null,
-                                                      ),
+                                                              subjectConditionModel:
+                                                                  null,
+                                                              redirectFrom:
+                                                                  null),
                                                     ),
                                                   );
                                                 } else {
@@ -558,9 +677,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       MaterialPageRoute(
                                                         builder: (context) =>
                                                             const SubjectListScreen(
-                                                          subjectConditionModel:
-                                                              null,
-                                                        ),
+                                                                subjectConditionModel:
+                                                                    null,
+                                                                redirectFrom:
+                                                                    null),
                                                       ),
                                                     );
                                                   } else {

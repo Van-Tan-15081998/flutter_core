@@ -11,9 +11,11 @@ import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.
 import '../../../../../core/components/form/CoreTextFormField.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
+import '../../../setting/providers/setting_notifier.dart';
 import '../../note/note_list_screen.dart';
 import '../databases/subject_db_manager.dart';
 import '../models/subject_model.dart';
@@ -41,11 +43,12 @@ class SubjectCreateScreen extends StatefulWidget {
 class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
-  String _color = '';
+  String _color =
+      Colors.blueGrey.withOpacity(0.85).value.toRadixString(16).substring(2);
 
   bool selectedSubjectDataLoaded = false;
 
-  Color defaultColor = const Color(0xff1f1f1f);
+  Color defaultColor = Colors.blueGrey;
   final ScrollController _controllerScrollController = ScrollController();
 
   final myController = TextEditingController();
@@ -169,16 +172,23 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final subjectNotifier = Provider.of<SubjectNotifier>(context);
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      appbarLeading: null,
       title: Text(
-        widget.subject == null ? 'Create' : 'Update',
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 26,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
-      ),
+          widget.subject == null
+              ? CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'screen.title.create')
+              : CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'screen.title.update'),
+          style: CommonStyles.screenTitleTextStyle(
+              fontSize: 26.0,
+              color: ThemeDataCenter.getScreenTitleTextColor(context))),
       isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -209,15 +219,16 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const NoteListScreen(
-                              noteConditionModel: null,
-                              isOpenSubjectsForFilter: true)));
+                                noteConditionModel: null,
+                                isOpenSubjectsForFilter: true,
+                                redirectFrom: RedirectFromEnum.subjectCreate,
+                              )));
                 } else {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const SubjectListScreen(
-                              subjectConditionModel: null,
-                            )),
+                            subjectConditionModel: null, redirectFrom: null)),
                     (route) => false,
                   );
                 }
@@ -248,6 +259,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                         MaterialPageRoute(
                             builder: (context) => SubjectDetailScreen(
                                   subject: result,
+                                  redirectFrom: RedirectFromEnum.subjectUpdate,
                                 )),
                         (route) => false);
                   }
@@ -286,52 +298,60 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: DottedBorder(
-                      color: const Color(0xFF404040),
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(12),
-                      padding: const EdgeInsets.all(6),
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(12)),
-                        child: SizedBox(
-                          height: 200,
-                          width: MediaQuery.of(context).size.width,
-                          child: Center(
-                            child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                radius: const Radius.circular(12),
-                                color: _color.toColor(),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(12)),
-                                  child: Container(
-                                      color: Colors.white,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(6.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.palette_rounded,
-                                                size: 26.0,
-                                                color: _color.toColor()),
-                                            const SizedBox(width: 6.0),
-                                            Flexible(
-                                              child: Text(
-                                                  _title.isNotEmpty
-                                                      ? _title
-                                                      : 'Your subject',
-                                                  style: const TextStyle(
-                                                      fontSize: 16.0,
-                                                      fontWeight:
-                                                          FontWeight.w400)),
-                                            ),
-                                          ],
-                                        ),
-                                      )),
-                                )),
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        color: settingNotifier.isSetBackgroundImage == true
+                            ? Colors.white.withOpacity(0.65)
+                            : Colors.transparent
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DottedBorder(
+                        color: const Color(0xFF404040),
+                        borderType: BorderType.RRect,
+                        radius: const Radius.circular(12),
+                        padding: const EdgeInsets.all(6),
+                        child: ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                          child: SizedBox(
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            child: Center(
+                              child: DottedBorder(
+                                  borderType: BorderType.RRect,
+                                  radius: const Radius.circular(12),
+                                  color: _color.toColor(),
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(12)),
+                                    child: Container(
+                                        color: Colors.white,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(6.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.palette_rounded,
+                                                  size: 26.0,
+                                                  color: _color.toColor()),
+                                              const SizedBox(width: 6.0),
+                                              Flexible(
+                                                child: Text(
+                                                    _title.isNotEmpty
+                                                        ? _title
+                                                        : 'Your subject',
+                                                    style: const TextStyle(
+                                                        fontSize: 16.0,
+                                                        fontWeight:
+                                                            FontWeight.w400)),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                                  )),
+                            ),
                           ),
                         ),
                       ),
@@ -346,141 +366,207 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
-                              child: Text(
-                                'Title:',
-                                style: GoogleFonts.montserrat(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: ThemeDataCenter
-                                        .getFormFieldLabelColorStyle(context)),
+                            Container(
+                              margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                  color: settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.65)
+                                      : Colors.transparent
                               ),
-                            ),
-                          ],
-                        ),
-                        CoreTextFormField(
-                          style: TextStyle(
-                              color: ThemeDataCenter.getAloneTextColorStyle(
-                                  context)),
-                          onChanged: (value) {
-                            setState(() {
-                              _title = value;
-                            });
-                          },
-                          controller: myController,
-                          focusNode: myFocusNode,
-                          validateString: 'Please enter your title',
-                          maxLength: 60,
-                          icon: Icon(Icons.edit,
-                              color:
-                                  ThemeDataCenter.getFormFieldLabelColorStyle(
-                                      context)),
-                          label: 'Title',
-                          labelColor:
-                              ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context),
-                          placeholder: 'Enter you title',
-                          helper: '',
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Color:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: ThemeDataCenter
-                                      .getFormFieldLabelColorStyle(context)),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40.0,
-                                height: 40.0,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6.0)),
-                                  color: _color.toColor(),
+                              child: Padding(
+                                padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                                child: Text(
+                                  CommonLanguages.convert(
+                                          lang: settingNotifier.languageString ??
+                                              CommonLanguages
+                                                  .languageStringDefault(),
+                                          word: 'form.field.title.title')
+                                      .addColon()
+                                      .toString(),
+                                  style: GoogleFonts.montserrat(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context)),
                                 ),
                               ),
-                              const SizedBox(width: 10.0),
-                              CoreElevatedButton(
-                                onPressed: () async {
-                                  myFocusNode.unfocus();
-                                  await showDialog<bool>(
-                                      context: context,
-                                      builder: (BuildContext context) => Form(
-                                            onWillPop: () async {
-                                              return true;
-                                            },
-                                            child: Dialog(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceAround,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      MaterialPicker(
-                                                        pickerColor:
-                                                            defaultColor, //default color
-                                                        onColorChanged:
-                                                            (Color color) {
-                                                          setState(() {
-                                                            _color = color.value
-                                                                .toRadixString(
-                                                                    16)
-                                                                .substring(
-                                                                    2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
-                                                          });
-                                                          // Khi su dung: String colorHex = "29b6f6";
-                                                          // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
-                                                        },
-                                                      )
-                                                    ])),
-                                          ));
-                                },
-                                coreButtonStyle: CoreButtonStyle.options(
-                                    coreStyle: CoreStyle.outlined,
-                                    coreColor: CoreColor.dark,
-                                    coreRadius: CoreRadius.radius_6,
-                                    kitForegroundColorOption:
-                                        const Color(0xff1f1f1f),
-                                    coreFixedSizeButton:
-                                        CoreFixedSizeButton.medium_40),
-                                child: Text('Choose color',
-                                    style: CommonStyles.buttonTextStyle),
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(12)),
+                              color: settingNotifier.isSetBackgroundImage == true
+                                  ? Colors.white.withOpacity(0.65)
+                                  : Colors.transparent
+                          ),
+                          child: CoreTextFormField(
+                            style: TextStyle(
+                                color: ThemeDataCenter.getAloneTextColorStyle(
+                                    context)),
+                            onChanged: (value) {
+                              setState(() {
+                                _title = value;
+                              });
+                            },
+                            controller: myController,
+                            focusNode: myFocusNode,
+                            validateString: 'Please enter your title',
+                            maxLength: 60,
+                            icon: Icon(Icons.edit,
+                                color:
+                                    ThemeDataCenter.getFormFieldLabelColorStyle(
+                                        context)),
+                            label: 'Title',
+                            labelColor:
+                                ThemeDataCenter.getFormFieldLabelColorStyle(
+                                    context),
+                            placeholder: 'Enter you title',
+                            helper: '',
                           ),
                         ),
-                        const SizedBox(height: 15),
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              'Parent subject:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: ThemeDataCenter
-                                      .getFormFieldLabelColorStyle(context)),
+                            Container(
+                              margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                  color: settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.65)
+                                      : Colors.transparent
+                              ),
+                              child: Padding(
+                                padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                                child: Text(
+                                  CommonLanguages.convert(
+                                          lang: settingNotifier.languageString ??
+                                              CommonLanguages
+                                                  .languageStringDefault(),
+                                          word: 'form.field.title.color')
+                                      .addColon()
+                                      .toString(),
+                                  style: GoogleFonts.montserrat(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(12)),
+                              color: settingNotifier.isSetBackgroundImage == true
+                                  ? Colors.white.withOpacity(0.65)
+                                  : Colors.transparent
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40.0,
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color: _color.toColor(),
+                                  ),
+                                ),
+                                const SizedBox(width: 10.0),
+                                CoreElevatedButton(
+                                  onPressed: () async {
+                                    myFocusNode.unfocus();
+                                    await showDialog<bool>(
+                                        context: context,
+                                        builder: (BuildContext context) => Form(
+                                              onWillPop: () async {
+                                                return true;
+                                              },
+                                              child: Dialog(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                  ),
+                                                  child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        MaterialPicker(
+                                                          pickerColor:
+                                                              defaultColor, //default color
+                                                          onColorChanged:
+                                                              (Color color) {
+                                                            setState(() {
+                                                              _color = color.value
+                                                                  .toRadixString(
+                                                                      16)
+                                                                  .substring(
+                                                                      2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
+                                                            });
+                                                            // Khi su dung: String colorHex = "29b6f6";
+                                                            // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
+                                                          },
+                                                        )
+                                                      ])),
+                                            ));
+                                  },
+                                  coreButtonStyle: CoreButtonStyle.options(
+                                      coreStyle: CoreStyle.outlined,
+                                      coreColor: CoreColor.dark,
+                                      coreRadius: CoreRadius.radius_6,
+                                      kitForegroundColorOption:
+                                          const Color(0xff1f1f1f),
+                                      coreFixedSizeButton:
+                                          CoreFixedSizeButton.medium_40),
+                                  child: Text('Choose color',
+                                      style: CommonStyles.buttonTextStyle),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                              decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                  color: settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.65)
+                                      : Colors.transparent
+                              ),
+                              child: Padding(
+                                padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                                child: Text(
+                                  CommonLanguages.convert(
+                                          lang: settingNotifier.languageString ??
+                                              CommonLanguages
+                                                  .languageStringDefault(),
+                                          word: 'form.field.title.parentSubject')
+                                      .addColon()
+                                      .toString(),
+                                  style: GoogleFonts.montserrat(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context)),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -492,50 +578,58 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                   snapshot.data!.isNotEmpty) {
                                 _setSelectedSubject();
 
-                                return Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: DropdownButtonFormField(
-                                            isExpanded: true,
-                                            decoration: InputDecoration(
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    color: Color(0xff343a40),
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
+                                return Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                      color: settingNotifier.isSetBackgroundImage == true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: DropdownButtonFormField(
+                                              isExpanded: true,
+                                              decoration: InputDecoration(
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderSide: const BorderSide(
+                                                      color: Color(0xff343a40),
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8.0),
+                                                ),
+                                                border: OutlineInputBorder(
+                                                  borderSide: const BorderSide(
+                                                      color: Color(0xff343a40),
+                                                      width: 2),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8.0),
+                                                ),
+                                                filled: true,
+                                                fillColor: Colors.white,
                                               ),
-                                              border: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    color: Color(0xff343a40),
-                                                    width: 2),
-                                                borderRadius:
-                                                    BorderRadius.circular(8.0),
-                                              ),
-                                              filled: true,
-                                              fillColor: Colors.white,
-                                            ),
-                                            dropdownColor: Colors.white,
-                                            value: selectedSubject,
-                                            onChanged:
-                                                (SubjectModel? newValue) {
-                                              setState(() {
-                                                selectedSubject = newValue;
-                                              });
-                                            },
-                                            items: snapshot.data!.map((item) {
-                                              return DropdownMenuItem(
-                                                value: item,
-                                                child: Text(item.title,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    maxLines: 1),
-                                              );
-                                            }).toList()),
-                                      ),
-                                    ],
+                                              dropdownColor: Colors.white,
+                                              value: selectedSubject,
+                                              onChanged:
+                                                  (SubjectModel? newValue) {
+                                                setState(() {
+                                                  selectedSubject = newValue;
+                                                });
+                                              },
+                                              items: snapshot.data!.map((item) {
+                                                return DropdownMenuItem(
+                                                  value: item,
+                                                  child: Text(item.title,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      maxLines: 1),
+                                                );
+                                              }).toList()),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               } else if (snapshot.hasError) {

@@ -5,7 +5,6 @@ import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart'
 import '../../../screens/setting/providers/setting_notifier.dart';
 
 class ThemeDataCenter {
-
   /*
   Change when choose a theme
   getBackgroundColor
@@ -30,11 +29,11 @@ class ThemeDataCenter {
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
       return const Color(0xffb3cde0);
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
-      return  Colors.white;
+      return Colors.white;
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
       return const Color(0xffe7eff6);
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
-      return  const Color(0xffa2dcd7);
+      return const Color(0xffa2dcd7);
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
       return const Color(0xfffdf498);
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
@@ -143,7 +142,6 @@ class ThemeDataCenter {
     return const Color(0xff1f1f1f);
   }
 
-
   static Color getTableCalendarBackgroundColor(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
@@ -156,11 +154,11 @@ class ThemeDataCenter {
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
       return const Color(0xffb3cde0);
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
-      return  Colors.white;
+      return Colors.white;
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
       return const Color(0xffe7eff6);
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
-      return  const Color(0xffa2dcd7);
+      return const Color(0xffa2dcd7);
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
       return const Color(0xfffdf498);
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
@@ -183,6 +181,51 @@ class ThemeDataCenter {
       return const Color(0xff00a0b0);
     }
     return const Color(0xffffffff);
+  }
+
+  /*
+  SCREENS
+   */
+  static Color getScreenTitleTextColor(BuildContext context) {
+    final settingNotifier = Provider.of<SettingNotifier>(context);
+
+    if (settingNotifier.themeString == 'isSetThemeDefault' ||
+        settingNotifier.themeString == null) {
+      return Colors.white;
+    } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeBeach') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemePinks') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
+      return const Color(0xFF1f1f1f);
+    } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
+      return const Color(0xFF1f1f1f);
+    }
+    return const Color(0xff1f1f1f);
   }
 
   /*
@@ -1163,7 +1206,10 @@ class ThemeDataCenter {
     );
   }
 
-  static CoreButtonStyle getCoreScreenButtonStyle({required BuildContext context, double? customPadding, double? customRadius}) {
+  static CoreButtonStyle getCoreScreenButtonStyle(
+      {required BuildContext context,
+      double? customPadding,
+      double? customRadius}) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     if (settingNotifier.themeString == 'isSetThemeDefault' ||
@@ -1392,111 +1438,147 @@ class ThemeDataCenter {
         settingNotifier.themeString == null) {
       return BoxDecoration(
           color: const Color(0xff343a40).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
       return BoxDecoration(
           color: const Color(0xffffffff).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
       return BoxDecoration(
           color: const Color(0xff2ab7ca).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff191919).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff191919).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
       return BoxDecoration(
           color: const Color(0xff055b96).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff011f4b).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff011f4b).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
       return BoxDecoration(
           color: const Color(0xff4a4e4b).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
       return BoxDecoration(
           color: const Color(0xff2a4d69).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff1f1f1f).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff1f1f1f).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
       return BoxDecoration(
           color: const Color(0xff009688).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
       return BoxDecoration(
           color: const Color(0xfff37736).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
       return BoxDecoration(
           color: const Color(0xfffaf0e6).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
-     return  BoxDecoration(
+      return BoxDecoration(
           color: const Color(0xff1e1f26).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xffffffff).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xffffffff).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
       return BoxDecoration(
           color: const Color(0xffffcc5c).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
       return BoxDecoration(
           color: const Color(0xff3c2f2f).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
       return BoxDecoration(
           color: const Color(0xff4a4e4d).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
       return BoxDecoration(
           color: const Color(0xffd11141).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
       return BoxDecoration(
           color: const Color(0xffff5588).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
       return BoxDecoration(
           color: const Color(0xff29a8ab).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
       return BoxDecoration(
           color: const Color(0xffcc2a36).withOpacity(0.3),
-          border: Border.all(width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
-          borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-      );
+          border: Border.all(
+              width: 1.0, color: const Color(0xff343a40).withOpacity(0.3)),
+          borderRadius: const BorderRadius.only(
+              topRight: Radius.circular(21.0),
+              bottomRight: Radius.circular(21.0)));
     }
     return BoxDecoration(
         color: Colors.green.withOpacity(0.3),
-        border: Border.all(width: 1.0, color: const Color(0xff1f1f1f).withOpacity(0.3)),
-        borderRadius: const BorderRadius.only(topRight: Radius.circular(21.0), bottomRight: Radius.circular(21.0))
-    );
+        border: Border.all(
+            width: 1.0, color: const Color(0xff1f1f1f).withOpacity(0.3)),
+        borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(21.0),
+            bottomRight: Radius.circular(21.0)));
   }
 
   static Color getFilteringTextColorStyle(BuildContext context) {
@@ -1522,7 +1604,7 @@ class ThemeDataCenter {
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
       return const Color(0xff1f1f1f);
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
-      return  const Color(0xff1f1f1f);
+      return const Color(0xff1f1f1f);
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
       return const Color(0xff1f1f1f);
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
@@ -1622,6 +1704,7 @@ class ThemeDataCenter {
     }
     return const Color(0xff1f1f1f);
   }
+
   static Color getTextOnActiveBackgroundColorStyle(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 

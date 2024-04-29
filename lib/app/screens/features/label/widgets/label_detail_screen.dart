@@ -3,6 +3,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -10,6 +11,7 @@ import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
@@ -22,8 +24,10 @@ import 'label_list_screen.dart';
 
 class LabelDetailScreen extends StatefulWidget {
   final LabelModel label;
+  final RedirectFromEnum? redirectFrom;
 
-  const LabelDetailScreen({super.key, required this.label});
+  const LabelDetailScreen(
+      {super.key, required this.label, required this.redirectFrom});
 
   @override
   State<LabelDetailScreen> createState() => _LabelDetailScreenState();
@@ -69,48 +73,88 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
     );
   }
 
+  void _onPopAction(BuildContext context) {
+    if (widget.redirectFrom == RedirectFromEnum.labelUpdate) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const LabelListScreen(
+                  labelConditionModel: null,
+                  redirectFrom: null,
+                )),
+        (route) => false,
+      );
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final labelNotifier = Provider.of<LabelNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
-    return CoreFullScreenDialog(
-      title: Text(
-        'Detail',
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 26,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
-      ),
-      actions: AppBarActionButtonEnum.home,
-      isConfirmToClose: false,
-      homeLabel: 'Labels',
-      onGoHome: () {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const LabelListScreen(
-                    labelConditionModel: null,
-                  )),
-          (route) => false,
-        );
+    return WillPopScope(
+      onWillPop: () async {
+        _onPopAction(context);
+        return Navigator.canPop(context);
       },
-      onSubmit: null,
-      onRedo: null,
-      onUndo: null,
-      onBack: null,
-      isShowBottomActionButton: false,
-      isShowGeneralActionButton: false,
-      isShowOptionActionButton: true,
-      optionActionContent: Container(),
-      bottomActionBar: const [Row()],
-      bottomActionBarScrollable: const [Row()],
-      child: _buildBody(context, labelNotifier, settingNotifier),
+      child: CoreFullScreenDialog(
+        appbarLeading: _buildAppbarLeading(context, settingNotifier),
+        title: Text(
+            CommonLanguages.convert(
+                lang: settingNotifier.languageString ??
+                    CommonLanguages.languageStringDefault(),
+                word: 'screen.title.detail'),
+            style: CommonStyles.screenTitleTextStyle(
+                fontSize: 26.0,
+                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        actions: AppBarActionButtonEnum.home,
+        isConfirmToClose: false,
+        homeLabel: 'Labels',
+        onGoHome: () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const LabelListScreen(
+                      labelConditionModel: null,
+                      redirectFrom: null,
+                    )),
+            (route) => false,
+          );
+        },
+        onSubmit: null,
+        onRedo: null,
+        onUndo: null,
+        onBack: null,
+        isShowBottomActionButton: false,
+        isShowGeneralActionButton: false,
+        isShowOptionActionButton: true,
+        optionActionContent: Container(),
+        bottomActionBar: const [Row()],
+        bottomActionBarScrollable: const [Row()],
+        child: _buildBody(context, labelNotifier, settingNotifier),
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, LabelNotifier labelNotifier, SettingNotifier settingNotifier) {
+  Widget _buildBody(BuildContext context, LabelNotifier labelNotifier,
+      SettingNotifier settingNotifier) {
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Column(children: <Widget>[
@@ -138,6 +182,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                               MaterialPageRoute(
                                 builder: (context) => const LabelListScreen(
                                   labelConditionModel: null,
+                                  redirectFrom: null,
                                 ),
                               ),
                             );
@@ -151,9 +196,11 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                         });
                       },
                       backgroundColor:
-                      settingNotifier.isSetBackgroundImage == true
-                          ? Colors.transparent
-                          : ThemeDataCenter.getBackgroundColor(context),
+                          settingNotifier.isSetBackgroundImage == true
+                              ? settingNotifier.isSetBackgroundImage == true
+                                  ? Colors.white.withOpacity(0.30)
+                                  : Colors.transparent
+                              : ThemeDataCenter.getBackgroundColor(context),
                       foregroundColor:
                           ThemeDataCenter.getDeleteSlidableActionColorStyle(
                               context),
@@ -168,8 +215,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
             child: ExpandableNotifier(
                 child: Column(
               children: [
-                widget.label.updatedAt == null &&
-                        widget.label.deletedAt == null
+                widget.label.updatedAt == null && widget.label.deletedAt == null
                     ? Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                         child: Tooltip(
@@ -178,20 +224,42 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Icon(Icons.create_rounded,
-                                  size: 13.0,
-                                  color: ThemeDataCenter.getTopCardLabelStyle(
-                                      context)),
-                              const SizedBox(width: 5.0),
-                              Text(CommonConverters.toTimeString(time: widget.label.createdAt!),
-                                  style:CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
+                              Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.create_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.label.createdAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
                       )
                     : Container(),
-                widget.label.updatedAt != null &&
-                        widget.label.deletedAt == null
+                widget.label.updatedAt != null && widget.label.deletedAt == null
                     ? Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                         child: Tooltip(
@@ -200,13 +268,35 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Icon(Icons.update_rounded,
-                                  size: 13.0,
-                                  color: ThemeDataCenter.getTopCardLabelStyle(
-                                      context)),
-                              const SizedBox(width: 5.0),
-                              Text(CommonConverters.toTimeString(time: widget.label.updatedAt!),
-                                  style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                              Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.label.updatedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -221,13 +311,35 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Icon(Icons.delete_rounded,
-                                  size: 13.0,
-                                  color: ThemeDataCenter.getTopCardLabelStyle(
-                                      context)),
-                              const SizedBox(width: 5.0),
-                              Text(CommonConverters.toTimeString(time: widget.label.deletedAt!),
-                                  style:CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)))
+                              Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.label.deletedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -238,8 +350,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                   elevation: 2.0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
-                        color:
-                            ThemeDataCenter.getBorderCardColorStyle(context),
+                        color: ThemeDataCenter.getBorderCardColorStyle(context),
                         width: 1.0),
                     borderRadius: BorderRadius.circular(5.0),
                   ),
@@ -276,8 +387,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                 color: Colors.white,
                                                 child: Padding(
                                                   padding:
-                                                      const EdgeInsets.all(
-                                                          6.0),
+                                                      const EdgeInsets.all(6.0),
                                                   child: Row(
                                                     mainAxisSize:
                                                         MainAxisSize.min,
@@ -291,8 +401,8 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                       const SizedBox(
                                                           width: 6.0),
                                                       Flexible(
-                                                        child: Text(widget
-                                                            .label.title),
+                                                        child: Text(
+                                                            widget.label.title),
                                                       ),
                                                     ],
                                                   ),
@@ -322,8 +432,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                       : Column(children: [
                                           CoreElevatedButton.iconOnly(
                                             onPressed: () {
-                                              _onRestoreLabelFromTrash(
-                                                      context)
+                                              _onRestoreLabelFromTrash(context)
                                                   .then((result) {
                                                 if (result) {
                                                   labelNotifier.onCountAll();
@@ -343,6 +452,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                           const LabelListScreen(
                                                         labelConditionModel:
                                                             null,
+                                                        redirectFrom: null,
                                                       ),
                                                     ),
                                                   );
@@ -358,8 +468,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                               });
                                             },
                                             coreButtonStyle: ThemeDataCenter
-                                                .getRestoreButtonStyle(
-                                                    context),
+                                                .getRestoreButtonStyle(context),
                                             icon: const Icon(
                                                 Icons
                                                     .restore_from_trash_rounded,
@@ -373,8 +482,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                 _onDeleteLabelForever(context)
                                                     .then((result) {
                                                   if (result) {
-                                                    labelNotifier
-                                                        .onCountAll();
+                                                    labelNotifier.onCountAll();
 
                                                     CoreNotification.show(
                                                         context,
@@ -391,6 +499,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                             const LabelListScreen(
                                                           labelConditionModel:
                                                               null,
+                                                          redirectFrom: null,
                                                         ),
                                                       ),
                                                     );

@@ -15,6 +15,7 @@ import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/dimensions/CommonDimensions.dart';
+import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../library/common/utils/CommonAudioOnPressButton.dart';
@@ -36,8 +37,9 @@ import 'widgets/template_widget.dart';
 
 class TemplateListScreen extends StatefulWidget {
   final TemplateConditionModel? templateConditionModel;
+  final RedirectFromEnum? redirectFrom;
 
-  const TemplateListScreen({super.key, required this.templateConditionModel});
+  const TemplateListScreen({super.key, required this.templateConditionModel, required this.redirectFrom});
 
   @override
   State<TemplateListScreen> createState() => _TemplateListScreenState();
@@ -288,6 +290,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   copyNote: noteFromTemplate,
                   subject: null,
                   actionMode: ActionModeEnum.copy,
+              redirectFrom: RedirectFromEnum.templateCreateNote,
                 )));
   }
 
@@ -465,38 +468,76 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     super.dispose();
   }
 
+  void _onPopAction(BuildContext context) {
+    if (widget.redirectFrom == null) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+              title: 'Hi Notes',
+            )),
+            (route) => false,
+      );
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget? _buildAppbarLeading(BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final templateNotifier = Provider.of<TemplateNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
-    return Scaffold(
-      extendBodyBehindAppBar:
-      settingNotifier.isSetBackgroundImage == true ? true : false,
-      backgroundColor: settingNotifier.isSetBackgroundImage == true
-          ? Colors.transparent
-          : ThemeDataCenter.getBackgroundColor(context),
-      appBar: _buildAppBar(context, settingNotifier),
-      body: settingNotifier.isSetBackgroundImage == true
-          ? DecoratedBox(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(
-                        "assets/images/cartoon-background-image.jpg"),
-                    fit: BoxFit.cover),
-              ),
-              child: _buildBody(templateNotifier, settingNotifier),
-            )
-          : _buildBody(templateNotifier, settingNotifier),
-      bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
-      floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.miniCenterDocked,
+    return WillPopScope(
+      onWillPop: () async {
+        _onPopAction(context);
+        return Navigator.canPop(context);
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar:
+        settingNotifier.isSetBackgroundImage == true ? true : false,
+        backgroundColor: settingNotifier.isSetBackgroundImage == true
+            ? Colors.transparent
+            : ThemeDataCenter.getBackgroundColor(context),
+        appBar: _buildAppBar(context, settingNotifier),
+        body: settingNotifier.isSetBackgroundImage == true
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(
+                          settingNotifier.backgroundImageSourceString ?? CommonStyles.backgroundImageSourceStringDefault()),
+                      fit: BoxFit.cover),
+                ),
+                child: _buildBody(templateNotifier, settingNotifier),
+              )
+            : _buildBody(templateNotifier, settingNotifier),
+        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
+        floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
+        floatingActionButtonLocation:
+        FloatingActionButtonLocation.miniCenterDocked,
+      ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
+      ),
+      leading: _buildAppbarLeading(context, settingNotifier),
       actions: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
@@ -523,12 +564,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
       title: Row(
         children: [
           Flexible(
-            child: Text('Templates',
-                style: GoogleFonts.montserrat(
-                    fontStyle: FontStyle.italic,
-                    fontSize: 20,
-                    color: const Color(0xFF404040),
-                    fontWeight: FontWeight.bold),
+            child: Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.templates'),
+                style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context)),
                 overflow: TextOverflow.ellipsis),
           ),
           _isFiltering()
@@ -551,9 +588,6 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                 )
               : Container()
         ],
-      ),
-      iconTheme: const IconThemeData(
-        color: Color(0xFF404040),
       ),
     );
   }

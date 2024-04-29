@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../library/common/languages/CommonLanguages.dart';
+import '../../../library/common/styles/CommonStyles.dart';
 import '../functions/SettingSharedPreferences.dart';
 
 class SettingNotifier with ChangeNotifier {
@@ -21,12 +23,20 @@ class SettingNotifier with ChangeNotifier {
   String? _themeString;
   String? get themeString => _themeString;
 
+  String? _backgroundImageSourceString;
+  String? get backgroundImageSourceString => _backgroundImageSourceString;
+
+  String? _languageString;
+  String? get languageString => _languageString;
+
   SettingNotifier() {
     init();
   }
 
   init() async {
     _themeString = await getThemeString();
+    _backgroundImageSourceString = await getBackgroundImageSourceString();
+    _languageString = await getLanguageString();
 
     _isSetColorAccordingSubjectColor =
         await getIsSetColorAccordingSubjectColor();
@@ -164,6 +174,40 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
+  Future<String?> getBackgroundImageSourceString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    result = await settingSharedPreferences.getBackgroundImageSourceString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setBackgroundImageSourceString(CommonStyles.backgroundImageSourceStringDefault());
+
+      // Get again
+      result = await getBackgroundImageSourceString();
+    }
+
+    return result;
+  }
+
+  Future<String?> getLanguageString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    result = await settingSharedPreferences.getLanguageString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setLanguageString(CommonLanguages.languageStringDefault());
+
+      // Get again
+      result = await getLanguageString();
+    }
+
+    return result;
+  }
+
   /*
   SETTER
    */
@@ -294,6 +338,44 @@ class SettingNotifier with ChangeNotifier {
 
     if (result != null) {
       _themeString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setBackgroundImageSourceString(String backgroundImageSourceStr) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    await settingSharedPreferences.setBackgroundImageSourceString(backgroundImageSourceStr);
+
+    result = await settingSharedPreferences.getBackgroundImageSourceString();
+
+    if (result != null) {
+      _backgroundImageSourceString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setLanguageString(String languageStr) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    await settingSharedPreferences.setLanguageString(languageStr);
+
+    result = await settingSharedPreferences.getLanguageString();
+
+    if (result != null) {
+      _languageString = result;
       notifyListeners();
 
       return true;

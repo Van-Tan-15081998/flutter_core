@@ -6,6 +6,7 @@ import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,7 @@ import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dar
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/converters/CommonConverters.dart';
+import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
@@ -33,12 +35,14 @@ class NoteDetailScreen extends StatefulWidget {
   final List<LabelModel>? labels;
   final SubjectModel? subject;
 
-  const NoteDetailScreen({
-    super.key,
-    required this.note,
-    required this.subject,
-    required this.labels,
-  });
+  final RedirectFromEnum? redirectFrom;
+
+  const NoteDetailScreen(
+      {super.key,
+      required this.note,
+      required this.subject,
+      required this.labels,
+      required this.redirectFrom});
 
   @override
   State<NoteDetailScreen> createState() => _NoteDetailScreenState();
@@ -69,6 +73,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                   copyNote: null,
                   subject: null,
                   actionMode: ActionModeEnum.update,
+                  redirectFrom: RedirectFromEnum.noteDetail,
                 )));
   }
 
@@ -276,7 +281,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => SubjectListScreen(
-                                subjectConditionModel: subjectConditionModel)),
+                                subjectConditionModel: subjectConditionModel,
+                                redirectFrom: null)),
                         (route) => false);
                   },
                   child: Container(
@@ -337,44 +343,85 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         : Container();
   }
 
+  void _onPopAction(BuildContext context) {
+    if (widget.redirectFrom == RedirectFromEnum.noteUpdate) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const NoteListScreen(
+                  noteConditionModel: null,
+                  isOpenSubjectsForFilter: null,
+                  redirectFrom: null,
+                )),
+        (route) => false,
+      );
+    } else {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     setDocuments();
-    return CoreFullScreenDialog(
-      title: Text(
-        'Detail',
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 26,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
-      ),
-      actions: AppBarActionButtonEnum.home,
-      isConfirmToClose: false,
-      homeLabel: 'Notes',
-      onGoHome: () {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const NoteListScreen(
-                    noteConditionModel: null,
-                  )),
-          (route) => false,
-        );
+    return WillPopScope(
+      onWillPop: () async {
+        _onPopAction(context);
+        return Navigator.canPop(context);
       },
-      onSubmit: null,
-      onRedo: null,
-      onUndo: null,
-      onBack: null,
-      isShowBottomActionButton: false,
-      isShowGeneralActionButton: false,
-      isShowOptionActionButton: true,
-      optionActionContent: Container(),
-      bottomActionBar: const [Row()],
-      bottomActionBarScrollable: const [Row()],
-      child: _buildBody(context, settingNotifier),
+      child: CoreFullScreenDialog(
+        appbarLeading: _buildAppbarLeading(context, settingNotifier),
+        title: Text(
+            CommonLanguages.convert(
+                lang: settingNotifier.languageString ??
+                    CommonLanguages.languageStringDefault(),
+                word: 'screen.title.detail'),
+            style: CommonStyles.screenTitleTextStyle(
+                fontSize: 26.0,
+                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        actions: AppBarActionButtonEnum.home,
+        isConfirmToClose: false,
+        homeLabel: 'Notes',
+        onGoHome: () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const NoteListScreen(
+                      noteConditionModel: null,
+                      isOpenSubjectsForFilter: null,
+                      redirectFrom: null,
+                    )),
+            (route) => false,
+          );
+        },
+        onSubmit: null,
+        onRedo: null,
+        onUndo: null,
+        onBack: null,
+        isShowBottomActionButton: false,
+        isShowGeneralActionButton: false,
+        isShowOptionActionButton: true,
+        optionActionContent: Container(),
+        bottomActionBar: const [Row()],
+        bottomActionBarScrollable: const [Row()],
+        child: _buildBody(context, settingNotifier),
+      ),
     );
   }
 
@@ -402,7 +449,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => const NoteListScreen(
-                                        noteConditionModel: null)),
+                                          noteConditionModel: null,
+                                          isOpenSubjectsForFilter: null,
+                                          redirectFrom: null,
+                                        )),
                                 (route) => false,
                               );
 
@@ -422,7 +472,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         },
                         backgroundColor:
                             settingNotifier.isSetBackgroundImage == true
-                                ? Colors.transparent
+                                ? settingNotifier.isSetBackgroundImage == true
+                                    ? Colors.white.withOpacity(0.30)
+                                    : Colors.transparent
                                 : ThemeDataCenter.getBackgroundColor(context),
                         foregroundColor:
                             ThemeDataCenter.getDeleteSlidableActionColorStyle(
@@ -447,63 +499,86 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    widget.note.createdForDay != null
-                                        ? Tooltip(
-                                            message: 'Created for',
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Icon(
-                                                    Icons
-                                                        .directions_run_rounded,
-                                                    size: 14.0,
-                                                    color: ThemeDataCenter
-                                                        .getTopCardLabelStyle(
-                                                            context)),
-                                                const SizedBox(width: 5.0),
-                                                Text(
-                                                  CommonConverters.toTimeString(time: widget
-                                                      .note.createdForDay!, format: 'dd/MM/yyyy'),
-                                                  style: TextStyle(
-                                                      fontSize: 13.0,
+                                Container(
+                                  padding:
+                                      settingNotifier.isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6.0)),
+                                      color: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      widget.note.createdForDay != null
+                                          ? Tooltip(
+                                              message: 'Created for',
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Icon(
+                                                      Icons
+                                                          .directions_run_rounded,
+                                                      size: 14.0,
                                                       color: ThemeDataCenter
                                                           .getTopCardLabelStyle(
                                                               context)),
-                                                ),
-                                                const SizedBox(width: 5.0),
-                                              ],
+                                                  const SizedBox(width: 5.0),
+                                                  Text(
+                                                    CommonConverters
+                                                        .toTimeString(
+                                                            time: widget.note
+                                                                .createdForDay!,
+                                                            format:
+                                                                'dd/MM/yyyy'),
+                                                    style: TextStyle(
+                                                        fontSize: 13.0,
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context)),
+                                                  ),
+                                                  const SizedBox(width: 5.0),
+                                                ],
+                                              ),
+                                            )
+                                          : Container(),
+                                      Tooltip(
+                                        message: 'Created time',
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Icon(Icons.create_rounded,
+                                                size: 13.0,
+                                                color: ThemeDataCenter
+                                                    .getTopCardLabelStyle(
+                                                        context)),
+                                            const SizedBox(width: 5.0),
+                                            Text(
+                                              CommonConverters.toTimeString(
+                                                  time: widget.note.createdAt!),
+                                              style: CommonStyles
+                                                  .dateTimeTextStyle(
+                                                      color: ThemeDataCenter
+                                                          .getTopCardLabelStyle(
+                                                              context)),
                                             ),
-                                          )
-                                        : Container(),
-                                    Tooltip(
-                                      message: 'Created time',
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Icon(Icons.create_rounded,
-                                              size: 13.0,
-                                              color: ThemeDataCenter
-                                                  .getTopCardLabelStyle(
-                                                      context)),
-                                          const SizedBox(width: 5.0),
-                                          Text(
-                                            CommonConverters.toTimeString(
-                                                time: widget.note.createdAt!),
-                                            style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context)),
-                                          ),
-                                          const SizedBox(width: 5.0),
-                                        ],
+                                            const SizedBox(width: 5.0),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 widget.note.isFavourite != null
                                     ? const Icon(Icons.favorite,
@@ -521,77 +596,106 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    widget.note.createdForDay != null
-                                        ? Tooltip(
-                                            message: 'Created for',
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Icon(
-                                                    Icons
-                                                        .directions_run_rounded,
-                                                    size: 14.0,
-                                                    color: ThemeDataCenter
-                                                        .getTopCardLabelStyle(
-                                                            context)),
-                                                const SizedBox(width: 5.0),
-                                                Text(
-                                                  CommonConverters.toTimeString(time: widget
-                                                      .note.createdForDay!, format: 'dd/MM/yyyy'),
-                                                  style: TextStyle(
-                                                      fontSize: 13.0,
+                                Container(
+                                  padding:
+                                      settingNotifier.isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(6.0)),
+                                      color: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? Colors.white.withOpacity(0.65)
+                                          : Colors.transparent),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      widget.note.createdForDay != null
+                                          ? Tooltip(
+                                              message: 'Created for',
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Icon(
+                                                      Icons
+                                                          .directions_run_rounded,
+                                                      size: 14.0,
                                                       color: ThemeDataCenter
                                                           .getTopCardLabelStyle(
                                                               context)),
-                                                ),
-                                                const SizedBox(width: 5.0),
-                                              ],
-                                            ),
-                                          )
-                                        : Container(),
-                                    Tooltip(
-                                      message: 'Updated time',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.update_rounded,
-                                              size: 13.0,
-                                              color: ThemeDataCenter
-                                                  .getTopCardLabelStyle(
-                                                      context)),
-                                          const SizedBox(width: 5.0),
-                                          Text(
-                                              CommonConverters.toTimeString(
-                                                  time: widget.note.updatedAt!),
-                                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
-                                          const SizedBox(width: 5.0),
-                                        ],
+                                                  const SizedBox(width: 5.0),
+                                                  Text(
+                                                    CommonConverters
+                                                        .toTimeString(
+                                                            time: widget.note
+                                                                .createdForDay!,
+                                                            format:
+                                                                'dd/MM/yyyy'),
+                                                    style: TextStyle(
+                                                        fontSize: 13.0,
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context)),
+                                                  ),
+                                                  const SizedBox(width: 5.0),
+                                                ],
+                                              ),
+                                            )
+                                          : Container(),
+                                      Tooltip(
+                                        message: 'Updated time',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.update_rounded,
+                                                size: 13.0,
+                                                color: ThemeDataCenter
+                                                    .getTopCardLabelStyle(
+                                                        context)),
+                                            const SizedBox(width: 5.0),
+                                            Text(
+                                                CommonConverters.toTimeString(
+                                                    time:
+                                                        widget.note.updatedAt!),
+                                                style: CommonStyles
+                                                    .dateTimeTextStyle(
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context))),
+                                            const SizedBox(width: 5.0),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Tooltip(
-                                      message: 'Created time',
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.create_rounded,
-                                              size: 13.0,
-                                              color: ThemeDataCenter
-                                                  .getTopCardLabelStyle(
-                                                      context)),
-                                          const SizedBox(width: 5.0),
-                                          Text(
-                                              CommonConverters.toTimeString(
-                                                  time: widget.note.createdAt!),
-                                              style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
-                                          const SizedBox(width: 5.0),
-                                        ],
+                                      Tooltip(
+                                        message: 'Created time',
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.create_rounded,
+                                                size: 13.0,
+                                                color: ThemeDataCenter
+                                                    .getTopCardLabelStyle(
+                                                        context)),
+                                            const SizedBox(width: 5.0),
+                                            Text(
+                                                CommonConverters.toTimeString(
+                                                    time:
+                                                        widget.note.createdAt!),
+                                                style: CommonStyles
+                                                    .dateTimeTextStyle(
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context))),
+                                            const SizedBox(width: 5.0),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 widget.note.isFavourite != null
                                     ? const Icon(Icons.favorite,
@@ -610,17 +714,39 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  Icon(Icons.delete_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.note.deletedAt!),
-                                      style: CommonStyles.dateTimeTextStyle(color: ThemeDataCenter.getTopCardLabelStyle(context))),
-                                  const SizedBox(width: 5.0),
+                                  Container(
+                                    padding:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? const EdgeInsets.all(2.0)
+                                            : const EdgeInsets.all(0),
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(6.0)),
+                                        color: settingNotifier
+                                                    .isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.delete_rounded,
+                                            size: 13.0,
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)),
+                                        const SizedBox(width: 5.0),
+                                        Text(
+                                          CommonConverters.toTimeString(
+                                              time: widget.note.deletedAt!),
+                                          style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 5.0),
+                                      ],
+                                    ),
+                                  ),
                                   widget.note.isFavourite != null
                                       ? const Icon(Icons.favorite,
                                           color: Color(0xffdc3545), size: 26.0)
@@ -721,8 +847,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   const NoteListScreen(
-                                                                      noteConditionModel:
-                                                                          null)),
+                                                                    noteConditionModel:
+                                                                        null,
+                                                                    isOpenSubjectsForFilter:
+                                                                        null,
+                                                                    redirectFrom:
+                                                                        null,
+                                                                  )),
                                                           (route) => false,
                                                         );
 
@@ -776,10 +907,16 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                               .pushAndRemoveUntil(
                                                             context,
                                                             MaterialPageRoute(
-                                                                builder: (context) =>
-                                                                    const NoteListScreen(
-                                                                        noteConditionModel:
-                                                                            null)),
+                                                                builder:
+                                                                    (context) =>
+                                                                        const NoteListScreen(
+                                                                          noteConditionModel:
+                                                                              null,
+                                                                          isOpenSubjectsForFilter:
+                                                                              null,
+                                                                          redirectFrom:
+                                                                              null,
+                                                                        )),
                                                             (route) => false,
                                                           );
 

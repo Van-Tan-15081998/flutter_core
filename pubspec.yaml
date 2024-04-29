@@ -55,6 +55,7 @@ dependencies:
   draggable_home: 1.0.5
   table_calendar: 3.0.9
   avatar_glow: 3.0.1
+  scrollable_positioned_list: 0.3.8
 
 dev_dependencies:
   flutter_test:
@@ -90,6 +91,25 @@ flutter:
     - assets/audio/message-incoming.mp3
     - assets/images/planet-background-image.jpg
     - assets/images/cartoon-background-image.jpg
+    - assets/images/background-image-01.jpg
+    - assets/images/background-image-02.jpg
+    - assets/images/background-image-03.jpg
+    - assets/images/background-image-04.jpg
+    - assets/images/background-image-05.jpg
+    - assets/images/background-image-06.jpg
+    - assets/images/background-image-07.jpg
+    - assets/images/background-image-08.jpg
+    - assets/images/background-image-09.jpg
+    - assets/images/flags/chinese.jpg
+    - assets/images/flags/english.jpg
+    - assets/images/flags/french.jpg
+    - assets/images/flags/indonesian.jpg
+    - assets/images/flags/japanese.jpg
+    - assets/images/flags/korean.jpg
+    - assets/images/flags/portuguese.jpg
+    - assets/images/flags/russian.jpg
+    - assets/images/flags/spanish.jpg
+    - assets/images/flags/vietnamese.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

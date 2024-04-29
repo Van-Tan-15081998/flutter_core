@@ -314,12 +314,16 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TemplateDetailScreen(
-                          template: widget.template,
-                          labels: widget.labels,
-                          subject: widget.subject)));
+                            template: widget.template,
+                            labels: widget.labels,
+                            subject: widget.subject,
+                            redirectFrom: null,
+                          )));
             },
             backgroundColor: settingNotifier.isSetBackgroundImage == true
-                ? Colors.transparent
+                ? settingNotifier.isSetBackgroundImage == true
+                    ? Colors.white.withOpacity(0.30)
+                    : Colors.transparent
                 : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
@@ -334,7 +338,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                     }
                   },
                   backgroundColor: settingNotifier.isSetBackgroundImage == true
-                      ? Colors.transparent
+                      ? settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.30)
+                          : Colors.transparent
                       : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getFavouriteSlidableActionColorStyle(
@@ -351,7 +357,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                     }
                   },
                   backgroundColor: settingNotifier.isSetBackgroundImage == true
-                      ? Colors.transparent
+                      ? settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.30)
+                          : Colors.transparent
                       : ThemeDataCenter.getBackgroundColor(context),
                   foregroundColor:
                       ThemeDataCenter.getDeleteSlidableActionColorStyle(
@@ -379,31 +387,45 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Created time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.create_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.template.createdAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context))),
-                                  const SizedBox(width: 5.0),
-                                  widget.template.isFavourite != null
-                                      ? BounceInDown(
-                                          duration:
-                                              const Duration(milliseconds: 500),
-                                          child: const Icon(Icons.favorite,
-                                              color: Color(0xffdc3545),
-                                              size: 26.0),
-                                        )
-                                      : Container(),
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.create_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.template.createdAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? BounceInDown(
+                                            duration: const Duration(
+                                                milliseconds: 500),
+                                            child: const Icon(Icons.favorite,
+                                                color: Color(0xffdc3545),
+                                                size: 26.0),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -422,31 +444,45 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Updated time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.update_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.template.updatedAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context))),
-                                  const SizedBox(width: 5.0),
-                                  widget.template.isFavourite != null
-                                      ? BounceInDown(
-                                          duration:
-                                              const Duration(milliseconds: 500),
-                                          child: const Icon(Icons.favorite,
-                                              color: Color(0xffdc3545),
-                                              size: 26.0),
-                                        )
-                                      : Container(),
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.template.updatedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? BounceInDown(
+                                            duration: const Duration(
+                                                milliseconds: 500),
+                                            child: const Icon(Icons.favorite,
+                                                color: Color(0xffdc3545),
+                                                size: 26.0),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -464,31 +500,45 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Deleted time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.template.deletedAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context))),
-                                  const SizedBox(width: 5.0),
-                                  widget.template.isFavourite != null
-                                      ? BounceInDown(
-                                          duration:
-                                              const Duration(milliseconds: 500),
-                                          child: const Icon(Icons.favorite,
-                                              color: Color(0xffdc3545),
-                                              size: 26.0),
-                                        )
-                                      : Container(),
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.template.deletedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                    const SizedBox(width: 5.0),
+                                    widget.template.isFavourite != null
+                                        ? BounceInDown(
+                                            duration: const Duration(
+                                                milliseconds: 500),
+                                            child: const Icon(Icons.favorite,
+                                                color: Color(0xffdc3545),
+                                                size: 26.0),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
                               ),
                             )
                           ],

@@ -111,9 +111,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                       });
                     },
                     backgroundColor:
-                    settingNotifier.isSetBackgroundImage == true
-                        ? Colors.transparent
-                        : ThemeDataCenter.getBackgroundColor(context),
+                        settingNotifier.isSetBackgroundImage == true
+                            ? settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.30)
+                                : Colors.transparent
+                            : ThemeDataCenter.getBackgroundColor(context),
                     foregroundColor:
                         ThemeDataCenter.getMoreSlidableActionColorStyle(
                             context),
@@ -126,11 +128,15 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            SubjectDetailScreen(subject: widget.subject)));
+                        builder: (context) => SubjectDetailScreen(
+                              subject: widget.subject,
+                              redirectFrom: null,
+                            )));
               },
               backgroundColor: settingNotifier.isSetBackgroundImage == true
-                  ? Colors.transparent
+                  ? settingNotifier.isSetBackgroundImage == true
+                      ? Colors.white.withOpacity(0.30)
+                      : Colors.transparent
                   : ThemeDataCenter.getBackgroundColor(context),
               foregroundColor:
                   ThemeDataCenter.getViewSlidableActionColorStyle(context),
@@ -145,9 +151,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                       }
                     },
                     backgroundColor:
-                    settingNotifier.isSetBackgroundImage == true
-                        ? Colors.transparent
-                        : ThemeDataCenter.getBackgroundColor(context),
+                        settingNotifier.isSetBackgroundImage == true
+                            ? settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.30)
+                                : Colors.transparent
+                            : ThemeDataCenter.getBackgroundColor(context),
                     foregroundColor:
                         ThemeDataCenter.getDeleteSlidableActionColorStyle(
                             context),
@@ -173,21 +181,35 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Created time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.create_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.subject.createdAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context))),
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.create_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.createdAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
@@ -209,21 +231,34 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Updated time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.update_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.subject.updatedAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context)))
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.updatedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -241,21 +276,34 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                 style: CommonStyles.labelTextStyle),
                             Tooltip(
                               message: 'Deleted time',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete_rounded,
-                                      size: 13.0,
-                                      color:
-                                          ThemeDataCenter.getTopCardLabelStyle(
-                                              context)),
-                                  const SizedBox(width: 5.0),
-                                  Text(
-                                      CommonConverters.toTimeString(
-                                          time: widget.subject.deletedAt!),
-                                      style: CommonStyles.dateTimeTextStyle(
-                                          color: ThemeDataCenter
-                                              .getTopCardLabelStyle(context)))
-                                ],
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.deletedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
                               ),
                             )
                           ],
@@ -434,8 +482,14 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   NoteListScreen(
-                                                                      noteConditionModel:
-                                                                          noteConditionModel)));
+                                                                    noteConditionModel:
+                                                                        noteConditionModel,
+                                                                    isOpenSubjectsForFilter:
+                                                                        true,
+                                                                    redirectFrom:
+                                                                        RedirectFromEnum
+                                                                            .subjects,
+                                                                  )));
                                                     },
                                                     coreButtonStyle: ThemeDataCenter
                                                         .getViewNotesButtonStyle(
@@ -452,15 +506,20 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                              builder: (context) => NoteCreateScreen(
-                                                                  note: null,
-                                                                  copyNote:
-                                                                      null,
-                                                                  subject: widget
-                                                                      .subject,
-                                                                  actionMode:
-                                                                      ActionModeEnum
-                                                                          .create)));
+                                                              builder: (context) =>
+                                                                  NoteCreateScreen(
+                                                                    note: null,
+                                                                    copyNote:
+                                                                        null,
+                                                                    subject: widget
+                                                                        .subject,
+                                                                    actionMode:
+                                                                        ActionModeEnum
+                                                                            .create,
+                                                                    redirectFrom:
+                                                                        RedirectFromEnum
+                                                                            .subjectCreateNote,
+                                                                  )));
                                                     },
                                                     coreButtonStyle: ThemeDataCenter
                                                         .getCreateNoteButtonStyle(

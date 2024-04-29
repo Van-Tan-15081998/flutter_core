@@ -108,7 +108,9 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
                           label: const Text('Cancel'),
                           onPressed: () async {
                             if (await confirmFunction()) {
-                              Navigator.pop(context);
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
                             }
                           },
                           coreButtonStyle: CoreButtonStyle.options(

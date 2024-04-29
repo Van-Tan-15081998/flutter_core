@@ -10,6 +10,7 @@ import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.
 import '../../../../../core/components/form/CoreTextFormField.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/enums/CommonEnums.dart';
@@ -32,9 +33,9 @@ class LabelCreateScreen extends StatefulWidget {
 class _LabelCreateScreenState extends State<LabelCreateScreen> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
-  String _color = '';
+  String _color = Colors.blueGrey.withOpacity(0.85).value.toRadixString(16).substring(2);
 
-  Color defaultColor = Color(0xff1f1f1f);
+  Color defaultColor = Colors.blueGrey;
   final ScrollController _controllerScrollController = ScrollController();
 
   final myController = TextEditingController();
@@ -83,14 +84,20 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      appbarLeading: null,
       title: Text(
-        widget.label == null ? 'Create' : 'Update',
-        style: GoogleFonts.montserrat(
-            fontStyle: FontStyle.italic,
-            fontSize: 26,
-            color: const Color(0xFF404040),
-            fontWeight: FontWeight.bold),
-      ),
+          widget.label == null
+              ? CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'screen.title.create')
+              : CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'screen.title.update'),
+          style: CommonStyles.screenTitleTextStyle(
+              fontSize: 26.0,
+              color: ThemeDataCenter.getScreenTitleTextColor(context))),
       isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -120,6 +127,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                   MaterialPageRoute(
                       builder: (context) => const LabelListScreen(
                             labelConditionModel: null,
+                            redirectFrom: null,
                           )),
                   (route) => false,
                 );
@@ -149,6 +157,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                         MaterialPageRoute(
                             builder: (context) => LabelDetailScreen(
                                   label: result,
+                                  redirectFrom: RedirectFromEnum.labelUpdate,
                                 )),
                         (route) => false);
                   }
@@ -168,19 +177,21 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
       bottomActionBarScrollable: [Container()],
       child: settingNotifier.isSetBackgroundImage == true
           ? DecoratedBox(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
                     image: AssetImage(
-                        "assets/images/cartoon-background-image.jpg"),
+                        settingNotifier.backgroundImageSourceString ??
+                            CommonStyles.backgroundImageSourceStringDefault()),
                     fit: BoxFit.cover),
               ),
-              child: _buildBody(context),
+              child: _buildBody(context, settingNotifier),
             )
-          : _buildBody(context),
+          : _buildBody(context, settingNotifier),
     );
   }
 
-  WillPopScope _buildBody(BuildContext context) {
+  WillPopScope _buildBody(
+      BuildContext context, SettingNotifier settingNotifier) {
     return WillPopScope(
       onWillPop: () async {
         onBack();
@@ -202,43 +213,51 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DottedBorder(
-                    borderType: BorderType.RRect,
-                    radius: const Radius.circular(12),
-                    padding: const EdgeInsets.all(6),
-                    child: ClipRRect(
+                Container(
+                  decoration: BoxDecoration(
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      child: SizedBox(
-                        height: 200,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: DottedBorder(
-                              borderType: BorderType.RRect,
-                              radius: const Radius.circular(12),
-                              color: _color.toColor(),
-                              child: ClipRRect(
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(12)),
-                                child: Container(
-                                    color: Colors.white,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(6.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.label_important_rounded,
-                                              color: _color.toColor()),
-                                          Flexible(
-                                            child: Text(_title.isNotEmpty
-                                                ? _title
-                                                : 'Your label'),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              )),
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DottedBorder(
+                      borderType: BorderType.RRect,
+                      radius: const Radius.circular(12),
+                      padding: const EdgeInsets.all(6),
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                        child: SizedBox(
+                          height: 200,
+                          width: MediaQuery.of(context).size.width,
+                          child: Center(
+                            child: DottedBorder(
+                                borderType: BorderType.RRect,
+                                radius: const Radius.circular(12),
+                                color: _color.toColor(),
+                                child: ClipRRect(
+                                  borderRadius:
+                                      const BorderRadius.all(Radius.circular(12)),
+                                  child: Container(
+                                      color: Colors.white,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(6.0),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.label_important_rounded,
+                                                color: _color.toColor()),
+                                            Flexible(
+                                              child: Text(_title.isNotEmpty
+                                                  ? _title
+                                                  : 'Your label'),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+                                )),
+                          ),
                         ),
                       ),
                     ),
@@ -253,125 +272,171 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 5.0, 5.0, 0),
-                            child: Text(
-                              'Title:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: ThemeDataCenter
-                                      .getFormFieldLabelColorStyle(context)),
+                          Container(
+                            margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                color: settingNotifier.isSetBackgroundImage == true
+                                    ? Colors.white.withOpacity(0.65)
+                                    : Colors.transparent
+                            ),
+                            child: Padding(
+                              padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                              child: Text(
+                                CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'form.field.title.title')
+                                    .addColon()
+                                    .toString(),
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: ThemeDataCenter
+                                        .getFormFieldLabelColorStyle(context)),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      CoreTextFormField(
-                        style: TextStyle(
-                            color: ThemeDataCenter.getAloneTextColorStyle(
-                                context)),
-                        onChanged: (value) {
-                          setState(() {
-                            _title = value;
-                          });
-                        },
-                        controller: myController,
-                        focusNode: myFocusNode,
-                        validateString: 'Please enter your title',
-                        maxLength: 30,
-                        icon: Icon(Icons.edit,
-                            color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                context)),
-                        label: 'Title',
-                        labelColor: ThemeDataCenter.getFormFieldLabelColorStyle(
-                            context),
-                        placeholder: 'Enter you title',
-                        helper: '',
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(12)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent
+                        ),
+                        child: CoreTextFormField(
+                          style: TextStyle(
+                              color: ThemeDataCenter.getAloneTextColorStyle(
+                                  context)),
+                          onChanged: (value) {
+                            setState(() {
+                              _title = value;
+                            });
+                          },
+                          controller: myController,
+                          focusNode: myFocusNode,
+                          validateString: 'Please enter your title',
+                          maxLength: 30,
+                          icon: Icon(Icons.edit,
+                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
+                                  context)),
+                          label: 'Title',
+                          labelColor: ThemeDataCenter.getFormFieldLabelColorStyle(
+                              context),
+                          placeholder: 'Enter you title',
+                          helper: '',
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 0),
-                            child: Text(
-                              'Color:',
-                              style: GoogleFonts.montserrat(
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: ThemeDataCenter
-                                      .getFormFieldLabelColorStyle(context)),
+                          Container(
+                            margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                color: settingNotifier.isSetBackgroundImage == true
+                                    ? Colors.white.withOpacity(0.65)
+                                    : Colors.transparent
+                            ),
+                            child: Padding(
+                              padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                              child: Text(
+                                CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'form.field.title.color')
+                                    .addColon()
+                                    .toString(),
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: ThemeDataCenter
+                                        .getFormFieldLabelColorStyle(context)),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40.0,
-                              height: 40.0,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.all(
-                                    Radius.circular(6.0)),
-                                color: _color.toColor(),
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(12)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(6.0)),
+                                  color: _color.toColor(),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 10.0),
-                            CoreElevatedButton(
-                              onPressed: () async {
-                                myFocusNode.unfocus();
-                                await showDialog<bool>(
-                                    context: context,
-                                    builder: (BuildContext context) => Form(
-                                          onWillPop: () async {
-                                            return true;
-                                          },
-                                          child: Dialog(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                              ),
-                                              child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    MaterialPicker(
-                                                      pickerColor:
-                                                          defaultColor, //default color
-                                                      onColorChanged:
-                                                          (Color color) {
-                                                        setState(() {
-                                                          _color = color.value
-                                                              .toRadixString(16)
-                                                              .substring(
-                                                                  2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
-                                                        });
-                                                        // Khi su dung: String colorHex = "29b6f6";
-                                                        // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
-                                                      },
-                                                    )
-                                                  ])),
-                                        ));
-                              },
-                              coreButtonStyle: CoreButtonStyle.options(
-                                  coreStyle: CoreStyle.outlined,
-                                  coreColor: CoreColor.dark,
-                                  coreRadius: CoreRadius.radius_6,
-                                  kitForegroundColorOption:
-                                      const Color(0xff1f1f1f),
-                                  coreFixedSizeButton:
-                                      CoreFixedSizeButton.medium_40),
-                              child: Text('Choose color',
-                                  style: CommonStyles.buttonTextStyle),
-                            ),
-                          ],
+                              const SizedBox(width: 10.0),
+                              CoreElevatedButton(
+                                onPressed: () async {
+                                  myFocusNode.unfocus();
+                                  await showDialog<bool>(
+                                      context: context,
+                                      builder: (BuildContext context) => Form(
+                                            onWillPop: () async {
+                                              return true;
+                                            },
+                                            child: Dialog(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10.0),
+                                                ),
+                                                child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceAround,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      MaterialPicker(
+                                                        pickerColor:
+                                                            defaultColor, //default color
+                                                        onColorChanged:
+                                                            (Color color) {
+                                                          setState(() {
+                                                            _color = color.value
+                                                                .toRadixString(16)
+                                                                .substring(
+                                                                    2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
+                                                          });
+                                                          // Khi su dung: String colorHex = "29b6f6";
+                                                          // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
+                                                        },
+                                                      )
+                                                    ])),
+                                          ));
+                                },
+                                coreButtonStyle: CoreButtonStyle.options(
+                                    coreStyle: CoreStyle.outlined,
+                                    coreColor: CoreColor.dark,
+                                    coreRadius: CoreRadius.radius_6,
+                                    kitForegroundColorOption:
+                                        const Color(0xff1f1f1f),
+                                    coreFixedSizeButton:
+                                        CoreFixedSizeButton.medium_40),
+                                child: Text('Choose color',
+                                    style: CommonStyles.buttonTextStyle),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

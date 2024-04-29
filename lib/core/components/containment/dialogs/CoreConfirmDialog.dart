@@ -50,7 +50,9 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
                 label: Text('Cancel', style: CommonStyles.labelTextStyle),
                 onPressed: () {
                   widget.onChanged(true);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                 },
                 coreButtonStyle: CoreButtonStyle.options(
                     coreStyle: CoreStyle.filled,
@@ -66,7 +68,9 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
                 label: Text('Yes, I\'m', style: CommonStyles.labelTextStyle),
                 onPressed: () {
                   widget.onChanged(false);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                 },
                 coreButtonStyle: CoreButtonStyle.options(
                     coreStyle: CoreStyle.filled,
