@@ -427,7 +427,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                             .update,
                                                                     subject: widget
                                                                         .subject,
-                                                                    redirectFromEnum:
+                                                                    redirectFrom:
+                                                                        null,
+                                                                    breadcrumb:
                                                                         null,
                                                                   )));
                                                     },
@@ -455,7 +457,9 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                     actionMode:
                                                                         ActionModeEnum
                                                                             .create,
-                                                                    redirectFromEnum:
+                                                                    redirectFrom:
+                                                                        null,
+                                                                    breadcrumb:
                                                                         null,
                                                                   )));
                                                     },

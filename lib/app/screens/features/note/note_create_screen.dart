@@ -24,6 +24,7 @@ import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
 import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
+import '../subjects/providers/subject_notifier.dart';
 import 'databases/note_db_manager.dart';
 import 'models/note_model.dart';
 import 'note_detail_screen.dart';
@@ -1292,6 +1293,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final noteNotifier = Provider.of<NoteNotifier>(context);
+    final subjectNotifier = Provider.of<SubjectNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
@@ -1349,16 +1351,23 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 CoreNotification.show(context, CoreNotificationStatus.success,
                     CoreNotificationAction.create, 'Note');
 
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const NoteListScreen(
-                            noteConditionModel: null,
-                            isOpenSubjectsForFilter: null,
-                            redirectFrom: null,
-                          )),
-                  (route) => false,
-                );
+                if (widget.redirectFrom ==
+                    RedirectFromEnum.subjectsInFolderMode) {
+                  subjectNotifier.onReloadPage();
+
+                  Navigator.pop(context);
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NoteListScreen(
+                          noteConditionModel: null,
+                          isOpenSubjectsForFilter: null,
+                          redirectFrom: null,
+                        )),
+                        (route) => false,
+                  );
+                }
               } else {
                 CoreNotification.show(context, CoreNotificationStatus.error,
                     CoreNotificationAction.create, 'Note');

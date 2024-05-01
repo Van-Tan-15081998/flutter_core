@@ -2,6 +2,12 @@ enum ActionModeEnum { create, update, delete, copy }
 
 enum ActionCreateNoteEnum { create, createForSelectedDay }
 
+enum ActionSubjectFolderItemEnum {
+  update,
+  delete,
+  deleteForever,
+  restore}
+
 enum RedirectFromEnum {
   home,
   labels,
@@ -13,6 +19,7 @@ enum RedirectFromEnum {
   noteCreate,
   noteUpdate,
   subjects,
+  subjectsInFolderMode,
   subjectCreate,
   subjectUpdate,
   subjectCreateNote,

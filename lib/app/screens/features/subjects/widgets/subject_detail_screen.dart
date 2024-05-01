@@ -5,8 +5,6 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
@@ -53,7 +51,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                   subject: widget.subject,
                   parentSubject: null,
                   actionMode: ActionModeEnum.update,
-                  redirectFromEnum: null,
+                  redirectFrom: null,
+                  breadcrumb: null,
                 )));
   }
 
@@ -86,7 +85,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const SubjectListScreen(
-                subjectConditionModel: null, redirectFrom: null)),
+                  subjectConditionModel: null,
+                  redirectFrom: null,
+                  breadcrumb: null,
+                )),
         (route) => false,
       );
     } else {
@@ -137,7 +139,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
               context,
               MaterialPageRoute(
                   builder: (context) => const SubjectListScreen(
-                      subjectConditionModel: null, redirectFrom: null)),
+                        subjectConditionModel: null,
+                        redirectFrom: null,
+                        breadcrumb: null,
+                      )),
               (route) => false,
             );
           },
@@ -183,8 +188,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const SubjectListScreen(
-                                    subjectConditionModel: null,
-                                    redirectFrom: null),
+                                  subjectConditionModel: null,
+                                  redirectFrom: null,
+                                  breadcrumb: null,
+                                ),
                               ),
                             );
                           } else {
@@ -442,7 +449,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                         .update,
                                                                 subject: widget
                                                                     .subject,
-                                                                redirectFromEnum:
+                                                                redirectFrom:
+                                                                    null,
+                                                                breadcrumb:
                                                                     null,
                                                               )));
                                                 },
@@ -469,7 +478,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                                 actionMode:
                                                                     ActionModeEnum
                                                                         .create,
-                                                                redirectFromEnum:
+                                                                redirectFrom:
+                                                                    null,
+                                                                breadcrumb:
                                                                     null,
                                                               )));
                                                 },
@@ -558,10 +569,11 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           SubjectListScreen(
-                                                              subjectConditionModel:
-                                                                  subjectConditionModel,
-                                                              redirectFrom:
-                                                                  null),
+                                                        subjectConditionModel:
+                                                            subjectConditionModel,
+                                                        redirectFrom: null,
+                                                        breadcrumb: null,
+                                                      ),
                                                     ),
                                                   );
                                                 },
@@ -591,10 +603,11 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           SubjectListScreen(
-                                                              subjectConditionModel:
-                                                                  subjectConditionModel,
-                                                              redirectFrom:
-                                                                  null),
+                                                        subjectConditionModel:
+                                                            subjectConditionModel,
+                                                        redirectFrom: null,
+                                                        breadcrumb: null,
+                                                      ),
                                                     ),
                                                   );
                                                 },
@@ -629,10 +642,11 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     MaterialPageRoute(
                                                       builder: (context) =>
                                                           const SubjectListScreen(
-                                                              subjectConditionModel:
-                                                                  null,
-                                                              redirectFrom:
-                                                                  null),
+                                                        subjectConditionModel:
+                                                            null,
+                                                        redirectFrom: null,
+                                                        breadcrumb: null,
+                                                      ),
                                                     ),
                                                   );
                                                 } else {
@@ -677,10 +691,11 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       MaterialPageRoute(
                                                         builder: (context) =>
                                                             const SubjectListScreen(
-                                                                subjectConditionModel:
-                                                                    null,
-                                                                redirectFrom:
-                                                                    null),
+                                                          subjectConditionModel:
+                                                              null,
+                                                          redirectFrom: null,
+                                                          breadcrumb: null,
+                                                        ),
                                                       ),
                                                     );
                                                   } else {

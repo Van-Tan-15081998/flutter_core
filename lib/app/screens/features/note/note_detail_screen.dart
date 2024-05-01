@@ -282,7 +282,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         MaterialPageRoute(
                             builder: (context) => SubjectListScreen(
                                 subjectConditionModel: subjectConditionModel,
-                                redirectFrom: null)),
+                                redirectFrom: null,
+                            breadcrumb: null,)),
                         (route) => false);
                   },
                   child: Container(

@@ -1,14 +1,12 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
+import 'package:flutter_core_v3/app/screens/features/subjects/widgets/subject_list_folder_mode_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sticky_headers/sticky_headers.dart';
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
-import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../../core/components/form/CoreTextFormField.dart';
@@ -32,10 +30,12 @@ import 'subject_create_screen.dart';
 class SubjectListScreen extends StatefulWidget {
   final SubjectConditionModel? subjectConditionModel;
   final RedirectFromEnum? redirectFrom;
+  final List<SubjectModel>? breadcrumb;
   const SubjectListScreen(
       {super.key,
       required this.subjectConditionModel,
-      required this.redirectFrom});
+      required this.redirectFrom,
+      required this.breadcrumb});
 
   @override
   State<SubjectListScreen> createState() => _SubjectListScreenState();
@@ -165,7 +165,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
       _subjectConditionModel.isDeleted = null;
       _subjectConditionModel.parentId = null;
       _subjectConditionModel.isRootSubject = null;
-
+      _subjectConditionModel.onlyParentId = null;
       _reloadPage();
     });
   }
@@ -191,18 +191,6 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
   _reloadPage() {
     _corePaginationModel.currentPageIndex = 0;
     _pagingController.refresh();
-  }
-
-  _onUpdateSubject(BuildContext context, SubjectModel subject) async {
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => SubjectCreateScreen(
-                  subject: subject,
-                  parentSubject: null,
-                  actionMode: ActionModeEnum.update,
-                  redirectFromEnum: null,
-                )));
   }
 
   Future<bool> _onDeleteSubject(
@@ -349,9 +337,9 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const HomeScreen(
-              title: 'Hi Notes',
-            )),
-            (route) => false,
+                  title: 'Hi Notes',
+                )),
+        (route) => false,
       );
     } else {
       if (Navigator.canPop(context)) {
@@ -360,9 +348,12 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
     }
   }
 
-  Widget? _buildAppbarLeading(BuildContext context, SettingNotifier settingNotifier) {
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
     return IconButton(
-      style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
       icon: const FaIcon(FontAwesomeIcons.chevronLeft),
       onPressed: () {
         _onPopAction(context);
@@ -391,9 +382,9 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
             ? DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage(
-                          settingNotifier.backgroundImageSourceString ??
-                              CommonStyles.backgroundImageSourceStringDefault()),
+                      image: AssetImage(settingNotifier
+                              .backgroundImageSourceString ??
+                          CommonStyles.backgroundImageSourceStringDefault()),
                       fit: BoxFit.cover),
                 ),
                 child: _buildBody(subjectNotifier, settingNotifier),
@@ -575,7 +566,8 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                   builder: (context) => const SubjectCreateScreen(
                         parentSubject: null,
                         actionMode: ActionModeEnum.create,
-                        redirectFromEnum: RedirectFromEnum.subjects,
+                        redirectFrom: RedirectFromEnum.subjects,
+                        breadcrumb: null,
                       )),
             );
           },
@@ -620,7 +612,8 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                                     subject: item,
                                     parentSubject: null,
                                     actionMode: ActionModeEnum.update,
-                                    redirectFromEnum: null,
+                                    redirectFrom: null,
+                                    breadcrumb: null,
                                   )));
                       setState(() {});
                     },
@@ -724,18 +717,39 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    BounceInLeft(
-                        child: FaIcon(FontAwesomeIcons.waze,
-                            size: 30.0,
-                            color: ThemeDataCenter.getAloneTextColorStyle(
-                                context))),
-                    const SizedBox(width: 5),
-                    BounceInRight(
-                      child: Text('No items found!',
-                          style: TextStyle(
-                              color: ThemeDataCenter.getAloneTextColorStyle(
-                                  context))),
-                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                      decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(24.0)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent),
+                      child: Row(
+                        children: [
+                          BounceInLeft(
+                              child: FaIcon(FontAwesomeIcons.waze,
+                                  size: 30.0,
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context))),
+                          const SizedBox(width: 5),
+                          BounceInRight(
+                            child: Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.noItem.subject'),
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16.0,
+                                    color:
+                                        ThemeDataCenter.getAloneTextColorStyle(
+                                            context),
+                                    fontWeight: FontWeight.w500)),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -778,13 +792,60 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
           : ThemeDataCenter.getBackgroundColor(context),
       title: Row(
         children: [
-          Text(
-            CommonLanguages.convert(
-                lang: settingNotifier.languageString ??
-                    CommonLanguages.languageStringDefault(),
-                word: 'screen.title.subjects'),
-            style: CommonStyles.screenTitleTextStyle(
-                color: ThemeDataCenter.getScreenTitleTextColor(context)),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 6.0),
+              child: Text(
+                CommonLanguages.convert(
+                    lang: settingNotifier.languageString ??
+                        CommonLanguages.languageStringDefault(),
+                    word: 'screen.title.subjects'),
+                style: CommonStyles.screenTitleTextStyle(
+                    color: ThemeDataCenter.getScreenTitleTextColor(context)),
+              ),
+            ),
+          ),
+          Tooltip(
+            message: 'Folder view',
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SubjectListFolderModeScreen(
+                            subjectConditionModel: null,
+                            redirectFrom: null,
+                            breadcrumb: null)),
+                    (route) => false,
+                  );
+                },
+                borderRadius: BorderRadius.circular(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: settingNotifier.isSetBackgroundImage == true
+                        ? Colors.white.withOpacity(0.65)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color:
+                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Icon(
+                      Icons.folder_rounded,
+                      size: 22,
+                      color:
+                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
           _isFiltering()
               ? Tooltip(

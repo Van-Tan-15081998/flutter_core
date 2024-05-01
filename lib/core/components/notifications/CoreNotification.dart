@@ -14,7 +14,6 @@ class CoreNotification {
    */
   static show(BuildContext context, CoreNotificationStatus status,
       CoreNotificationAction action, String resourceName) {
-
     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
     audio.playAudioOnNotification();
 
@@ -24,24 +23,22 @@ class CoreNotification {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  static showMessage(BuildContext context, CoreNotificationStatus status, String message) {
-
+  static showMessage(
+      BuildContext context, CoreNotificationStatus status, String message) {
     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
     audio.playAudioOnMessage();
 
-    final snackBar = buildContent(
-        context, status, message);
+    final snackBar = buildContent(context, status, message);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
-
 
   static SnackBar buildContent(BuildContext context,
       CoreNotificationStatus status, String contentString) {
     switch (status) {
       case CoreNotificationStatus.success:
         return SnackBar(
+          duration: const Duration(milliseconds: 1500),
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.green[400],
           content: Padding(
@@ -56,7 +53,8 @@ class CoreNotification {
                       radius: const Radius.circular(30),
                       color: Colors.white,
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(30)),
                         child: Container(
                             width: 50,
                             height: 50,
@@ -112,7 +110,8 @@ class CoreNotification {
                       radius: const Radius.circular(30),
                       color: Colors.white,
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(30)),
                         child: Container(
                             width: 50,
                             height: 50,
@@ -168,7 +167,8 @@ class CoreNotification {
                       radius: const Radius.circular(30),
                       color: Colors.white,
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(30)),
                         child: Container(
                             width: 50,
                             height: 50,
@@ -224,7 +224,8 @@ class CoreNotification {
                       radius: const Radius.circular(30),
                       color: Colors.white,
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(30)),
                         child: Container(
                             width: 50,
                             height: 50,

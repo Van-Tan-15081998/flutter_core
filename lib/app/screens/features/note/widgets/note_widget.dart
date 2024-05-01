@@ -13,6 +13,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../setting/providers/setting_notifier.dart';
@@ -153,9 +154,9 @@ class _NoteWidgetState extends State<NoteWidget> {
     }
   }
 
-  Widget onGetTitle() {
+  Widget onGetTitle(SettingNotifier settingNotifier) {
     String defaultTitle =
-        'You wrote at ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
+        '${CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'card.title.youWroteAt')} ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -256,7 +257,9 @@ class _NoteWidgetState extends State<NoteWidget> {
                       MaterialPageRoute(
                           builder: (context) => SubjectListScreen(
                               subjectConditionModel: subjectConditionModel,
-                              redirectFrom: RedirectFromEnum.notes)),
+                              redirectFrom: RedirectFromEnum.notes,
+                            breadcrumb: null,
+                          )),
                     );
                   },
                   onTap: () {
@@ -489,7 +492,7 @@ class _NoteWidgetState extends State<NoteWidget> {
                                   widget.note.isFavourite != null
                                       ? Padding(
                                           padding: const EdgeInsets.fromLTRB(
-                                              10.0, 0, 0, 10.0),
+                                              10.0, 0, 0, 0),
                                           child: BounceInDown(
                                             duration: const Duration(
                                                 milliseconds: 500),
@@ -845,7 +848,7 @@ class _NoteWidgetState extends State<NoteWidget> {
                                                         scrollable: false,
                                                         showCursor: false),
                                               )
-                                            : onGetTitle()),
+                                            : onGetTitle(settingNotifier)),
                                     widget.note.deletedAt == null
                                         ? Tooltip(
                                             message: 'Update',

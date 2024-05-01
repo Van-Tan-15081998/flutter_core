@@ -507,18 +507,38 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    BounceInLeft(
-                        child: FaIcon(FontAwesomeIcons.waze,
-                            size: 30.0,
-                            color: ThemeDataCenter.getAloneTextColorStyle(
-                                context))),
-                    const SizedBox(width: 5),
-                    BounceInRight(
-                      child: Text('No items found!',
-                          style: TextStyle(
-                              color: ThemeDataCenter.getAloneTextColorStyle(
-                                  context))),
-                    ),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(
+                              Radius.circular(24.0)),
+                          color: settingNotifier
+                              .isSetBackgroundImage ==
+                              true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent),
+                      child: Row(
+                        children: [
+                          BounceInLeft(
+                              child: FaIcon(FontAwesomeIcons.waze,
+                                  size: 30.0,
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context))),
+                          const SizedBox(width: 5),
+                          BounceInRight(
+                            child: Text(
+                                CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'notification.noItem.label'),
+                                style: GoogleFonts.montserrat(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 16.0,
+                                    color: ThemeDataCenter.getAloneTextColorStyle(context),
+                                    fontWeight: FontWeight.w500)
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+
                   ],
                 ),
               ),

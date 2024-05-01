@@ -275,7 +275,9 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                         MaterialPageRoute(
                             builder: (context) => SubjectListScreen(
                                 subjectConditionModel: subjectConditionModel,
-                                redirectFrom: null)),
+                                redirectFrom: null,
+                              breadcrumb: null,
+                            )),
                         (route) => false);
                   },
                   child: Container(

@@ -4,6 +4,7 @@ class SubjectConditionModel {
   String? searchText;
   bool? isDeleted;
   int? parentId;
+  int? onlyParentId;
   bool? isRootSubject;
 
   SubjectConditionModel({
@@ -12,6 +13,7 @@ class SubjectConditionModel {
     this.searchText,
     this.isDeleted,
     this.parentId,
+    this.onlyParentId,
     this.isRootSubject
   });
 }

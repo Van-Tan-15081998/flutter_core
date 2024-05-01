@@ -117,11 +117,11 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
         break;
       case AppBarActionButtonEnum.home:
         {
-          return Padding(
+          return widget.homeLabel != null ? Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
             child: CoreElevatedButton.icon(
               icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text(widget.homeLabel != null ? widget.homeLabel! : 'Home',
+              label: Text('Home',
                   style: CommonStyles.buttonTextStyle),
               onPressed: () {
                 if (widget.onGoHome != null) {
@@ -135,7 +135,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                   kitForegroundColorOption: Colors.black,
                   coreFixedSizeButton: CoreFixedSizeButton.medium_40),
             ),
-          );
+          ) : Container();
         }
         break;
 

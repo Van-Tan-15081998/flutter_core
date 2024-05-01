@@ -21,6 +21,7 @@ import '../features/label/widgets/label_list_screen.dart';
 import '../features/note/databases/note_db_manager.dart';
 import '../features/note/providers/note_notifier.dart';
 import '../features/subjects/providers/subject_notifier.dart';
+import '../features/subjects/widgets/subject_list_folder_mode_screen.dart';
 import '../features/subjects/widgets/subject_list_screen.dart';
 import '../features/template/providers/template_notifier.dart';
 import '../features/template/template_list_screen.dart';
@@ -370,13 +371,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                     message: 'View',
                                     child: CoreElevatedButton(
                                       onPressed: () {
+
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //         const SubjectListScreen(
+                                        //       subjectConditionModel: null,
+                                        //       redirectFrom: null,
+                                        //           breadcrumb: null,
+                                        //     ),
+                                        //   ),
+                                        // );
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                const SubjectListScreen(
+                                            const SubjectListFolderModeScreen(
                                               subjectConditionModel: null,
                                               redirectFrom: null,
+                                              breadcrumb: null,
                                             ),
                                           ),
                                         );
@@ -749,7 +763,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
       appBar: _buildAppBar(context, settingNotifier),
-      drawer: _buildDrawer(context),
+      drawer: _buildDrawer(context, settingNotifier),
       body: settingNotifier.isSetBackgroundImage == true
           ? DecoratedBox(
               decoration: BoxDecoration(
@@ -765,16 +779,16 @@ class _HomeScreenState extends State<HomeScreen> {
       // bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
       //     ? null
       //     : _buildBottomNavigationBar(context),
-      floatingActionButton: _buildFloatingActionCreateButton(context),
+      floatingActionButton: _buildFloatingActionCreateButton(context, settingNotifier),
     );
   }
 
-  Widget _buildFloatingActionCreateButton(BuildContext context) {
+  Widget _buildFloatingActionCreateButton(BuildContext context, SettingNotifier settingNotifier) {
     return AvatarGlow(
       glowRadiusFactor: 0.2,
       curve: Curves.linearToEaseOut,
       child: Tooltip(
-        message: 'Create note',
+        message: CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'tooltip.button.createNote'),
         child: CoreElevatedButton.iconOnly(
           onPressed: () {
             Navigator.push(
@@ -843,15 +857,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       // backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       backgroundColor: Colors.transparent,
-      child: _buildFloatingActionCreateButton(context),
+      child: _buildFloatingActionCreateButton(context, settingNotifier),
     );
   }
 
-  Drawer _buildDrawer(BuildContext context) {
+  Drawer _buildDrawer(BuildContext context, SettingNotifier settingNotifier) {
     return Drawer(
       child: Column(
         children: [
@@ -877,7 +891,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Settings',
+                  Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'button.title.setting'),
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 18,
