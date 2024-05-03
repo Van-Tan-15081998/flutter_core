@@ -9,12 +9,12 @@ class SubjectModel {
 
   const SubjectModel(
       {required this.title,
-        required this.color,
-        required this.parentId,
-        required this.createdAt,
-        this.updatedAt,
-        this.deletedAt,
-        this.id});
+      required this.color,
+      required this.parentId,
+      required this.createdAt,
+      this.updatedAt,
+      this.deletedAt,
+      this.id});
 
   factory SubjectModel.fromJson(Map<String, dynamic> json) => SubjectModel(
       id: json['id'],
@@ -26,12 +26,12 @@ class SubjectModel {
       deletedAt: json['deletedAt']);
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'color': color,
-    'parentId': parentId,
-    'createdAt': createdAt,
-    'updatedAt': updatedAt,
-    'deletedAt': deletedAt
-  };
+        'id': id,
+        'title': title,
+        'color': color,
+        'parentId': parentId,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        'deletedAt': deletedAt
+      };
 }

@@ -381,14 +381,33 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
       },
       child: CoreFullScreenDialog(
         appbarLeading: _buildAppbarLeading(context, settingNotifier),
-        title: Text(
-            CommonLanguages.convert(
-                lang: settingNotifier.languageString ??
-                    CommonLanguages.languageStringDefault(),
-                word: 'screen.title.detail'),
-            style: CommonStyles.screenTitleTextStyle(
-                fontSize: 26.0,
-                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        title: Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'screen.title.detail'),
+                            style: CommonStyles.screenTitleTextStyle(
+                                fontSize: 22.0,
+                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
         homeLabel: 'Templates',
@@ -778,7 +797,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                   onPressed: () async {
                                                     if (await CoreHelperWidget
                                                         .confirmFunction(
-                                                            context)) {
+                                                        context: context)) {
                                                       _onDeleteTemplateForever(
                                                               context)
                                                           .then((result) {

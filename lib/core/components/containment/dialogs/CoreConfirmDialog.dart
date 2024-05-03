@@ -10,12 +10,14 @@ class CoreConfirmDialog extends StatefulWidget {
   final Widget confirmTitle;
   final bool initialData;
   final ValueChanged<bool> onChanged;
+  final bool? isOnlyWarning;
 
   const CoreConfirmDialog({
     super.key,
     required this.confirmTitle,
     required this.initialData,
     required this.onChanged,
+    required this.isOnlyWarning
   });
 
   @override
@@ -36,13 +38,36 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const FaIcon(FontAwesomeIcons.triangleExclamation, size: 18.0),
+              widget.isOnlyWarning == true ? const FaIcon(FontAwesomeIcons.twitch, size: 25.0)  :  const FaIcon(FontAwesomeIcons.triangleExclamation, size: 25.0),
               const SizedBox(width: 10.0),
-              widget.confirmTitle,
+              Expanded(child: widget.confirmTitle),
             ],
           ),
           const SizedBox(height: 12.0),
+          widget.isOnlyWarning == true ?
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              CoreElevatedButton.icon(
+                icon: const FaIcon(FontAwesomeIcons.handPeace, size: 18.0),
+                label: Text('I got it', style: CommonStyles.labelTextStyle),
+                onPressed: () {
+                  widget.onChanged(true);
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                },
+                coreButtonStyle: CoreButtonStyle.options(
+                    coreStyle: CoreStyle.filled,
+                    coreColor: CoreColor.success,
+                    coreRadius: CoreRadius.radius_6,
+                    kitBorderColorOption: Colors.black,
+                    kitForegroundColorOption: Colors.black,
+                    coreFixedSizeButton: CoreFixedSizeButton.medium_48),
+              ),
+              ]
+          )
+          : Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               CoreElevatedButton.icon(

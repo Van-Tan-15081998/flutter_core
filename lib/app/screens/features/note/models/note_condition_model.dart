@@ -11,17 +11,16 @@ class NoteConditionModel {
   bool? recentlyUpdated;
   bool? favourite;
 
-  NoteConditionModel({
-    this.title,
-    this.description,
-    this.createdAtStartOfDay,
-    this.createdAtEndOfDay,
-    this.labelId,
-    this.subjectId,
-    this.onlyNoneSubject,
-    this.searchText,
-    this.isDeleted,
-    this.recentlyUpdated,
-    this.favourite
-  });
+  NoteConditionModel(
+      {this.title,
+      this.description,
+      this.createdAtStartOfDay,
+      this.createdAtEndOfDay,
+      this.labelId,
+      this.subjectId,
+      this.onlyNoneSubject,
+      this.searchText,
+      this.isDeleted,
+      this.recentlyUpdated,
+      this.favourite});
 }

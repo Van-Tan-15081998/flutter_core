@@ -152,7 +152,7 @@ class DatabaseProvider {
             ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND ((createdAt >= ${noteConditionModel.createdAtStartOfDay} "
                 "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} ) OR (createdForDay >= ${noteConditionModel.createdAtStartOfDay} AND createdForDay <= ${noteConditionModel.createdAtEndOfDay}))" : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
-                ' ${noteConditionModel.onlyNoneSubject == true ? " AND subjectID IS NULL" : ""}'
+            ' ${noteConditionModel.onlyNoneSubject == true ? " AND subjectID IS NULL" : ""}'
             ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
         orderBy: noteConditionModel.recentlyUpdated != null
@@ -301,8 +301,8 @@ class DatabaseProvider {
             ' ${subjectConditionModel.isDeleted == null || subjectConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
             ' ${subjectConditionModel.id != null ? " AND id = ${subjectConditionModel.id}" : ""}'
             ' ${subjectConditionModel.isRootSubject == true ? " AND parentId IS NULL" : ""}'
-                ' ${subjectConditionModel.onlyParentId != null ? " AND parentId = ${subjectConditionModel.onlyParentId}" : ""}'
-                ' ${subjectConditionModel.parentId != null ? " AND (parentId = ${subjectConditionModel.parentId} OR id = ${subjectConditionModel.parentId})" : ""}'
+            ' ${subjectConditionModel.onlyParentId != null ? " AND parentId = ${subjectConditionModel.onlyParentId}" : ""}'
+            ' ${subjectConditionModel.parentId != null ? " AND (parentId = ${subjectConditionModel.parentId} OR id = ${subjectConditionModel.parentId})" : ""}'
             ' ${subjectConditionModel.searchText != null && subjectConditionModel.searchText!.isNotEmpty ? " AND title LIKE \'%${subjectConditionModel.searchText}%\'" : ""}',
         orderBy: subjectConditionModel.parentId != null ? "id ASC" : "id DESC");
 
@@ -317,7 +317,7 @@ class DatabaseProvider {
   static Future<int> countAllSubjects() async {
     final db = await _getDB();
     int? countAll = Sqflite.firstIntValue(await db
-        .rawQuery('SELECT COUNT(*) FROM subjects WHERE deletedAt IS NULL'));
+        .rawQuery('SELECT COUNT(*) FROM subjects WHERE deletedAt IS NULL AND parentId IS NULL'));
 
     if (countAll == null) {
       return 0;

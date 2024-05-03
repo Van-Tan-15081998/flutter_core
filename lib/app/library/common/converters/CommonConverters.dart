@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 
 class CommonConverters {
@@ -10,5 +12,11 @@ class CommonConverters {
     return DateFormat(format ?? 'HH:mm  dd/MM/yyyy').format(dateTime);
   }
 
-
+  /*
+  CommonConverters.getRandomNumber(maxNumber:)
+   */
+  static int getRandomNumber({required maxNumber}) {
+    Random random = Random();
+    return random.nextInt(maxNumber); // Trả về số ngẫu nhiên từ 0 đến 8
+  }
 }

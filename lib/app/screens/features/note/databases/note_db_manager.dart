@@ -1,5 +1,4 @@
 import 'package:flutter_core_v3/app/services/database/database_provider.dart';
-
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../models/note_condition_model.dart';
 import '../models/note_model.dart';
@@ -12,13 +11,17 @@ class NoteDatabaseManager {
   }
 
   static Future<List<NoteModel>?> getAllNotesDistinctCreatedAt() async {
-    List<NoteModel>? notes = await DatabaseProvider.getAllNotesDistinctCreatedAt();
+    List<NoteModel>? notes =
+        await DatabaseProvider.getAllNotesDistinctCreatedAt();
 
     return notes;
   }
 
-  static Future<List<NoteModel>?> onGetNotePagination(CorePaginationModel corePaginationModel, NoteConditionModel noteConditionModel) async {
-    List<NoteModel>? notes = await DatabaseProvider.getNotePagination(corePaginationModel, noteConditionModel);
+  static Future<List<NoteModel>?> onGetNotePagination(
+      CorePaginationModel corePaginationModel,
+      NoteConditionModel noteConditionModel) async {
+    List<NoteModel>? notes = await DatabaseProvider.getNotePagination(
+        corePaginationModel, noteConditionModel);
 
     return notes;
   }
@@ -28,7 +31,7 @@ class NoteDatabaseManager {
       int countAll = await DatabaseProvider.countAllNotes();
 
       return countAll;
-    } catch (e){
+    } catch (e) {
       return 0;
     }
   }
@@ -77,7 +80,7 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onUpdate(NoteModel note) async {
+  static Future<NoteModel?> _onUpdate(NoteModel note) async {
     try {
       int result = await DatabaseProvider.updateNote(note);
 
@@ -107,7 +110,8 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onFavourite(NoteModel note, int? isFavourite) async {
+  static Future<NoteModel?> _onFavourite(
+      NoteModel note, int? isFavourite) async {
     try {
       int result = await DatabaseProvider.favouriteNote(note, isFavourite);
 
@@ -137,7 +141,7 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onDelete(NoteModel note, int deleteTime) async {
+  static Future<NoteModel?> _onDelete(NoteModel note, int deleteTime) async {
     try {
       int result = await DatabaseProvider.deleteNote(note, deleteTime);
 
@@ -167,7 +171,7 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _onDeleteForever(NoteModel note) async {
+  static Future<NoteModel?> _onDeleteForever(NoteModel note) async {
     try {
       int result = await DatabaseProvider.deleteForeverNote(note);
 
@@ -197,7 +201,8 @@ class NoteDatabaseManager {
     return false;
   }
 
-  static  Future<NoteModel?> _restoreFromTrash(NoteModel note, int restoreTime) async {
+  static Future<NoteModel?> _restoreFromTrash(
+      NoteModel note, int restoreTime) async {
     try {
       int result = await DatabaseProvider.restoreNote(note, restoreTime);
 
@@ -213,7 +218,7 @@ class NoteDatabaseManager {
     }
   }
 
-  static  Future<NoteModel?> getById(int id) async {
+  static Future<NoteModel?> getById(int id) async {
     try {
       NoteModel? result = await DatabaseProvider.getNoteById(id);
 

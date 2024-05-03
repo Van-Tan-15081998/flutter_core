@@ -8,9 +8,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
@@ -23,6 +21,7 @@ import '../../setting/providers/setting_notifier.dart';
 import '../label/models/label_model.dart';
 import '../subjects/models/subject_condition_model.dart';
 import '../subjects/models/subject_model.dart';
+import '../subjects/providers/subject_notifier.dart';
 import '../subjects/widgets/subject_list_screen.dart';
 import 'databases/note_db_manager.dart';
 import 'models/note_model.dart';
@@ -281,9 +280,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => SubjectListScreen(
-                                subjectConditionModel: subjectConditionModel,
-                                redirectFrom: null,
-                            breadcrumb: null,)),
+                                  subjectConditionModel: subjectConditionModel,
+                                  redirectFrom: null,
+                                  breadcrumb: null,
+                                )),
                         (route) => false);
                   },
                   child: Container(
@@ -378,6 +378,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final subjectNotifier = Provider.of<SubjectNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     setDocuments();
@@ -388,14 +389,33 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       },
       child: CoreFullScreenDialog(
         appbarLeading: _buildAppbarLeading(context, settingNotifier),
-        title: Text(
-            CommonLanguages.convert(
-                lang: settingNotifier.languageString ??
-                    CommonLanguages.languageStringDefault(),
-                word: 'screen.title.detail'),
-            style: CommonStyles.screenTitleTextStyle(
-                fontSize: 26.0,
-                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        title: Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'screen.title.detail'),
+                            style: CommonStyles.screenTitleTextStyle(
+                                fontSize: 22.0,
+                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
         homeLabel: 'Notes',
@@ -421,12 +441,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         optionActionContent: Container(),
         bottomActionBar: const [Row()],
         bottomActionBarScrollable: const [Row()],
-        child: _buildBody(context, settingNotifier),
+        child: _buildBody(context, settingNotifier, subjectNotifier),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, SettingNotifier settingNotifier) {
+  Widget _buildBody(BuildContext context, SettingNotifier settingNotifier,
+      SubjectNotifier subjectNotifier) {
     return Padding(
       padding: const EdgeInsets.all(0),
       child: Column(
@@ -446,22 +467,28 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               Provider.of<NoteNotifier>(context, listen: false)
                                   .onCountAll();
 
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const NoteListScreen(
-                                          noteConditionModel: null,
-                                          isOpenSubjectsForFilter: null,
-                                          redirectFrom: null,
-                                        )),
-                                (route) => false,
-                              );
-
                               CoreNotification.show(
                                   context,
                                   CoreNotificationStatus.success,
                                   CoreNotificationAction.delete,
                                   'Note');
+
+                              if (widget.redirectFrom ==
+                                  RedirectFromEnum.subjectsInFolderMode) {
+                                Navigator.pop(context, result);
+                              } else {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NoteListScreen(
+                                            noteConditionModel: null,
+                                            isOpenSubjectsForFilter: null,
+                                            redirectFrom: null,
+                                          )),
+                                  (route) => false,
+                                );
+                              }
                             } else {
                               CoreNotification.show(
                                   context,
@@ -790,10 +817,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                       MainAxisAlignment.spaceBetween,
                                   mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width -
-                                                115.0,
+                                    Expanded(
                                         child: checkTitleEmpty()
                                             ? flutter_quill.QuillEditor(
                                                 controller:
@@ -811,146 +835,159 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                 scrollable: false,
                                                 showCursor: false)
                                             : _onGetTitle()),
-                                    widget.note.deletedAt == null
-                                        ? Tooltip(
-                                            message: 'Update',
-                                            child: CoreElevatedButton.iconOnly(
-                                              onPressed: () {
-                                                _onUpdate();
-                                              },
-                                              coreButtonStyle: ThemeDataCenter
-                                                  .getUpdateButtonStyle(
-                                                      context),
-                                              icon: const Icon(
-                                                  Icons.edit_note_rounded,
-                                                  size: 26.0),
-                                            ),
-                                          )
-                                        : Column(
-                                            children: [
-                                              Tooltip(
-                                                message: 'Restore',
-                                                child:
-                                                    CoreElevatedButton.iconOnly(
-                                                  onPressed: () {
-                                                    _onRestoreNoteFromTrash(
-                                                            context)
-                                                        .then((result) {
-                                                      if (result) {
-                                                        Provider.of<NoteNotifier>(
-                                                                context,
-                                                                listen: false)
-                                                            .onCountAll();
+                                    widget.redirectFrom !=
+                                            RedirectFromEnum
+                                                .subjectsInFolderMode
+                                        ? Container(
+                                            child: widget.note.deletedAt == null
+                                                ? Tooltip(
+                                                    message: 'Update',
+                                                    child: CoreElevatedButton
+                                                        .iconOnly(
+                                                      onPressed: () {
+                                                        _onUpdate();
+                                                      },
+                                                      coreButtonStyle:
+                                                          ThemeDataCenter
+                                                              .getUpdateButtonStyle(
+                                                                  context),
+                                                      icon: const Icon(
+                                                          Icons
+                                                              .edit_note_rounded,
+                                                          size: 26.0),
+                                                    ),
+                                                  )
+                                                : Column(
+                                                    children: [
+                                                      Tooltip(
+                                                        message: 'Restore',
+                                                        child:
+                                                            CoreElevatedButton
+                                                                .iconOnly(
+                                                          onPressed: () {
+                                                            _onRestoreNoteFromTrash(
+                                                                    context)
+                                                                .then((result) {
+                                                              if (result) {
+                                                                Provider.of<NoteNotifier>(
+                                                                        context,
+                                                                        listen:
+                                                                            false)
+                                                                    .onCountAll();
 
-                                                        Navigator
-                                                            .pushAndRemoveUntil(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (context) =>
-                                                                  const NoteListScreen(
-                                                                    noteConditionModel:
-                                                                        null,
-                                                                    isOpenSubjectsForFilter:
-                                                                        null,
-                                                                    redirectFrom:
-                                                                        null,
-                                                                  )),
-                                                          (route) => false,
-                                                        );
-
-                                                        CoreNotification.show(
-                                                            context,
-                                                            CoreNotificationStatus
-                                                                .success,
-                                                            CoreNotificationAction
-                                                                .restore,
-                                                            'Note');
-                                                      } else {
-                                                        CoreNotification.show(
-                                                            context,
-                                                            CoreNotificationStatus
-                                                                .error,
-                                                            CoreNotificationAction
-                                                                .restore,
-                                                            'Note');
-                                                      }
-                                                    });
-                                                  },
-                                                  coreButtonStyle:
-                                                      ThemeDataCenter
-                                                          .getRestoreButtonStyle(
-                                                              context),
-                                                  icon: const Icon(
-                                                      Icons
-                                                          .restore_from_trash_rounded,
-                                                      size: 26.0),
-                                                ),
-                                              ),
-                                              const SizedBox(height: 2.0),
-                                              Tooltip(
-                                                message: 'Delete forever',
-                                                child:
-                                                    CoreElevatedButton.iconOnly(
-                                                  onPressed: () async {
-                                                    if (await CoreHelperWidget
-                                                        .confirmFunction(
-                                                            context)) {
-                                                      _onDeleteNoteForever(
-                                                              context)
-                                                          .then((result) {
-                                                        if (result) {
-                                                          Provider.of<NoteNotifier>(
+                                                                Navigator
+                                                                    .pushAndRemoveUntil(
                                                                   context,
-                                                                  listen: false)
-                                                              .onCountAll();
+                                                                  MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              const NoteListScreen(
+                                                                                noteConditionModel: null,
+                                                                                isOpenSubjectsForFilter: null,
+                                                                                redirectFrom: null,
+                                                                              )),
+                                                                  (route) =>
+                                                                      false,
+                                                                );
 
-                                                          Navigator
-                                                              .pushAndRemoveUntil(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        const NoteListScreen(
-                                                                          noteConditionModel:
-                                                                              null,
-                                                                          isOpenSubjectsForFilter:
-                                                                              null,
-                                                                          redirectFrom:
-                                                                              null,
-                                                                        )),
-                                                            (route) => false,
-                                                          );
+                                                                CoreNotification.show(
+                                                                    context,
+                                                                    CoreNotificationStatus
+                                                                        .success,
+                                                                    CoreNotificationAction
+                                                                        .restore,
+                                                                    'Note');
+                                                              } else {
+                                                                CoreNotification.show(
+                                                                    context,
+                                                                    CoreNotificationStatus
+                                                                        .error,
+                                                                    CoreNotificationAction
+                                                                        .restore,
+                                                                    'Note');
+                                                              }
+                                                            });
+                                                          },
+                                                          coreButtonStyle:
+                                                              ThemeDataCenter
+                                                                  .getRestoreButtonStyle(
+                                                                      context),
+                                                          icon: const Icon(
+                                                              Icons
+                                                                  .restore_from_trash_rounded,
+                                                              size: 26.0),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 2.0),
+                                                      Tooltip(
+                                                        message:
+                                                            'Delete forever',
+                                                        child:
+                                                            CoreElevatedButton
+                                                                .iconOnly(
+                                                          onPressed: () async {
+                                                            if (await CoreHelperWidget
+                                                                .confirmFunction(
+                                                                context: context)) {
+                                                              _onDeleteNoteForever(
+                                                                      context)
+                                                                  .then(
+                                                                      (result) {
+                                                                if (result) {
+                                                                  Provider.of<NoteNotifier>(
+                                                                          context,
+                                                                          listen:
+                                                                              false)
+                                                                      .onCountAll();
 
-                                                          CoreNotification.show(
-                                                              context,
-                                                              CoreNotificationStatus
-                                                                  .success,
-                                                              CoreNotificationAction
-                                                                  .delete,
-                                                              'Note');
-                                                        } else {
-                                                          CoreNotification.show(
-                                                              context,
-                                                              CoreNotificationStatus
-                                                                  .error,
-                                                              CoreNotificationAction
-                                                                  .delete,
-                                                              'Note');
-                                                        }
-                                                      });
-                                                    }
-                                                  },
-                                                  coreButtonStyle: ThemeDataCenter
-                                                      .getDeleteForeverButtonStyle(
-                                                          context),
-                                                  icon: const Icon(
-                                                      Icons
-                                                          .delete_forever_rounded,
-                                                      size: 26.0),
-                                                ),
-                                              ),
-                                            ],
+                                                                  Navigator
+                                                                      .pushAndRemoveUntil(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder: (context) =>
+                                                                            const NoteListScreen(
+                                                                              noteConditionModel: null,
+                                                                              isOpenSubjectsForFilter: null,
+                                                                              redirectFrom: null,
+                                                                            )),
+                                                                    (route) =>
+                                                                        false,
+                                                                  );
+
+                                                                  CoreNotification.show(
+                                                                      context,
+                                                                      CoreNotificationStatus
+                                                                          .success,
+                                                                      CoreNotificationAction
+                                                                          .delete,
+                                                                      'Note');
+                                                                } else {
+                                                                  CoreNotification.show(
+                                                                      context,
+                                                                      CoreNotificationStatus
+                                                                          .error,
+                                                                      CoreNotificationAction
+                                                                          .delete,
+                                                                      'Note');
+                                                                }
+                                                              });
+                                                            }
+                                                          },
+                                                          coreButtonStyle:
+                                                              ThemeDataCenter
+                                                                  .getDeleteForeverButtonStyle(
+                                                                      context),
+                                                          icon: const Icon(
+                                                              Icons
+                                                                  .delete_forever_rounded,
+                                                              size: 26.0),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                           )
+                                        : Container(),
                                   ],
                                 ),
                               ),

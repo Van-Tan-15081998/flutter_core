@@ -60,7 +60,7 @@ class CoreFullScreenDialog extends StatefulWidget {
       required this.onBack,
       required this.onGoHome,
       required this.appbarLeading,
-      this.homeLabel,
+      required this.homeLabel,
       required this.isShowGeneralActionButton,
       required this.isShowOptionActionButton,
       required this.isShowBottomActionButton});
@@ -117,25 +117,27 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
         break;
       case AppBarActionButtonEnum.home:
         {
-          return widget.homeLabel != null ? Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text('Home',
-                  style: CommonStyles.buttonTextStyle),
-              onPressed: () {
-                if (widget.onGoHome != null) {
-                  widget.onGoHome!();
-                }
-              },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitForegroundColorOption: Colors.black,
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-            ),
-          ) : Container();
+          return widget.homeLabel != null
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                  child: CoreElevatedButton.icon(
+                    icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
+                    label: Text(widget.homeLabel!,
+                        style: CommonStyles.buttonTextStyle),
+                    onPressed: () {
+                      if (widget.onGoHome != null) {
+                        widget.onGoHome!();
+                      }
+                    },
+                    coreButtonStyle: CoreButtonStyle.options(
+                        coreStyle: CoreStyle.outlined,
+                        coreColor: CoreColor.dark,
+                        coreRadius: CoreRadius.radius_6,
+                        kitForegroundColorOption: Colors.black,
+                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                  ),
+                )
+              : Container();
         }
         break;
 
@@ -234,7 +236,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                 onPressed: () async {
                                   if (widget.isConfirmToClose!) {
                                     if (await CoreHelperWidget.confirmFunction(
-                                        context)) {
+                                        context: context)) {
                                       if (Navigator.canPop(context)) {
                                         Navigator.pop(context);
                                       }
@@ -320,17 +322,22 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
+      titleSpacing: 0,
       iconTheme: IconThemeData(
         color: ThemeDataCenter.getScreenTitleTextColor(context),
         size: 26,
       ),
-      leading: widget.appbarLeading ?? IconButton(
-        style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
-        icon: const FaIcon(FontAwesomeIcons.chevronLeft),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
+      leading: widget.appbarLeading ??
+          IconButton(
+            style: CommonStyles.appbarLeadingBackButtonStyle(
+                whiteBlur: settingNotifier.isSetBackgroundImage == true
+                    ? true
+                    : false),
+            icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
       title: widget.title,
       actions: [_buildAppBarActionButtons()],
       backgroundColor: settingNotifier.isSetBackgroundImage == true

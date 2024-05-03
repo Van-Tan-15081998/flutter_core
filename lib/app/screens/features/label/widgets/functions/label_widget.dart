@@ -3,8 +3,6 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';

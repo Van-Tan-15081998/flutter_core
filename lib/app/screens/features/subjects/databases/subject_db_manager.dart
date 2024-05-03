@@ -213,4 +213,24 @@ class SubjectDatabaseManager {
       return 0;
     }
   }
+
+  static Future<bool> checkCanDeleteSubject(SubjectModel subject) async {
+    // Only can delete subject it has not sub subjects and notes
+    try {
+      int? countNotes;
+      int? countChildren;
+
+      countNotes = await DatabaseProvider.countNotes(subject);
+      countChildren = await DatabaseProvider.countChildren(subject);
+
+      if (countNotes == 0 && countChildren == 0) {
+        return true;
+      }
+
+    }  catch (e) {
+      return false;
+    }
+
+    return false;
+  }
 }

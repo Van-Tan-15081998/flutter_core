@@ -12,16 +12,15 @@ class SettingSharedPreferences {
     final bool? isSetColorAccordingSubjectColor =
         prefs.getBool('isSetColorAccordingSubjectColor');
 
-    await prefs
-        .setBool('isSetColorAccordingSubjectColor', isSet);
+    await prefs.setBool('isSetColorAccordingSubjectColor', isSet);
   }
 
-  Future<void> setIsActiveSound(bool isSet) async {
+  Future<void> setIsStickTitleOfNote(bool isSet) async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isActiveSound = prefs.getBool('isActiveSound');
+    final bool? isStickTitleOfNote = prefs.getBool('isStickTitleOfNote');
 
-    await prefs.setBool('isActiveSound', isSet);
+    await prefs.setBool('isStickTitleOfNote', isSet);
   }
 
   Future<void> setIsSetBackgroundImage(bool isSet) async {
@@ -43,7 +42,8 @@ class SettingSharedPreferences {
   Future<void> setIsExpandedSubjectActions(bool isSet) async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isExpandedSubjectActions = prefs.getBool('isExpandedSubjectActions');
+    final bool? isExpandedSubjectActions =
+        prefs.getBool('isExpandedSubjectActions');
 
     await prefs.setBool('isExpandedSubjectActions', isSet);
   }
@@ -51,7 +51,8 @@ class SettingSharedPreferences {
   Future<void> setIsExpandedTemplateContent(bool isSet) async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isExpandedTemplateContent = prefs.getBool('isExpandedTemplateContent');
+    final bool? isExpandedTemplateContent =
+        prefs.getBool('isExpandedTemplateContent');
 
     await prefs.setBool('isExpandedTemplateContent', isSet);
   }
@@ -85,12 +86,23 @@ class SettingSharedPreferences {
     await prefs.setString('themeString', themeStr);
   }
 
-  Future<void> setBackgroundImageSourceString(String backgroundImageSourceStr) async {
+  Future<void> setAvatarDescriptionString(String avatarDescriptionStr) async {
     final SharedPreferences prefs = await _prefs;
 
-    final String? backgroundImageSourceString = prefs.getString('backgroundImageSourceString');
+    final String? avatarDescriptionString = prefs.getString('avatarDescriptionString');
 
-    await prefs.setString('backgroundImageSourceString', backgroundImageSourceStr);
+    await prefs.setString('avatarDescriptionString', avatarDescriptionStr);
+  }
+
+  Future<void> setBackgroundImageSourceString(
+      String backgroundImageSourceStr) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? backgroundImageSourceString =
+        prefs.getString('backgroundImageSourceString');
+
+    await prefs.setString(
+        'backgroundImageSourceString', backgroundImageSourceStr);
   }
 
   Future<void> setLanguageString(String languageStr) async {
@@ -114,12 +126,12 @@ GETTER
     return isSetColorAccordingSubjectColor;
   }
 
-  Future<bool?> getIsActiveSound() async {
+  Future<bool?> getIsStickTitleOfNote() async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isActiveSound = prefs.getBool('isActiveSound');
+    final bool? isStickTitleOfNote = prefs.getBool('isStickTitleOfNote');
 
-    return isActiveSound;
+    return isStickTitleOfNote;
   }
 
   Future<bool?> getIsSetBackgroundImage() async {
@@ -141,7 +153,8 @@ GETTER
   Future<bool?> getIsExpandedSubjectActions() async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isExpandedSubjectActions = prefs.getBool('isExpandedSubjectActions');
+    final bool? isExpandedSubjectActions =
+        prefs.getBool('isExpandedSubjectActions');
 
     return isExpandedSubjectActions;
   }
@@ -149,7 +162,8 @@ GETTER
   Future<bool?> getIsExpandedTemplateContent() async {
     final SharedPreferences prefs = await _prefs;
 
-    final bool? isExpandedTemplateContent = prefs.getBool('isExpandedTemplateContent');
+    final bool? isExpandedTemplateContent =
+        prefs.getBool('isExpandedTemplateContent');
 
     return isExpandedTemplateContent;
   }
@@ -162,10 +176,19 @@ GETTER
     return themeString;
   }
 
+  Future<String?> getAvatarDescriptionString() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? avatarDescriptionString = prefs.getString('avatarDescriptionString');
+
+    return avatarDescriptionString;
+  }
+
   Future<String?> getBackgroundImageSourceString() async {
     final SharedPreferences prefs = await _prefs;
 
-    final String? backgroundImageSourceString = prefs.getString('backgroundImageSourceString');
+    final String? backgroundImageSourceString =
+        prefs.getString('backgroundImageSourceString');
 
     return backgroundImageSourceString;
   }

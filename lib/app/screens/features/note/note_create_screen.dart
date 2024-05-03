@@ -1297,6 +1297,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      homeLabel: null,
       appbarLeading: _buildAppbarLeading(),
       isShowOptionActionButton: true,
       title: _buildTitle(context, settingNotifier),
@@ -1353,19 +1354,17 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
                 if (widget.redirectFrom ==
                     RedirectFromEnum.subjectsInFolderMode) {
-                  subjectNotifier.onReloadPage();
-
-                  Navigator.pop(context);
+                  Navigator.pop(context, result);
                 } else {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const NoteListScreen(
-                          noteConditionModel: null,
-                          isOpenSubjectsForFilter: null,
-                          redirectFrom: null,
-                        )),
-                        (route) => false,
+                              noteConditionModel: null,
+                              isOpenSubjectsForFilter: null,
+                              redirectFrom: null,
+                            )),
+                    (route) => false,
                   );
                 }
               } else {
@@ -1392,18 +1391,23 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 CoreNotification.show(context, CoreNotificationStatus.success,
                     CoreNotificationAction.update, 'Note');
 
-                _onGetUpdatedNote(context, model).then((result) {
-                  if (result != null) {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NoteDetailScreen(
-                                  note: result,
-                                  labels: selectedNoteLabels,
-                                  subject: selectedSubject,
-                              redirectFrom: RedirectFromEnum.noteUpdate,
-                                )),
-                        (route) => false);
+                _onGetUpdatedNote(context, model).then((getResult) {
+                  if (getResult != null) {
+                    if (widget.redirectFrom ==
+                        RedirectFromEnum.subjectsInFolderMode) {
+                      Navigator.pop(context, result);
+                    } else {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => NoteDetailScreen(
+                                    note: getResult,
+                                    labels: selectedNoteLabels,
+                                    subject: selectedSubject,
+                                    redirectFrom: RedirectFromEnum.noteUpdate,
+                                  )),
+                          (route) => false);
+                    }
                   }
                 });
               } else {
@@ -1455,7 +1459,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           key: _formKey,
           onWillPop: () async {
             _onBack();
-            if (await CoreHelperWidget.confirmFunction(context)) {
+            if (await CoreHelperWidget.confirmFunction(context: context)) {
               return true;
             }
             return false;
@@ -1468,15 +1472,19 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
                           CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
@@ -1488,8 +1496,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1508,8 +1517,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
-                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
+                        color: settingNotifier.isSetBackgroundImage == true
+                            ? Colors.white.withOpacity(0.65)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0))),
                     constraints: const BoxConstraints(maxHeight: 60.0),
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.all(6.0),
@@ -1538,15 +1550,19 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
                           key: _detailContentKeyForScroll,
                           CommonLanguages.convert(
@@ -1559,8 +1575,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1579,8 +1596,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
-                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
+                        color: settingNotifier.isSetBackgroundImage == true
+                            ? Colors.white.withOpacity(0.65)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0))),
                     constraints: BoxConstraints(
                         minHeight: 150.0,
                         maxHeight: _detailContentContainerHeight),
@@ -1611,15 +1631,19 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
                           CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
@@ -1631,8 +1655,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1648,11 +1673,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
                         return Container(
                           decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(12)),
-                              color: settingNotifier.isSetBackgroundImage == true
-                                  ? Colors.white.withOpacity(0.65)
-                                  : Colors.transparent
-                          ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(12)),
+                              color:
+                                  settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.65)
+                                      : Colors.transparent),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -1663,13 +1689,15 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                                       decoration: InputDecoration(
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                              color: Color(0xff343a40), width: 2),
+                                              color: Color(0xff343a40),
+                                              width: 2),
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                              color: Color(0xff343a40), width: 2),
+                                              color: Color(0xff343a40),
+                                              width: 2),
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
@@ -1711,15 +1739,19 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
                           CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
@@ -1731,8 +1763,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1743,8 +1776,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                       color: settingNotifier.isSetBackgroundImage == true
                           ? Colors.white.withOpacity(0.65)
-                          : Colors.transparent
-                  ),
+                          : Colors.transparent),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -1770,7 +1802,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               coreColor: CoreColor.dark,
                               coreRadius: CoreRadius.radius_6,
                               kitForegroundColorOption: Colors.black,
-                              coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                              coreFixedSizeButton:
+                                  CoreFixedSizeButton.medium_40),
                         ),
                       ],
                     ),
@@ -1789,61 +1822,76 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   }
 
   Widget _buildTitle(BuildContext context, SettingNotifier settingNotifier) {
-    return Row(
-      children: [
-        Text(
-          widget.note == null
-              ? CommonLanguages.convert(
-                  lang: settingNotifier.languageString ??
-                      CommonLanguages.languageStringDefault(),
-                  word: 'screen.title.create')
-              : CommonLanguages.convert(
-                  lang: settingNotifier.languageString ??
-                      CommonLanguages.languageStringDefault(),
-                  word: 'screen.title.update'),
-          style: CommonStyles.screenTitleTextStyle(
-              fontSize: 26.0,
-              color: ThemeDataCenter.getScreenTitleTextColor(context)),
-        ),
-        const SizedBox(width: 5),
-        widget.actionCreateNoteEnum ==
-                    ActionCreateNoteEnum.createForSelectedDay &&
-                widget.createdForDay != null
-            ? Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'note for',
-                      style: TextStyle(
-                          color:
-                              ThemeDataCenter.getAloneTextColorStyle(context),
-                          fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
+    return Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(5.0),
+              decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      widget.note == null
+                          ? CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'screen.title.create')
+                          : CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'screen.title.update'),
+                      style: CommonStyles.screenTitleTextStyle(
+                          fontSize: 22.0,
+                          color: ThemeDataCenter.getScreenTitleTextColor(context)),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            DateFormat('dd/MM/yyyy')
-                                .format(DateTime.fromMillisecondsSinceEpoch(
-                                    widget.createdForDay!))
-                                .toString(),
-                            style: TextStyle(
-                                color: ThemeDataCenter.getAloneTextColorStyle(
-                                    context),
-                                fontSize: 14),
-                            overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          widget.actionCreateNoteEnum ==
+                      ActionCreateNoteEnum.createForSelectedDay &&
+                  widget.createdForDay != null
+              ? Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'note for',
+                        style: TextStyle(
+                            color:
+                                ThemeDataCenter.getAloneTextColorStyle(context),
+                            fontSize: 12),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              DateFormat('dd/MM/yyyy')
+                                  .format(DateTime.fromMillisecondsSinceEpoch(
+                                      widget.createdForDay!))
+                                  .toString(),
+                              style: TextStyle(
+                                  color: ThemeDataCenter.getAloneTextColorStyle(
+                                      context),
+                                  fontSize: 14),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              )
-            : Container()
-      ],
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              : Container()
+        ],
+      ),
     );
   }
 }

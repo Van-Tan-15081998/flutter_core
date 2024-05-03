@@ -22,7 +22,6 @@ import '../../subjects/models/subject_condition_model.dart';
 import '../../subjects/models/subject_model.dart';
 import '../../subjects/widgets/subject_list_screen.dart';
 import '../models/note_model.dart';
-import 'package:intl/intl.dart';
 import '../note_detail_screen.dart';
 
 class NoteWidget extends StatefulWidget {
@@ -256,10 +255,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SubjectListScreen(
-                              subjectConditionModel: subjectConditionModel,
-                              redirectFrom: RedirectFromEnum.notes,
-                            breadcrumb: null,
-                          )),
+                                subjectConditionModel: subjectConditionModel,
+                                redirectFrom: RedirectFromEnum.notes,
+                                breadcrumb: null,
+                              )),
                     );
                   },
                   onTap: () {

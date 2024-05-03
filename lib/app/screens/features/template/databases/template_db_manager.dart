@@ -1,5 +1,4 @@
 import 'package:flutter_core_v3/app/services/database/database_provider.dart';
-
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../models/template_condition_model.dart';
 import '../models/template_model.dart';
@@ -11,8 +10,12 @@ class TemplateDatabaseManager {
     return templates;
   }
 
-  static Future<List<TemplateModel>?> onGetTemplatePagination(CorePaginationModel corePaginationModel, TemplateConditionModel templateConditionModel) async {
-    List<TemplateModel>? templates = await DatabaseProvider.getTemplatePagination(corePaginationModel, templateConditionModel);
+  static Future<List<TemplateModel>?> onGetTemplatePagination(
+      CorePaginationModel corePaginationModel,
+      TemplateConditionModel templateConditionModel) async {
+    List<TemplateModel>? templates =
+        await DatabaseProvider.getTemplatePagination(
+            corePaginationModel, templateConditionModel);
 
     return templates;
   }
@@ -22,7 +25,7 @@ class TemplateDatabaseManager {
       int countAll = await DatabaseProvider.countAllTemplates();
 
       return countAll;
-    } catch (e){
+    } catch (e) {
       return 0;
     }
   }
@@ -71,7 +74,7 @@ class TemplateDatabaseManager {
     return false;
   }
 
-  static  Future<TemplateModel?> _onUpdate(TemplateModel template) async {
+  static Future<TemplateModel?> _onUpdate(TemplateModel template) async {
     try {
       int result = await DatabaseProvider.updateTemplate(template);
 
@@ -87,7 +90,8 @@ class TemplateDatabaseManager {
     }
   }
 
-  static Future<bool> favourite(TemplateModel template, int? isFavourite) async {
+  static Future<bool> favourite(
+      TemplateModel template, int? isFavourite) async {
     try {
       TemplateModel? favouriteModel;
       favouriteModel = await _onFavourite(template, isFavourite);
@@ -101,9 +105,11 @@ class TemplateDatabaseManager {
     return false;
   }
 
-  static  Future<TemplateModel?> _onFavourite(TemplateModel template, int? isFavourite) async {
+  static Future<TemplateModel?> _onFavourite(
+      TemplateModel template, int? isFavourite) async {
     try {
-      int result = await DatabaseProvider.favouriteTemplate(template, isFavourite);
+      int result =
+          await DatabaseProvider.favouriteTemplate(template, isFavourite);
 
       if (result != 0) {
         TemplateModel? favouriteModel = await getById(template.id!);
@@ -131,7 +137,8 @@ class TemplateDatabaseManager {
     return false;
   }
 
-  static  Future<TemplateModel?> _onDelete(TemplateModel template, int deleteTime) async {
+  static Future<TemplateModel?> _onDelete(
+      TemplateModel template, int deleteTime) async {
     try {
       int result = await DatabaseProvider.deleteTemplate(template, deleteTime);
 
@@ -161,7 +168,7 @@ class TemplateDatabaseManager {
     return false;
   }
 
-  static  Future<TemplateModel?> _onDeleteForever(TemplateModel template) async {
+  static Future<TemplateModel?> _onDeleteForever(TemplateModel template) async {
     try {
       int result = await DatabaseProvider.deleteForeverTemplate(template);
 
@@ -177,7 +184,8 @@ class TemplateDatabaseManager {
     }
   }
 
-  static Future<bool> restoreFromTrash(TemplateModel template, int restoreTime) async {
+  static Future<bool> restoreFromTrash(
+      TemplateModel template, int restoreTime) async {
     try {
       TemplateModel? restoredModel;
       restoredModel = await _restoreFromTrash(template, restoreTime);
@@ -191,9 +199,11 @@ class TemplateDatabaseManager {
     return false;
   }
 
-  static  Future<TemplateModel?> _restoreFromTrash(TemplateModel template, int restoreTime) async {
+  static Future<TemplateModel?> _restoreFromTrash(
+      TemplateModel template, int restoreTime) async {
     try {
-      int result = await DatabaseProvider.restoreTemplate(template, restoreTime);
+      int result =
+          await DatabaseProvider.restoreTemplate(template, restoreTime);
 
       if (result != 0) {
         TemplateModel? restoredModel = await getById(template.id!);
@@ -207,7 +217,7 @@ class TemplateDatabaseManager {
     }
   }
 
-  static  Future<TemplateModel?> getById(int id) async {
+  static Future<TemplateModel?> getById(int id) async {
     try {
       TemplateModel? result = await DatabaseProvider.getTemplateById(id);
 

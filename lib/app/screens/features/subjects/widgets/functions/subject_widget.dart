@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
@@ -7,8 +6,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
@@ -634,35 +631,48 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 4.0, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text('Sub subjects: ',
-                          style: TextStyle(
-                              color: ThemeDataCenter.getBottomCardLabelStyle(
-                                  context))),
-                      Text(
-                        countChildren.toString(),
-                        style: TextStyle(
-                            color: ThemeDataCenter.getBottomCardLabelStyle(
-                                context),
-                            fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(
-                        width: 30.0,
-                      ),
-                      Text('Notes: ',
-                          style: TextStyle(
-                              color: ThemeDataCenter.getBottomCardLabelStyle(
-                                  context))),
-                      Text(
-                        countNotes.toString(),
-                        style: TextStyle(
-                            color: ThemeDataCenter.getBottomCardLabelStyle(
-                                context),
-                            fontWeight: FontWeight.w600),
-                      ),
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: CommonStyles.titleScreenDecorationStyle(
+                            settingNotifier.isSetBackgroundImage),
+                        child: Row(
+                          children: [
+                            Text('Sub subjects: ',
+                                style: TextStyle(
+                                    color:
+                                        ThemeDataCenter.getBottomCardLabelStyle(
+                                            context))),
+                            Text(
+                              countChildren.toString(),
+                              style: TextStyle(
+                                  color:
+                                      ThemeDataCenter.getBottomCardLabelStyle(
+                                          context),
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(
+                              width: 30.0,
+                            ),
+                            Text('Notes: ',
+                                style: TextStyle(
+                                    color:
+                                        ThemeDataCenter.getBottomCardLabelStyle(
+                                            context))),
+                            Text(
+                              countNotes.toString(),
+                              style: TextStyle(
+                                  color:
+                                      ThemeDataCenter.getBottomCardLabelStyle(
+                                          context),
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 )

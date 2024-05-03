@@ -7,14 +7,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
-import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
-import '../../../../../core/components/form/CoreTextFormField.dart';
-import '../../../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
+import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/dimensions/CommonDimensions.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../home/home_screen.dart';
 import '../../../setting/providers/setting_notifier.dart';
@@ -24,7 +23,8 @@ import '../../note/databases/note_db_manager.dart';
 import '../../note/models/note_condition_model.dart';
 import '../../note/models/note_model.dart';
 import '../../note/note_create_screen.dart';
-import '../../note/widgets/note_widget.dart';
+import '../../note/note_detail_screen.dart';
+import '../../note/providers/note_notifier.dart';
 import '../../note/widgets/small_note_widget.dart';
 import '../databases/subject_db_manager.dart';
 import '../models/subject_condition_model.dart';
@@ -67,6 +67,44 @@ class _SubjectListFolderModeScreenState
    */
   SubjectConditionModel _subjectConditionModel = SubjectConditionModel();
   NoteConditionModel _noteConditionModel = NoteConditionModel();
+
+  Future<bool> _onDeleteSubject(
+      BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.delete(
+        subject, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  _onUpdateNote(BuildContext context, NoteModel note) async {
+    bool isUpdated = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteCreateScreen(
+          note: note,
+          copyNote: null,
+          subject: null,
+          actionMode: ActionModeEnum.update,
+          redirectFrom: RedirectFromEnum.subjectsInFolderMode,
+        ),
+      ),
+    );
+
+    if (isUpdated == true) {
+      _reloadPage();
+    }
+  }
+
+  Future<bool> _onDeleteNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.delete(
+        note, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<bool> _onFavouriteNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.favourite(
+        note,
+        note.isFavourite == null
+            ? DateTime.now().millisecondsSinceEpoch
+            : null);
+  }
 
   Future<List<SubjectModel>> _fetchPageDataSubject() async {
     try {
@@ -313,12 +351,7 @@ class _SubjectListFolderModeScreenState
   Widget build(BuildContext context) {
     final subjectNotifier = Provider.of<SubjectNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
-
-    bool reloadPage = subjectNotifier.reloadPage;
-    if (reloadPage) {
-      _reloadPage();
-      subjectNotifier.onResetReloadPage();
-    }
+    final noteNotifier = Provider.of<NoteNotifier>(context);
 
     return WillPopScope(
       onWillPop: () async {
@@ -341,9 +374,10 @@ class _SubjectListFolderModeScreenState
                           CommonStyles.backgroundImageSourceStringDefault()),
                       fit: BoxFit.cover),
                 ),
-                child:
-                    _buildBodyFolderViewMode(subjectNotifier, settingNotifier))
-            : _buildBodyFolderViewMode(subjectNotifier, settingNotifier),
+                child: _buildBodyFolderViewMode(
+                    context, subjectNotifier, settingNotifier, noteNotifier))
+            : _buildBodyFolderViewMode(
+                context, subjectNotifier, settingNotifier, noteNotifier),
         floatingActionButton:
             _buildFloatingActionCreateButton(context, settingNotifier),
       ),
@@ -361,8 +395,8 @@ class _SubjectListFolderModeScreenState
                 CommonLanguages.languageStringDefault(),
             word: 'tooltip.button.createNote'),
         child: CoreElevatedButton.iconOnly(
-          onPressed: () {
-            Navigator.push(
+          onPressed: () async {
+            bool? isCreated = await Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => NoteCreateScreen(
@@ -373,6 +407,10 @@ class _SubjectListFolderModeScreenState
                         redirectFrom: RedirectFromEnum.subjectsInFolderMode,
                       )),
             );
+
+            if (isCreated == true) {
+              _reloadPage();
+            }
           },
           coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(
               context: context, customRadius: 40.0),
@@ -397,9 +435,7 @@ class _SubjectListFolderModeScreenState
       child: Container(
         decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(6.0)),
-            color: settingNotifier.isSetBackgroundImage == true
-                ? Colors.white.withOpacity(0.85)
-                : Colors.transparent),
+            color: Colors.white.withOpacity(0.85)),
         child: Row(
           children: [
             IconButton(
@@ -483,8 +519,8 @@ class _SubjectListFolderModeScreenState
                 backgroundColor: MaterialStateProperty.all<Color?>(
                     Colors.blueGrey.withOpacity(0.65)),
               ),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                bool? isCreated = await Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => SubjectCreateScreen(
@@ -494,6 +530,10 @@ class _SubjectListFolderModeScreenState
                             breadcrumb: null,
                           )),
                 );
+
+                if (isCreated == true) {
+                  _reloadPage();
+                }
               },
               icon: const Icon(Icons.create_new_folder_rounded),
             ),
@@ -504,7 +544,10 @@ class _SubjectListFolderModeScreenState
   }
 
   Widget _buildBodyFolderViewMode(
-      SubjectNotifier subjectNotifier, SettingNotifier settingNotifier) {
+      BuildContext context,
+      SubjectNotifier subjectNotifier,
+      SettingNotifier settingNotifier,
+      NoteNotifier noteNotifier) {
     return Column(
       children: [
         settingNotifier.isSetBackgroundImage == true
@@ -528,29 +571,87 @@ class _SubjectListFolderModeScreenState
                     ),
                     itemCount: subjectFolders.length,
                     itemBuilder: (context, index) {
-                      return SubjectWidgetFolderItem(
-                        index: index,
-                        subject: subjectFolders[index],
-                        isSubSubject: null,
-                        onUpdate: () {},
-                        onDelete: () {},
-                        onDeleteForever: () {},
-                        onRestoreFromTrash: () {},
-                        onFilterChildrenOnly: () {
-                          currentParentSubject = subjectFolders[index];
+                      return ZoomIn(
+                        animate: true,
+                        duration: const Duration(milliseconds: 200),
+                        child: SubjectWidgetFolderItem(
+                          key: ValueKey<int>(subjectFolders[index].id!),
+                          index: index,
+                          subject: subjectFolders[index],
+                          isSubSubject: null,
+                          onUpdate: () async {
+                            bool? isUpdated = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SubjectCreateScreen(
+                                          parentSubject: null,
+                                          actionMode: ActionModeEnum.update,
+                                          subject: subjectFolders[index],
+                                          redirectFrom: RedirectFromEnum
+                                              .subjectsInFolderMode,
+                                          breadcrumb: null,
+                                        )));
 
-                          _reloadPage().then((result) {
-                            if (result) {
-                              setState(() {
-                                breadcrumb.add(currentParentSubject!);
-                                canPop = false;
-                              });
-
-                              _scrollToLastBreadcrumbItem();
+                            if (isUpdated == true) {
+                              _reloadPage();
                             }
-                          });
-                        },
-                        onFilterParent: () {},
+                          },
+                          onDelete: () async {
+                            bool isCanDeleteSubject =
+                                await SubjectDatabaseManager
+                                    .checkCanDeleteSubject(
+                                        subjectFolders[index]);
+
+                            if (!isCanDeleteSubject) {
+                              await CoreHelperWidget.confirmFunction(
+                                  context: context,
+                                  isOnlyWarning: true,
+                                  title:
+                                      'Không thể xóa! Vui lòng xóa toàn bộ chủ đề con và ghi chú của chủ đề mà bạn muốn xóa!');
+                            } else {
+                              if (await CoreHelperWidget.confirmFunction(
+                                  context: context)) {
+                                _onDeleteSubject(context, subjectFolders[index])
+                                    .then((result) {
+                                  if (result) {
+                                    subjectNotifier.onCountAll();
+
+                                    _reloadPage();
+
+                                    CoreNotification.show(
+                                        context,
+                                        CoreNotificationStatus.success,
+                                        CoreNotificationAction.delete,
+                                        'Subject');
+                                  } else {
+                                    CoreNotification.show(
+                                        context,
+                                        CoreNotificationStatus.error,
+                                        CoreNotificationAction.delete,
+                                        'Subject');
+                                  }
+                                });
+                              }
+                            }
+                          },
+                          onDeleteForever: () {},
+                          onRestoreFromTrash: () {},
+                          onFilterChildrenOnly: () {
+                            currentParentSubject = subjectFolders[index];
+
+                            _reloadPage().then((result) {
+                              if (result) {
+                                setState(() {
+                                  breadcrumb.add(currentParentSubject!);
+                                  canPop = false;
+                                });
+
+                                _scrollToLastBreadcrumbItem();
+                              }
+                            });
+                          },
+                          onFilterParent: () {},
+                        ),
                       );
                     },
                   )
@@ -595,7 +696,7 @@ class _SubjectListFolderModeScreenState
                     ],
                   ),
             notesWidget: notes.isNotEmpty
-                ? _buildNotesWidget(context, settingNotifier)
+                ? _buildNotesWidget(context, settingNotifier, noteNotifier)
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -670,18 +771,85 @@ class _SubjectListFolderModeScreenState
     return subjects.isNotEmpty ? subjects.first : null;
   }
 
-  Widget _buildNotesWidget(
-      BuildContext context, SettingNotifier settingNotifier) {
+  Widget _buildNotesWidget(BuildContext context,
+      SettingNotifier settingNotifier, NoteNotifier noteNotifier) {
     return SingleChildScrollView(
-        child: Column(
-            children: List.generate(
-                notes.length,
-                (index) => SmallNoteWidget(
-                      note: notes[index],
-                      index: index + 1,
-                      labels: _getNoteLabels(notes[index].labels!),
-                      subject: _getNoteSubject(notes[index].subjectId),
-                    ))));
+      child: Column(
+        children: List.generate(
+            notes.length,
+            // (index) => SmallNoteWidget(
+            //   note: notes[index],
+            //   index: index + 1,
+            //   labels: _getNoteLabels(notes[index].labels!),
+            //   subject: _getNoteSubject(notes[index].subjectId),
+            // ),
+            (index) => SmallNoteWidget(
+                  index: index + 1,
+                  note: notes[index],
+                  isLastItem: index == notes.length - 1,
+                  labels: _getNoteLabels(notes[index].labels!),
+                  subject: _getNoteSubject(notes[index].subjectId),
+                  onView: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NoteDetailScreen(
+                                  note: notes[index],
+                                  labels: _getNoteLabels(notes[index].labels!),
+                                  subject:
+                                      _getNoteSubject(notes[index].subjectId),
+                                  redirectFrom:
+                                      RedirectFromEnum.subjectsInFolderMode,
+                                )));
+                  },
+                  onUpdate: () {
+                    _onUpdateNote(context, notes[index]);
+                  },
+                  onDelete: () {
+                    _onDeleteNote(context, notes[index]).then((result) {
+                      if (result) {
+                        noteNotifier.onCountAll();
+                        _reloadPage();
+
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.success,
+                            CoreNotificationAction.delete,
+                            'Note');
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.delete,
+                            'Note');
+                      }
+                    });
+                  },
+                  onFavourite: () {
+                    _onFavouriteNote(context, notes[index]).then((result) {
+                      if (result) {
+                        setState(() {
+                          notes[index].isFavourite =
+                              notes[index].isFavourite == null
+                                  ? DateTime.now().millisecondsSinceEpoch
+                                  : null;
+                        });
+
+                        CommonAudioOnPressButton audio =
+                            CommonAudioOnPressButton();
+                        audio.playAudioOnFavourite();
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.update,
+                            'Note');
+                      }
+                    });
+                  },
+                )),
+      ),
+    );
   }
 
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
@@ -714,57 +882,68 @@ class _SubjectListFolderModeScreenState
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Row(
-        children: [
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 6.0),
-              child: Text(
-                CommonLanguages.convert(
-                    lang: settingNotifier.languageString ??
-                        CommonLanguages.languageStringDefault(),
-                    word: 'screen.title.subjects'),
-                style: CommonStyles.screenTitleTextStyle(
-                    color: ThemeDataCenter.getScreenTitleTextColor(context)),
-              ),
-            ),
-          ),
-          Tooltip(
-            message: 'List view',
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: settingNotifier.isSetBackgroundImage == true
-                        ? Colors.white.withOpacity(0.65)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
-                      width: 1.0,
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'screen.title.subjects'),
+                        style: CommonStyles.screenTitleTextStyle(
+                            color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Icon(
-                      Icons.list_rounded,
-                      size: 22,
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
-                    ),
-                  ),
+                  ],
                 ),
-                onTap: () {
-                  _onChangeToListView();
-                },
               ),
             ),
-          ),
-        ],
+            Tooltip(
+              message: 'List view',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Icon(
+                        Icons.list_rounded,
+                        size: 22,
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    _onChangeToListView();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+      titleSpacing: 0,
     );
   }
 }

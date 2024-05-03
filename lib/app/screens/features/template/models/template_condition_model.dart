@@ -8,14 +8,13 @@ class TemplateConditionModel {
   bool? recentlyUpdated;
   bool? favourite;
 
-  TemplateConditionModel({
-    this.title,
-    this.description,
-    this.labelId,
-    this.subjectId,
-    this.searchText,
-    this.isDeleted,
-    this.recentlyUpdated,
-    this.favourite
-  });
+  TemplateConditionModel(
+      {this.title,
+      this.description,
+      this.labelId,
+      this.subjectId,
+      this.searchText,
+      this.isDeleted,
+      this.recentlyUpdated,
+      this.favourite});
 }

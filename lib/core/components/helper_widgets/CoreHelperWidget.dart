@@ -5,7 +5,8 @@ import '../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 import '../containment/dialogs/CoreConfirmDialog.dart';
 
 class CoreHelperWidget {
-  static Future<bool> confirmFunction(BuildContext context) async {
+  static Future<bool> confirmFunction(
+      {required BuildContext context, bool? isOnlyWarning, String? title}) async {
     bool result = false;
     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
     audio.playAudioOnOpenPopup();
@@ -13,22 +14,26 @@ class CoreHelperWidget {
     await showDialog<bool>(
         context: context,
         builder: (BuildContext context) => Form(
-          onWillPop: () async { return result; },
-          child: Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.circular(10.0), // Điều chỉnh border radius ở đây
-              ),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [CoreConfirmDialog(
-                    confirmTitle: Text('Are you sure?', style: CommonStyles.labelTextStyle),
-                    initialData: false,
-                    onChanged: (value) => result = value,
-                  ),]
-              )),
-        ));
+              onWillPop: () async {
+                return result;
+              },
+              child: Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        10.0), // Điều chỉnh border radius ở đây
+                  ),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CoreConfirmDialog(
+                            confirmTitle: Text(title ?? 'Are you sure?',
+                                style: CommonStyles.labelTextStyle),
+                            initialData: false,
+                            onChanged: (value) => result = value,
+                            isOnlyWarning: isOnlyWarning),
+                      ])),
+            ));
 
     if (!result) {
       return true;
@@ -38,11 +43,10 @@ class CoreHelperWidget {
   }
 
   static bool isShowingKeyBoard(List<FocusNode> focusNode) {
-
     bool result = false;
 
     for (var element in focusNode) {
-      if(element.hasFocus) {
+      if (element.hasFocus) {
         result = true;
       }
     }

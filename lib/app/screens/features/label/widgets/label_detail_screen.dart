@@ -5,7 +5,6 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../../core/components/helper_widgets/CoreHelperWidget.dart';
@@ -116,14 +115,33 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
       },
       child: CoreFullScreenDialog(
         appbarLeading: _buildAppbarLeading(context, settingNotifier),
-        title: Text(
-            CommonLanguages.convert(
-                lang: settingNotifier.languageString ??
-                    CommonLanguages.languageStringDefault(),
-                word: 'screen.title.detail'),
-            style: CommonStyles.screenTitleTextStyle(
-                fontSize: 26.0,
-                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+        title: Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(5.0),
+                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'screen.title.detail'),
+                            style: CommonStyles.screenTitleTextStyle(
+                                fontSize: 22.0,
+                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
         homeLabel: 'Labels',
@@ -478,7 +496,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                           CoreElevatedButton.iconOnly(
                                             onPressed: () async {
                                               if (await CoreHelperWidget
-                                                  .confirmFunction(context)) {
+                                                  .confirmFunction(context: context)) {
                                                 _onDeleteLabelForever(context)
                                                     .then((result) {
                                                   if (result) {

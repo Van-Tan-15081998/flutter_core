@@ -7,14 +7,14 @@ import '../functions/SettingSharedPreferences.dart';
 
 class SettingNotifier with ChangeNotifier {
   bool? _isSetColorAccordingSubjectColor;
-  bool? _isActiveSound;
+  bool? _isStickTitleOfNote;
   bool? _isExpandedNoteContent;
   bool? _isExpandedSubjectActions;
   bool? _isExpandedTemplateContent;
   bool? _isSetBackgroundImage;
 
   bool? get isSetColorAccordingSubjectColor => _isSetColorAccordingSubjectColor;
-  bool? get isActiveSound => _isActiveSound;
+  bool? get isStickTitleOfNote => _isStickTitleOfNote;
   bool? get isExpandedNoteContent => _isExpandedNoteContent;
   bool? get isExpandedSubjectActions => _isExpandedSubjectActions;
   bool? get isExpandedTemplateContent => _isExpandedTemplateContent;
@@ -29,19 +29,23 @@ class SettingNotifier with ChangeNotifier {
   String? _languageString;
   String? get languageString => _languageString;
 
+  String? _avatarDescriptionString;
+  String? get avatarDescriptionString => _avatarDescriptionString;
+
   SettingNotifier() {
     init();
   }
 
   init() async {
     _themeString = await getThemeString();
+    _avatarDescriptionString = await getAvatarDescriptionString();
     _backgroundImageSourceString = await getBackgroundImageSourceString();
     _languageString = await getLanguageString();
 
     _isSetColorAccordingSubjectColor =
         await getIsSetColorAccordingSubjectColor();
 
-    _isActiveSound = await getIsActiveSound();
+    _isStickTitleOfNote = await getIsStickTitleOfNote();
 
     _isSetBackgroundImage = await getIsSetBackgroundImage();
 
@@ -72,18 +76,18 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
-  Future<bool?> getIsActiveSound() async {
+  Future<bool?> getIsStickTitleOfNote() async {
     bool? result;
     SettingSharedPreferences settingSharedPreferences =
         SettingSharedPreferences();
-    result = await settingSharedPreferences.getIsActiveSound();
+    result = await settingSharedPreferences.getIsStickTitleOfNote();
 
     if (result == null) {
       // Set false
-      await settingSharedPreferences.setIsActiveSound(false);
+      await settingSharedPreferences.setIsStickTitleOfNote(false);
 
       // Get again
-      result = await getIsActiveSound();
+      result = await getIsStickTitleOfNote();
     }
 
     return result;
@@ -174,15 +178,33 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
-  Future<String?> getBackgroundImageSourceString() async {
+  Future<String?> getAvatarDescriptionString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
     SettingSharedPreferences();
+    result = await settingSharedPreferences.getAvatarDescriptionString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setAvatarDescriptionString('Hi!, press and hold to change the description');
+
+      // Get again
+      result = await getAvatarDescriptionString();
+    }
+
+    return result;
+  }
+
+  Future<String?> getBackgroundImageSourceString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getBackgroundImageSourceString();
 
     if (result == null) {
       // Set default
-      await settingSharedPreferences.setBackgroundImageSourceString(CommonStyles.backgroundImageSourceStringDefault());
+      await settingSharedPreferences.setBackgroundImageSourceString(
+          CommonStyles.backgroundImageSourceStringDefault());
 
       // Get again
       result = await getBackgroundImageSourceString();
@@ -194,12 +216,13 @@ class SettingNotifier with ChangeNotifier {
   Future<String?> getLanguageString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getLanguageString();
 
     if (result == null) {
       // Set default
-      await settingSharedPreferences.setLanguageString(CommonLanguages.languageStringDefault());
+      await settingSharedPreferences
+          .setLanguageString(CommonLanguages.languageStringDefault());
 
       // Get again
       result = await getLanguageString();
@@ -231,18 +254,18 @@ class SettingNotifier with ChangeNotifier {
     return false;
   }
 
-  Future<bool> setIsActiveSound(bool isSet) async {
+  Future<bool> setIsStickTitleOfNote(bool isSet) async {
     bool? result;
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
         SettingSharedPreferences();
-    await settingSharedPreferences.setIsActiveSound(isSet);
+    await settingSharedPreferences.setIsStickTitleOfNote(isSet);
 
-    result = await settingSharedPreferences.getIsActiveSound();
+    result = await settingSharedPreferences.getIsStickTitleOfNote();
 
     if (result != null) {
-      _isActiveSound = result;
+      _isStickTitleOfNote = result;
       notifyListeners();
 
       return true;
@@ -345,13 +368,34 @@ class SettingNotifier with ChangeNotifier {
     return false;
   }
 
-  Future<bool> setBackgroundImageSourceString(String backgroundImageSourceStr) async {
+  Future<bool> setAvatarDescription(String avatarDescriptionString) async {
     String? result;
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
     SettingSharedPreferences();
-    await settingSharedPreferences.setBackgroundImageSourceString(backgroundImageSourceStr);
+    await settingSharedPreferences.setAvatarDescriptionString(avatarDescriptionString);
+
+    result = await settingSharedPreferences.getAvatarDescriptionString();
+
+    if (result != null) {
+      _avatarDescriptionString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setBackgroundImageSourceString(
+      String backgroundImageSourceStr) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    await settingSharedPreferences
+        .setBackgroundImageSourceString(backgroundImageSourceStr);
 
     result = await settingSharedPreferences.getBackgroundImageSourceString();
 
@@ -369,7 +413,7 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences.setLanguageString(languageStr);
 
     result = await settingSharedPreferences.getLanguageString();

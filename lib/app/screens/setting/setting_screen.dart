@@ -28,7 +28,7 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   bool isSetColorAccordingSubjectColor = false;
-  bool isActiveSound = false;
+  bool isStickTitleOfNote = false;
   bool isExpandedNoteContent = false;
   bool isExpandedSubjectActions = false;
   bool isExpandedTemplateContent = false;
@@ -1603,7 +1603,7 @@ class _SettingScreenState extends State<SettingScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
     isSetColorAccordingSubjectColor =
         settingNotifier.isSetColorAccordingSubjectColor ?? false;
-    isActiveSound = settingNotifier.isActiveSound ?? false;
+    isStickTitleOfNote = settingNotifier.isStickTitleOfNote ?? false;
     isExpandedNoteContent = settingNotifier.isExpandedNoteContent ?? false;
     isExpandedSubjectActions =
         settingNotifier.isExpandedSubjectActions ?? false;
@@ -1735,7 +1735,7 @@ class _SettingScreenState extends State<SettingScreen> {
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(4.0),
               child: Column(
                 children: [
                   Card(
@@ -1765,7 +1765,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.setting.display'),
+                                    Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'screen.title.setting.display'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2009,23 +2016,23 @@ class _SettingScreenState extends State<SettingScreen> {
                                         title: Row(
                                           children: [
                                             Flexible(
-                                              child: Text('Sounds',
+                                              child: Text('Stick title of note',
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
                                           ],
                                         ),
-                                        value: isActiveSound,
+                                        value: isStickTitleOfNote,
                                         onChanged: (bool value) {
                                           setState(
                                             () {
                                               settingNotifier
-                                                  .setIsActiveSound(value)
+                                                  .setIsStickTitleOfNote(value)
                                                   .then(
                                                 (success) {
                                                   if (success) {
                                                     setState(() {
-                                                      isActiveSound = value;
+                                                      isStickTitleOfNote = value;
                                                     });
 
                                                     CoreNotification.show(
@@ -2248,7 +2255,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.setting.languages'),
+                                    Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'screen.title.setting.languages'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2276,11 +2290,12 @@ class _SettingScreenState extends State<SettingScreen> {
                                     crossAxisSpacing: 10,
                                     mainAxisSpacing: 10,
                                     crossAxisCount: 3,
-                                    children:  List.generate(
+                                    children: List.generate(
                                         CommonLanguages.languageStringList()
                                             .length,
                                         (index) => Padding(
-                                              padding: const EdgeInsets.all(4.0),
+                                              padding:
+                                                  const EdgeInsets.all(4.0),
                                               child: Stack(
                                                 children: [
                                                   InkWell(
@@ -2363,7 +2378,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                                               Padding(
                                                                 padding:
                                                                     EdgeInsets
-                                                                        .all(8.0),
+                                                                        .all(
+                                                                            8.0),
                                                                 child: FaIcon(
                                                                   FontAwesomeIcons
                                                                       .circleCheck,
@@ -2411,7 +2427,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.setting.colorThemes'),
+                                    Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'screen.title.setting.colorThemes'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2500,7 +2523,11 @@ class _SettingScreenState extends State<SettingScreen> {
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.setting'),
+      title: Text(
+          CommonLanguages.convert(
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'screen.title.setting'),
           style: CommonStyles.screenTitleTextStyle(
               color: ThemeDataCenter.getScreenTitleTextColor(context))),
     );

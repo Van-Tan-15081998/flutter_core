@@ -48,6 +48,7 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
                       ),
                       initialData: false,
                       onChanged: (value) => result = value,
+                      isOnlyWarning: null,
                     ),
                   ]),
             )));

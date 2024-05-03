@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
-import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
@@ -1218,13 +1217,40 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      homeLabel: null,
       appbarLeading: null,
       isShowOptionActionButton: true,
-      title: Text(
-        widget.template == null ?
-        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.create') :
-        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'screen.title.update'),
-        style: CommonStyles.screenTitleTextStyle(fontSize: 26.0, color: ThemeDataCenter.getScreenTitleTextColor(context))
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                          widget.template == null
+                              ? CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.create')
+                              : CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.update'),
+                          style: CommonStyles.screenTitleTextStyle(
+                              fontSize: 22.0,
+                              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -1305,7 +1331,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                   template: result,
                                   labels: selectedTemplateLabels,
                                   subject: selectedSubject,
-                              redirectFrom: RedirectFromEnum.templateUpdate,
+                                  redirectFrom: RedirectFromEnum.templateUpdate,
                                 )),
                         (route) => false);
                   }
@@ -1359,7 +1385,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
           key: _formKey,
           onWillPop: () async {
             _onBack();
-            if (await CoreHelperWidget.confirmFunction(context)) {
+            if (await CoreHelperWidget.confirmFunction(context: context)) {
               return true;
             }
             return false;
@@ -1372,23 +1398,33 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
-                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.title').addColon().toString(),
+                          CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.field.title.title')
+                              .addColon()
+                              .toString(),
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1407,8 +1443,11 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
-                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
+                        color: settingNotifier.isSetBackgroundImage == true
+                            ? Colors.white.withOpacity(0.65)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0))),
                     constraints: const BoxConstraints(maxHeight: 60.0),
                     margin: const EdgeInsets.all(4.0),
                     padding: const EdgeInsets.all(6.0),
@@ -1437,24 +1476,34 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
                           key: _detailContentKeyForScroll,
-                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.content').addColon().toString(),
+                          CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.field.title.content')
+                              .addColon()
+                              .toString(),
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1473,8 +1522,11 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                           const BorderRadius.all(Radius.circular(12.0))),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: settingNotifier.isSetBackgroundImage == true ?  Colors.white.withOpacity(0.65) : const Color(0xFFF7F7F7),
-                        borderRadius: const BorderRadius.all(Radius.circular(10.0))),
+                        color: settingNotifier.isSetBackgroundImage == true
+                            ? Colors.white.withOpacity(0.65)
+                            : const Color(0xFFF7F7F7),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0))),
                     constraints: BoxConstraints(
                         minHeight: 150.0,
                         maxHeight: _detailContentContainerHeight),
@@ -1505,23 +1557,33 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
-                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.subject').addColon().toString(),
+                          CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.field.title.subject')
+                              .addColon()
+                              .toString(),
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1537,11 +1599,12 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
 
                         return Container(
                           decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(Radius.circular(12)),
-                              color: settingNotifier.isSetBackgroundImage == true
-                                  ? Colors.white.withOpacity(0.65)
-                                  : Colors.transparent
-                          ),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(12)),
+                              color:
+                                  settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.65)
+                                      : Colors.transparent),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -1552,13 +1615,15 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                       decoration: InputDecoration(
                                         enabledBorder: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                              color: Color(0xff343a40), width: 2),
+                                              color: Color(0xff343a40),
+                                              width: 2),
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: const BorderSide(
-                                              color: Color(0xff343a40), width: 2),
+                                              color: Color(0xff343a40),
+                                              width: 2),
                                           borderRadius:
                                               BorderRadius.circular(8.0),
                                         ),
@@ -1600,23 +1665,33 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      margin: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0) : const EdgeInsets.all(0),
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(12)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
                           color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
-                              : Colors.transparent
-                      ),
+                              : Colors.transparent),
                       child: Padding(
-                        padding: settingNotifier.isSetBackgroundImage == true ? const EdgeInsets.all(5.0) : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
-                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),word: 'form.field.title.label').addColon().toString(),
+                          CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.field.title.label')
+                              .addColon()
+                              .toString(),
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              color: ThemeDataCenter.getFormFieldLabelColorStyle(
-                                  context)),
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
                         ),
                       ),
                     ),
@@ -1627,8 +1702,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
                       color: settingNotifier.isSetBackgroundImage == true
                           ? Colors.white.withOpacity(0.65)
-                          : Colors.transparent
-                  ),
+                          : Colors.transparent),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -1654,7 +1728,8 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                               coreColor: CoreColor.dark,
                               coreRadius: CoreRadius.radius_6,
                               kitForegroundColorOption: const Color(0xff1f1f1f),
-                              coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                              coreFixedSizeButton:
+                                  CoreFixedSizeButton.medium_40),
                         ),
                       ],
                     ),

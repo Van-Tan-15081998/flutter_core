@@ -9,7 +9,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -1040,7 +1039,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                         });
                       },
                       onDeleteForever: () async {
-                        if (await CoreHelperWidget.confirmFunction(context)) {
+                        if (await CoreHelperWidget.confirmFunction(context: context)) {
                           _onDeleteNoteForever(context, item).then((result) {
                             if (result) {
                               noteNotifier.onCountAll();
@@ -1208,6 +1207,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                         await showDialog<bool>(
                             context: context,
                             builder: (BuildContext context) => CoreBasicDialog(
+                              backgroundColor: Colors.white.withOpacity(0.8),
                               shape:
                               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                               child: SizedBox(
@@ -1652,151 +1652,161 @@ class _NoteListScreenState extends State<NoteListScreen> {
         )
       ],
       backgroundColor: settingNotifier.isSetBackgroundImage == true  ? Colors.transparent : ThemeDataCenter.getBackgroundColor(context),
-      title: Row(
-        children: [
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 6.0),
-              child: Text(
-                  CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.notes'),
-                style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context))
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                          CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.notes'),
+                        style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context))
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Tooltip(
-            message: 'Created day',
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: settingNotifier.isSetBackgroundImage == true
-                    ? Colors.white.withOpacity(0.65)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: ThemeDataCenter.getFilteringTextColorStyle(context),
-                      width: 1.0,
+            Tooltip(
+              message: 'Created day',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                      ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: ThemeDataCenter.getFilteringTextColorStyle(context),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Icon(
-                      Icons.calendar_month_rounded,
-                      size: 22,
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
-                    ),
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _filterByDate = !_filterByDate;
-
-                    if (!_filterByDate) {
-                      if  (_noteConditionModel.createdAtStartOfDay != null && _noteConditionModel.createdAtEndOfDay != null) {
-                        _noteConditionModel.createdAtStartOfDay = null;
-                        _noteConditionModel.createdAtEndOfDay = null;
-
-                        /*
-                      Reset Table Calendar
-                       */
-                        _selectedDay = null;
-                        _focusedDay = DateTime.now();
-                        _rangeStart = null;
-                        _rangeEnd = null;
-
-                        _reloadPage();
-                      }
-                    }
-                  });
-                },
-              ),
-            ),
-          ),
-          Tooltip(
-            message: 'Subjects',
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: settingNotifier.isSetBackgroundImage == true
-                    ? Colors.white.withOpacity(0.65)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: ThemeDataCenter.getFilteringTextColorStyle(context),
-                      width: 1.0,
-                    ),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Icon(
-                      Icons.color_lens_rounded,
-                      size: 22,
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        size: 22,
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                      ),
                     ),
                   ),
-                ),
-                onTap: () {
-                  try {
+                  onTap: () {
                     setState(() {
-                      _filterBySubject = !_filterBySubject;
+                      _filterByDate = !_filterByDate;
 
-                      if (!_filterBySubject) {
-                        if (filteredSubject != null && _noteConditionModel.subjectId != null) {
-                          filteredSubject = null;
-                          _noteConditionModel.subjectId = null;
+                      if (!_filterByDate) {
+                        if  (_noteConditionModel.createdAtStartOfDay != null && _noteConditionModel.createdAtEndOfDay != null) {
+                          _noteConditionModel.createdAtStartOfDay = null;
+                          _noteConditionModel.createdAtEndOfDay = null;
+
+                          /*
+                        Reset Table Calendar
+                         */
+                          _selectedDay = null;
+                          _focusedDay = DateTime.now();
+                          _rangeStart = null;
+                          _rangeEnd = null;
 
                           _reloadPage();
                         }
                       }
                     });
-                  } catch (exception) {
-                    CoreNotification.showMessage(context,
-                        CoreNotificationStatus.warning, 'System error!');
-                  }
-                },
+                  },
+                ),
               ),
             ),
-          ),
-          _isFiltering()
-              ? Tooltip(
-                  message: 'Filtering...',
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+            Tooltip(
+              message: 'Subjects',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                      ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: ThemeDataCenter.getFilteringTextColorStyle(context),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(6.0),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10.0),
-                        child: AvatarGlow(
-                          glowRadiusFactor: 0.5,
-                          curve: Curves.linearToEaseOut,
-                          child: Icon(
-                            Icons.filter_alt_rounded,
-                            size: 22,
-                            color: ThemeDataCenter.getFilteringTextColorStyle(
-                                context),
-                          ),
-                        ),
-                        onTap: () async {
-                          await showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  _filterPopup(context));
-                        },
+                      child: Icon(
+                        Icons.color_lens_rounded,
+                        size: 22,
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
                       ),
                     ),
                   ),
-                )
-              : Container()
-        ],
+                  onTap: () {
+                    try {
+                      setState(() {
+                        _filterBySubject = !_filterBySubject;
+
+                        if (!_filterBySubject) {
+                          if (filteredSubject != null && _noteConditionModel.subjectId != null) {
+                            filteredSubject = null;
+                            _noteConditionModel.subjectId = null;
+
+                            _reloadPage();
+                          }
+                        }
+                      });
+                    } catch (exception) {
+                      CoreNotification.showMessage(context,
+                          CoreNotificationStatus.warning, 'System error!');
+                    }
+                  },
+                ),
+              ),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: AvatarGlow(
+                            glowRadiusFactor: 0.5,
+                            curve: Curves.linearToEaseOut,
+                            child: Icon(
+                              Icons.filter_alt_rounded,
+                              size: 22,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context),
+                            ),
+                          ),
+                          onTap: () async {
+                            await showDialog<bool>(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    _filterPopup(context));
+                          },
+                        ),
+                      ),
+                    ),
+                  )
+                : Container()
+          ],
+        ),
       ),
-      titleSpacing: 2.0,
+      titleSpacing: 0,
     );
   }
 }

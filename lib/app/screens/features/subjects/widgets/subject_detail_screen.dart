@@ -123,14 +123,33 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
       },
       child: CoreFullScreenDialog(
           appbarLeading: _buildAppbarLeading(context, settingNotifier),
-          title: Text(
-              CommonLanguages.convert(
-                  lang: settingNotifier.languageString ??
-                      CommonLanguages.languageStringDefault(),
-                  word: 'screen.title.detail'),
-              style: CommonStyles.screenTitleTextStyle(
-                  fontSize: 26.0,
-                  color: ThemeDataCenter.getScreenTitleTextColor(context))),
+          title: Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(5.0),
+                    decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.detail'),
+                              style: CommonStyles.screenTitleTextStyle(
+                                  fontSize: 22.0,
+                                  color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: AppBarActionButtonEnum.home,
           isConfirmToClose: false,
           homeLabel: 'Subjects',
@@ -671,7 +690,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                           CoreElevatedButton.iconOnly(
                                             onPressed: () async {
                                               if (await CoreHelperWidget
-                                                  .confirmFunction(context)) {
+                                                  .confirmFunction(context: context)) {
                                                 _onDeleteSubjectForever(context)
                                                     .then((result) {
                                                   if (result) {

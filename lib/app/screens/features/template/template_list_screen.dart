@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
-import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../core/components/form/CoreTextFormField.dart';
@@ -561,34 +560,48 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Row(
-        children: [
-          Flexible(
-            child: Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.templates'),
-                style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context)),
-                overflow: TextOverflow.ellipsis),
-          ),
-          _isFiltering()
-              ? Tooltip(
-                  message: 'Filtering...',
-                  child: IconButton(
-                      icon: AvatarGlow(
-                        glowRadiusFactor: 0.5,
-                        curve: Curves.linearToEaseOut,
-                        child: Icon(Icons.filter_alt_rounded,
-                            color: ThemeDataCenter.getFilteringTextColorStyle(
-                                context)),
-                      ),
-                      onPressed: () async {
-                        await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                _filterPopup(context));
-                      }),
-                )
-              : Container()
-        ],
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.templates'),
+                          style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: IconButton(
+                        icon: AvatarGlow(
+                          glowRadiusFactor: 0.5,
+                          curve: Curves.linearToEaseOut,
+                          child: Icon(Icons.filter_alt_rounded,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context)),
+                        ),
+                        onPressed: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _filterPopup(context));
+                        }),
+                  )
+                : Container()
+          ],
+        ),
       ),
+      titleSpacing: 0,
     );
   }
 
@@ -818,7 +831,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   });
                 },
                 onDeleteForever: () async {
-                  if (await CoreHelperWidget.confirmFunction(context)) {
+                  if (await CoreHelperWidget.confirmFunction(context: context)) {
                     _onDeleteTemplateForever(context, item).then((result) {
                       if (result) {
                         templateNotifier.onCountAll();

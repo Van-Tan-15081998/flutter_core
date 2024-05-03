@@ -5,9 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:table_calendar/table_calendar.dart';
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
-import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../../core/components/form/CoreTextFormField.dart';
@@ -32,7 +30,10 @@ class LabelListScreen extends StatefulWidget {
   final LabelConditionModel? labelConditionModel;
   final RedirectFromEnum? redirectFrom;
 
-  const LabelListScreen({super.key, required this.labelConditionModel, required this.redirectFrom});
+  const LabelListScreen(
+      {super.key,
+      required this.labelConditionModel,
+      required this.redirectFrom});
 
   @override
   State<LabelListScreen> createState() => _LabelListScreenState();
@@ -282,9 +283,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const HomeScreen(
-              title: 'Hi Notes',
-            )),
-            (route) => false,
+                  title: 'Hi Notes',
+                )),
+        (route) => false,
       );
     } else {
       if (Navigator.canPop(context)) {
@@ -293,9 +294,12 @@ class _LabelListScreenState extends State<LabelListScreen> {
     }
   }
 
-  Widget? _buildAppbarLeading(BuildContext context, SettingNotifier settingNotifier) {
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
     return IconButton(
-      style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
       icon: const FaIcon(FontAwesomeIcons.chevronLeft),
       onPressed: () {
         _onPopAction(context);
@@ -324,17 +328,22 @@ class _LabelListScreenState extends State<LabelListScreen> {
             ? DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage(
-                          settingNotifier.backgroundImageSourceString ?? CommonStyles.backgroundImageSourceStringDefault()),
+                      image: AssetImage(settingNotifier
+                              .backgroundImageSourceString ??
+                          CommonStyles.backgroundImageSourceStringDefault()),
                       fit: BoxFit.cover),
                 ),
                 child: _buildBody(context, labelNotifier, settingNotifier),
               )
             : _buildBody(context, labelNotifier, settingNotifier),
-        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
-        floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
+        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
+            ? null
+            : _buildBottomNavigationBar(context),
+        floatingActionButton: settingNotifier.isSetBackgroundImage == true
+            ? _buildBottomNavigationBarActionList(context)
+            : null,
         floatingActionButtonLocation:
-        FloatingActionButtonLocation.miniCenterDocked,
+            FloatingActionButtonLocation.miniCenterDocked,
       ),
     );
   }
@@ -361,40 +370,60 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 (route) => false,
               );
             },
-            coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
           ),
         )
       ],
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Row(
-        children: [
-          Text(
-              CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.labels'),
-            style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context))
-          ),
-          _isFiltering()
-              ? Tooltip(
-                  message: 'Filtering...',
-                  child: IconButton(
-                      icon: AvatarGlow(
-                        glowRadiusFactor: 0.5,
-                        curve: Curves.linearToEaseOut,
-                        child: Icon(Icons.filter_alt_rounded,
-                            color: ThemeDataCenter.getFilteringTextColorStyle(
-                                context)),
-                      ),
-                      onPressed: () async {
-                        await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                _filterPopup(context));
-                      }),
-                )
-              : Container()
-        ],
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'screen.title.labels'),
+                          style: CommonStyles.screenTitleTextStyle(
+                              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: IconButton(
+                        icon: AvatarGlow(
+                          glowRadiusFactor: 0.5,
+                          curve: Curves.linearToEaseOut,
+                          child: Icon(Icons.filter_alt_rounded,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context)),
+                        ),
+                        onPressed: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _filterPopup(context));
+                        }),
+                  )
+                : Container()
+          ],
+        ),
       ),
+      titleSpacing: 0,
     );
   }
 
@@ -407,7 +436,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
             : Container(),
         Expanded(
           child: PagedListView<int, LabelModel>(
-            padding: EdgeInsets.only(top: CommonDimensions.scaffoldAppBarHeight(context)/5),
+            padding: EdgeInsets.only(
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<LabelModel>(
@@ -449,7 +479,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                   });
                 },
                 onDeleteForever: () async {
-                  if (await CoreHelperWidget.confirmFunction(context)) {
+                  if (await CoreHelperWidget.confirmFunction(context: context)) {
                     _onDeleteLabelForever(context, item).then((result) {
                       if (result) {
                         labelNotifier.onCountAll();
@@ -510,11 +540,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
                     Container(
                       padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(24.0)),
-                          color: settingNotifier
-                              .isSetBackgroundImage ==
-                              true
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(24.0)),
+                          color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
                               : Colors.transparent),
                       child: Row(
@@ -527,18 +555,21 @@ class _LabelListScreenState extends State<LabelListScreen> {
                           const SizedBox(width: 5),
                           BounceInRight(
                             child: Text(
-                                CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'notification.noItem.label'),
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.noItem.label'),
                                 style: GoogleFonts.montserrat(
                                     fontStyle: FontStyle.italic,
                                     fontSize: 16.0,
-                                    color: ThemeDataCenter.getAloneTextColorStyle(context),
-                                    fontWeight: FontWeight.w500)
-                            ),
+                                    color:
+                                        ThemeDataCenter.getAloneTextColorStyle(
+                                            context),
+                                    fontWeight: FontWeight.w500)),
                           ),
                         ],
                       ),
                     )
-
                   ],
                 ),
               ),
@@ -561,173 +592,166 @@ class _LabelListScreenState extends State<LabelListScreen> {
 
   Row _buildBottomNavigationBarActionList(BuildContext context) {
     return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          CoreElevatedButton(
-            onPressed: () {
-              _resetConditions();
-              _reloadPage();
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.refresh_rounded,
-              size: 25.0,
-            ),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CoreElevatedButton(
+          onPressed: () {
+            _resetConditions();
+            _reloadPage();
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.refresh_rounded,
+            size: 25.0,
           ),
-          const SizedBox(width: 5),
-          const SizedBox(width: 5),
-          CoreElevatedButton(
-            onPressed: () async {
-              await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) => Form(
-                        child: CoreBasicDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceAround,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Form(
-                                  key: _formKey,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      CoreTextFormField(
-                                        style: TextStyle(
-                                            color: ThemeDataCenter
-                                                .getAloneTextColorStyle(
-                                                    context)),
-                                        onChanged: (String value) {
-                                          if (value.isNotEmpty) {
-                                            setState(() {
-                                              _searchText = value.trim();
-                                            });
-                                          }
-                                        },
-                                        controller: _searchController,
-                                        focusNode: _searchFocusNode,
-                                        validateString:
-                                            'Please enter search string!',
-                                        maxLength: 60,
-                                        icon: Icon(Icons.edit,
-                                            color: ThemeDataCenter
-                                                .getFormFieldLabelColorStyle(
-                                                    context)),
-                                        label: 'Search',
-                                        labelColor: ThemeDataCenter
-                                            .getFormFieldLabelColorStyle(
-                                                context),
-                                        placeholder: 'Search on labels',
-                                        helper: '',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 20.0),
-                                Row(
+        ),
+        const SizedBox(width: 5),
+        const SizedBox(width: 5),
+        CoreElevatedButton(
+          onPressed: () async {
+            await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => Form(
+                      child: CoreBasicDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
                                   children: [
-                                    CoreElevatedButton.iconOnly(
-                                        icon: const Icon(Icons.close_rounded),
-                                        onPressed: () {
-                                          if (_searchController
-                                              .text.isNotEmpty) {
-                                            setState(() {
-                                              _searchController.text = "";
-                                              _searchText =
-                                                  _searchController.text;
-                                              _labelConditionModel
-                                                  .searchText = _searchText;
-                                            });
-                                            // Reload Page
-                                            _reloadPage();
-                                          }
-                                        },
-                                        coreButtonStyle: ThemeDataCenter
-                                            .getCoreScreenButtonStyle(
-                                            context: context)),
-                                    CoreElevatedButton.iconOnly(
-                                        icon:
-                                            const Icon(Icons.search_rounded),
-                                        onPressed: () {
-                                          if (_formKey.currentState!
-                                              .validate()) {
-                                            setState(() {
-                                              // Set Condition
-                                              if (_searchController
-                                                  .text.isNotEmpty) {
-                                                _labelConditionModel
-                                                    .searchText = _searchText;
-
-                                                // Reload Data
-                                                _reloadPage();
-
-                                                // Close Dialog
-                                                Navigator.of(context).pop();
-                                              }
-                                            });
-                                          }
-                                        },
-                                        coreButtonStyle: ThemeDataCenter
-                                            .getCoreScreenButtonStyle(
-                                            context: context)),
+                                    CoreTextFormField(
+                                      style: TextStyle(
+                                          color: ThemeDataCenter
+                                              .getAloneTextColorStyle(context)),
+                                      onChanged: (String value) {
+                                        if (value.isNotEmpty) {
+                                          setState(() {
+                                            _searchText = value.trim();
+                                          });
+                                        }
+                                      },
+                                      controller: _searchController,
+                                      focusNode: _searchFocusNode,
+                                      validateString:
+                                          'Please enter search string!',
+                                      maxLength: 60,
+                                      icon: Icon(Icons.edit,
+                                          color: ThemeDataCenter
+                                              .getFormFieldLabelColorStyle(
+                                                  context)),
+                                      label: 'Search',
+                                      labelColor: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context),
+                                      placeholder: 'Search on labels',
+                                      helper: '',
+                                    ),
                                   ],
-                                )
-                              ],
-                            ),
+                                ),
+                              ),
+                              const SizedBox(height: 20.0),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  CoreElevatedButton.iconOnly(
+                                      icon: const Icon(Icons.close_rounded),
+                                      onPressed: () {
+                                        if (_searchController.text.isNotEmpty) {
+                                          setState(() {
+                                            _searchController.text = "";
+                                            _searchText =
+                                                _searchController.text;
+                                            _labelConditionModel.searchText =
+                                                _searchText;
+                                          });
+                                          // Reload Page
+                                          _reloadPage();
+                                        }
+                                      },
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(
+                                              context: context)),
+                                  CoreElevatedButton.iconOnly(
+                                      icon: const Icon(Icons.search_rounded),
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          setState(() {
+                                            // Set Condition
+                                            if (_searchController
+                                                .text.isNotEmpty) {
+                                              _labelConditionModel.searchText =
+                                                  _searchText;
+
+                                              // Reload Data
+                                              _reloadPage();
+
+                                              // Close Dialog
+                                              Navigator.of(context).pop();
+                                            }
+                                          });
+                                        }
+                                      },
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(
+                                              context: context)),
+                                ],
+                              )
+                            ],
                           ),
                         ),
-                      ));
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.search,
-              size: 25.0,
-            ),
+                      ),
+                    ));
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.search,
+            size: 25.0,
           ),
-          const SizedBox(width: 5.0),
-          CoreElevatedButton(
-            onPressed: () async {
-              await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) => _filterPopup(context));
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.filter_list_alt,
-              size: 25.0,
-            ),
+        ),
+        const SizedBox(width: 5.0),
+        CoreElevatedButton(
+          onPressed: () async {
+            await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => _filterPopup(context));
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.filter_list_alt,
+            size: 25.0,
           ),
-          const SizedBox(width: 5),
-          CoreElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const LabelCreateScreen(
-                        actionMode: ActionModeEnum.create)),
-              );
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.add,
-              size: 25.0,
-            ),
+        ),
+        const SizedBox(width: 5),
+        CoreElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const LabelCreateScreen(
+                      actionMode: ActionModeEnum.create)),
+            );
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.add,
+            size: 25.0,
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 }

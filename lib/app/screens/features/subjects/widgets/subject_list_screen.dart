@@ -645,7 +645,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                       });
                     },
                     onDeleteForever: () async {
-                      if (await CoreHelperWidget.confirmFunction(context)) {
+                      if (await CoreHelperWidget.confirmFunction(context: context)) {
                         _onDeleteSubjectForever(context, item).then((result) {
                           if (result) {
                             subjectNotifier.onCountAll();
@@ -790,84 +790,95 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Row(
-        children: [
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 6.0),
-              child: Text(
-                CommonLanguages.convert(
-                    lang: settingNotifier.languageString ??
-                        CommonLanguages.languageStringDefault(),
-                    word: 'screen.title.subjects'),
-                style: CommonStyles.screenTitleTextStyle(
-                    color: ThemeDataCenter.getScreenTitleTextColor(context)),
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'screen.title.subjects'),
+                        style: CommonStyles.screenTitleTextStyle(
+                            color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Tooltip(
-            message: 'Folder view',
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SubjectListFolderModeScreen(
-                            subjectConditionModel: null,
-                            redirectFrom: null,
-                            breadcrumb: null)),
-                    (route) => false,
-                  );
-                },
-                borderRadius: BorderRadius.circular(10.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: settingNotifier.isSetBackgroundImage == true
-                        ? Colors.white.withOpacity(0.65)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
-                      width: 1.0,
+            Tooltip(
+              message: 'Folder view',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SubjectListFolderModeScreen(
+                              subjectConditionModel: null,
+                              redirectFrom: null,
+                              breadcrumb: null)),
+                      (route) => false,
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6.0),
-                    child: Icon(
-                      Icons.folder_rounded,
-                      size: 22,
-                      color:
-                          ThemeDataCenter.getFilteringTextColorStyle(context),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Icon(
+                        Icons.folder_rounded,
+                        size: 22,
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          _isFiltering()
-              ? Tooltip(
-                  message: 'Filtering...',
-                  child: IconButton(
-                      icon: AvatarGlow(
-                        glowRadiusFactor: 0.5,
-                        curve: Curves.linearToEaseOut,
-                        child: Icon(Icons.filter_alt_rounded,
-                            color: ThemeDataCenter.getFilteringTextColorStyle(
-                                context)),
-                      ),
-                      onPressed: () async {
-                        await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                _filterPopup(context));
-                      }),
-                )
-              : Container()
-        ],
+            _isFiltering()
+                ? Tooltip(
+                    message: 'Filtering...',
+                    child: IconButton(
+                        icon: AvatarGlow(
+                          glowRadiusFactor: 0.5,
+                          curve: Curves.linearToEaseOut,
+                          child: Icon(Icons.filter_alt_rounded,
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context)),
+                        ),
+                        onPressed: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _filterPopup(context));
+                        }),
+                  )
+                : Container()
+          ],
+        ),
       ),
+      titleSpacing: 0,
     );
   }
 }

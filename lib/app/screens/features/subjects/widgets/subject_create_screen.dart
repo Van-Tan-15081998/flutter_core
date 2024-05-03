@@ -21,7 +21,6 @@ import '../databases/subject_db_manager.dart';
 import '../models/subject_model.dart';
 import '../providers/subject_notifier.dart';
 import 'subject_detail_screen.dart';
-import 'subject_list_folder_mode_screen.dart';
 import 'subject_list_screen.dart';
 
 class SubjectCreateScreen extends StatefulWidget {
@@ -177,20 +176,43 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return CoreFullScreenDialog(
+      homeLabel: null,
       appbarLeading: null,
-      title: Text(
-          widget.subject == null
-              ? CommonLanguages.convert(
-                  lang: settingNotifier.languageString ??
-                      CommonLanguages.languageStringDefault(),
-                  word: 'screen.title.create')
-              : CommonLanguages.convert(
-                  lang: settingNotifier.languageString ??
-                      CommonLanguages.languageStringDefault(),
-                  word: 'screen.title.update'),
-          style: CommonStyles.screenTitleTextStyle(
-              fontSize: 26.0,
-              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                          widget.subject == null
+                              ? CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.create')
+                              : CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'screen.title.update'),
+                          style: CommonStyles.screenTitleTextStyle(
+                              fontSize: 22.0,
+                              color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       isShowOptionActionButton: false,
       isConfirmToClose: true,
       actions: AppBarActionButtonEnum.save,
@@ -227,20 +249,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                               )));
                 } else if (widget.redirectFrom ==
                     RedirectFromEnum.subjectsInFolderMode) {
-
-                  subjectNotifier.onReloadPage();
-
-                  Navigator.pop(context);
-                  // Navigator.pushAndRemoveUntil(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => SubjectListFolderModeScreen(
-                  //             subjectConditionModel: null,
-                  //             redirectFrom: null,
-                  //             breadcrumb: widget.breadcrumb,
-                  //           )),
-                  //   (route) => false,
-                  // );
+                  Navigator.pop(context, result);
                 } else {
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -273,16 +282,22 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                 CoreNotification.show(context, CoreNotificationStatus.success,
                     CoreNotificationAction.update, 'Subject');
 
-                _onGetUpdatedSubject(context, model).then((result) {
-                  if (result != null) {
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SubjectDetailScreen(
-                                  subject: result,
-                                  redirectFrom: RedirectFromEnum.subjectUpdate,
-                                )),
-                        (route) => false);
+                _onGetUpdatedSubject(context, model).then((getResult) {
+                  if (getResult != null) {
+                    if (widget.redirectFrom ==
+                        RedirectFromEnum.subjectsInFolderMode) {
+                      Navigator.pop(context, result);
+                    } else {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SubjectDetailScreen(
+                                    subject: getResult,
+                                    redirectFrom:
+                                        RedirectFromEnum.subjectUpdate,
+                                  )),
+                          (route) => false);
+                    }
                   }
                 });
               } else {
@@ -301,7 +316,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
       child: WillPopScope(
         onWillPop: () async {
           onBack();
-          if (await CoreHelperWidget.confirmFunction(context)) {
+          if (await CoreHelperWidget.confirmFunction(context: context)) {
             return true;
           }
           return false;
@@ -509,70 +524,148 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                       : Colors.transparent),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Row(
+                            child: Column(
                               children: [
-                                Container(
-                                  width: 40.0,
-                                  height: 40.0,
-                                  decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(6.0)),
-                                    color: _color.toColor(),
-                                  ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                          children: List.generate(
+                                              CommonStyles
+                                                      .commonSubjectColorStringList()
+                                                  .length,
+                                              (index) => Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: _color ==
+                                                                CommonStyles
+                                                                        .commonSubjectColorStringList()[
+                                                                    index]
+                                                            ? Colors.blue
+                                                            : Colors
+                                                                .transparent,
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                                  .all(
+                                                              Radius.circular(
+                                                                  10.0)),
+                                                    ),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          _color = CommonStyles
+                                                                  .commonSubjectColorStringList()[
+                                                              index];
+                                                        });
+                                                      },
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(5.0),
+                                                        child: Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .black87,
+                                                                    width: 1.0,
+                                                                  ),
+                                                                  borderRadius: const BorderRadius
+                                                                          .all(
+                                                                      Radius.circular(
+                                                                          15.0)),
+                                                                  color: CommonStyles
+                                                                              .commonSubjectColorStringList()[
+                                                                          index]
+                                                                      .toColor()),
+                                                          child: const SizedBox(
+                                                            height: 22.0,
+                                                            width: 22.0,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ))),
+                                    ))
+                                  ],
                                 ),
-                                const SizedBox(width: 10.0),
-                                CoreElevatedButton(
-                                  onPressed: () async {
-                                    myFocusNode.unfocus();
-                                    await showDialog<bool>(
-                                        context: context,
-                                        builder: (BuildContext context) => Form(
-                                              onWillPop: () async {
-                                                return true;
-                                              },
-                                              child: Dialog(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                  ),
-                                                  child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceAround,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        MaterialPicker(
-                                                          pickerColor:
-                                                              defaultColor, //default color
-                                                          onColorChanged:
-                                                              (Color color) {
-                                                            setState(() {
-                                                              _color = color
-                                                                  .value
-                                                                  .toRadixString(
-                                                                      16)
-                                                                  .substring(
-                                                                      2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
-                                                            });
-                                                            // Khi su dung: String colorHex = "29b6f6";
-                                                            // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
-                                                          },
-                                                        )
-                                                      ])),
-                                            ));
-                                  },
-                                  coreButtonStyle: CoreButtonStyle.options(
-                                      coreStyle: CoreStyle.outlined,
-                                      coreColor: CoreColor.dark,
-                                      coreRadius: CoreRadius.radius_6,
-                                      kitForegroundColorOption:
-                                          const Color(0xff1f1f1f),
-                                      coreFixedSizeButton:
-                                          CoreFixedSizeButton.medium_40),
-                                  child: Text('Choose color',
-                                      style: CommonStyles.buttonTextStyle),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 40.0,
+                                      height: 40.0,
+                                      decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(6.0)),
+                                        color: _color.toColor(),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10.0),
+                                    CoreElevatedButton(
+                                      onPressed: () async {
+                                        myFocusNode.unfocus();
+                                        await showDialog<bool>(
+                                            context: context,
+                                            builder: (BuildContext context) =>
+                                                Form(
+                                                  onWillPop: () async {
+                                                    return true;
+                                                  },
+                                                  child: Dialog(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10.0),
+                                                      ),
+                                                      child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceAround,
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            MaterialPicker(
+                                                              pickerColor:
+                                                                  defaultColor, //default color
+                                                              onColorChanged:
+                                                                  (Color
+                                                                      color) {
+                                                                setState(() {
+                                                                  _color = color
+                                                                      .value
+                                                                      .toRadixString(
+                                                                          16)
+                                                                      .substring(
+                                                                          2); // Lấy giá trị hex và bỏ qua byte alpha (Color(0xff29b6f6) => 29b6f6)
+                                                                });
+                                                                // Khi su dung: String colorHex = "29b6f6";
+                                                                // Color parsedColor = Color(int.parse("0xFF$colorHex", radix: 16)); Color(0xff29b6f6)
+                                                              },
+                                                            )
+                                                          ])),
+                                                ));
+                                      },
+                                      coreButtonStyle: CoreButtonStyle.options(
+                                          coreStyle: CoreStyle.outlined,
+                                          coreColor: CoreColor.dark,
+                                          coreRadius: CoreRadius.radius_6,
+                                          kitForegroundColorOption:
+                                              const Color(0xff1f1f1f),
+                                          coreFixedSizeButton:
+                                              CoreFixedSizeButton.medium_40),
+                                      child: Text('Color palette',
+                                          style: CommonStyles.buttonTextStyle),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
