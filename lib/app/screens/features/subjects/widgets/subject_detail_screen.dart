@@ -13,6 +13,7 @@ import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../../note/models/note_condition_model.dart';
@@ -37,10 +38,19 @@ class SubjectDetailScreen extends StatefulWidget {
 }
 
 class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   _onUpdateSubject() async {
@@ -130,7 +140,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(5.0),
-                    decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                    decoration: CommonStyles.titleScreenDecorationStyle(
+                        settingNotifier.isSetBackgroundImage),
                     child: Row(
                       children: [
                         Flexible(
@@ -141,7 +152,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                   word: 'screen.title.detail'),
                               style: CommonStyles.screenTitleTextStyle(
                                   fontSize: 22.0,
-                                  color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                                  color:
+                                      ThemeDataCenter.getScreenTitleTextColor(
+                                          context))),
                         ),
                       ],
                     ),
@@ -455,6 +468,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Update',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
@@ -485,6 +500,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Create sub subject',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
@@ -514,6 +531,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Notes',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   NoteConditionModel
                                                       noteConditionModel =
@@ -545,6 +564,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Create note',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   Navigator.push(
                                                       context,
@@ -574,6 +595,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Parent subject',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   SubjectConditionModel
                                                       subjectConditionModel =
@@ -607,6 +630,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               message: 'Sub subjects',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   SubjectConditionModel
                                                       subjectConditionModel =
@@ -641,6 +666,8 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                         )
                                       : Column(children: [
                                           CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
                                             onPressed: () {
                                               _onRestoreSubjectFromTrash(
                                                       context)
@@ -688,9 +715,12 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                           ),
                                           const SizedBox(height: 2.0),
                                           CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
                                             onPressed: () async {
                                               if (await CoreHelperWidget
-                                                  .confirmFunction(context: context)) {
+                                                  .confirmFunction(
+                                                      context: context)) {
                                                 _onDeleteSubjectForever(context)
                                                     .then((result) {
                                                   if (result) {

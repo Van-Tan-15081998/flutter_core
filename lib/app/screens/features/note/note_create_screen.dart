@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:animate_do/animate_do.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
@@ -19,6 +20,7 @@ import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../core/stores/icons/CoreStoreIcons.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
@@ -63,11 +65,15 @@ class NoteCreateScreen extends StatefulWidget {
 }
 
 class _NoteCreateScreenState extends State<NoteCreateScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final ScrollController _controllerScrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
 
   bool isShowDialogSetLabel = false;
   bool isShowDialogSetEmoji = false;
+
+  bool isLock = false;
 
   /*
    Title's Parameters
@@ -219,6 +225,10 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
         _detailContentDocument = flutter_quill.Document.fromDelta(delta);
       }
+
+      if (widget.note!.isLocked != null) {
+        isLock = true;
+      }
     } else if (widget.copyNote != null &&
         widget.actionMode == ActionModeEnum.copy) {
       if (widget.copyNote!.title != null &&
@@ -325,10 +335,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   @override
   void dispose() {
     _subjectStreamController.close();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
-  Widget _buildOptionActionContent(BuildContext context) {
+  Widget _buildOptionActionContent(BuildContext context, SettingNotifier settingNotifier) {
     if (isShowDialogSetEmoji) {
       return Container(
           margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
@@ -385,6 +396,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       itemCount: CoreStoreIcons.emojis.length,
                       itemBuilder: (context, index) {
                         return CoreElevatedButton.iconOnly(
+                          buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
@@ -442,6 +454,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                       itemCount: CoreStoreIcons.natureAndAnimals.length,
                       itemBuilder: (context, index) {
                         return CoreElevatedButton.iconOnly(
+                          buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
@@ -570,6 +583,32 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   ),
               itemCount: labelList!.length),
         );
+      } else {
+        return Center(child: Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              BounceInLeft(
+                  child: const FaIcon(FontAwesomeIcons.waze,
+                      size: 30.0,
+                      color: Colors.white54)),
+              const SizedBox(width: 5),
+              BounceInRight(
+                child: Text(
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.noItem.label'),
+                    style: GoogleFonts.montserrat(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 16.0,
+                        color: Colors.white54,
+                        fontWeight: FontWeight.w500)),
+              ),
+            ],
+          ),
+        ),);
       }
     }
 
@@ -1069,6 +1108,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   _buildCloseButtonSetEmojiOnToolbar() {
     if (isShowDialogSetEmoji) {
       return CoreElevatedButton.iconOnly(
+        buttonAudio: commonAudioOnPressButton,
         icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
         onPressed: () {
           setState(() {
@@ -1100,6 +1140,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   _buildCloseButtonSetLabelOnToolbar() {
     if (isShowDialogSetLabel) {
       return CoreElevatedButton.iconOnly(
+        buttonAudio: commonAudioOnPressButton,
         icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
         onPressed: () {
           setState(() {
@@ -1305,7 +1346,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
       actions: AppBarActionButtonEnum.save,
       isShowBottomActionButton: true,
       isShowGeneralActionButton: false,
-      optionActionContent: _buildOptionActionContent(context),
+      optionActionContent: _buildOptionActionContent(context, settingNotifier),
       onGoHome: () {},
       onSubmit: () async {
         if (_formKey.currentState!.validate()) {
@@ -1338,11 +1379,19 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 createdAtDayFormat: DateTime(DateTime.now().year,
                         DateTime.now().month, DateTime.now().day)
                     .millisecondsSinceEpoch,
-                createdForDay: widget.actionCreateNoteEnum ==
-                            ActionCreateNoteEnum.createForSelectedDay &&
+                createdForDay: (widget.actionCreateNoteEnum ==
+                            ActionCreateNoteEnum.createForSelectedDay || widget.actionMode ==
+                    ActionModeEnum.copy) &&
                         widget.createdForDay != null
                     ? widget.createdForDay
                     : null,
+                isFavourite: null,
+                isPinned: null,
+                isLocked: isLock == false
+                    ? null
+                    : DateTime(DateTime.now().year, DateTime.now().month,
+                            DateTime.now().day)
+                        .millisecondsSinceEpoch,
                 id: widget.note?.id);
 
             _onCreateNote(context, model).then((result) {
@@ -1384,6 +1433,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 createdAtDayFormat: widget.note?.createdAtDayFormat,
                 createdForDay: widget.note?.createdForDay,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
+                isPinned: widget.note?.isPinned,
+                isLocked: isLock == false
+                    ? null
+                    : widget.note?.isLocked ??
+                        DateTime(DateTime.now().year, DateTime.now().month,
+                                DateTime.now().day)
+                            .millisecondsSinceEpoch,
                 id: widget.note?.id);
 
             _onUpdateNote(context, model).then((result) {
@@ -1753,6 +1809,50 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                             ? const EdgeInsets.all(5.0)
                             : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
+                          "Lock:",
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  ThemeDataCenter.getFormFieldLabelColorStyle(
+                                      context)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20.0),
+                    Expanded(
+                      child: SwitchListTile(
+                          contentPadding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+                          title: Container(),
+                          value: isLock,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isLock = value;
+                            });
+                          }),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: settingNotifier.isSetBackgroundImage == true
+                          ? const EdgeInsets.fromLTRB(0, 5.0, 0, 2.0)
+                          : const EdgeInsets.all(0),
+                      decoration: BoxDecoration(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                          color: settingNotifier.isSetBackgroundImage == true
+                              ? Colors.white.withOpacity(0.65)
+                              : Colors.transparent),
+                      child: Padding(
+                        padding: settingNotifier.isSetBackgroundImage == true
+                            ? const EdgeInsets.all(5.0)
+                            : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                        child: Text(
                           CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
                                       CommonLanguages.languageStringDefault(),
@@ -1782,6 +1882,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                     child: Row(
                       children: [
                         CoreElevatedButton.icon(
+                          buttonAudio: commonAudioOnPressButton,
                           icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
                           label: Text('Choose labels',
                               style: CommonStyles.buttonTextStyle),
@@ -1829,7 +1930,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           Expanded(
             child: Container(
               padding: const EdgeInsets.all(5.0),
-              decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+              decoration: CommonStyles.titleScreenDecorationStyle(
+                  settingNotifier.isSetBackgroundImage),
               child: Row(
                 children: [
                   Flexible(
@@ -1845,7 +1947,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               word: 'screen.title.update'),
                       style: CommonStyles.screenTitleTextStyle(
                           fontSize: 22.0,
-                          color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                          color:
+                              ThemeDataCenter.getScreenTitleTextColor(context)),
                     ),
                   ),
                 ],
@@ -1853,8 +1956,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             ),
           ),
           const SizedBox(width: 5),
-          widget.actionCreateNoteEnum ==
-                      ActionCreateNoteEnum.createForSelectedDay &&
+          (widget.actionCreateNoteEnum ==
+                      ActionCreateNoteEnum.createForSelectedDay || widget.actionMode == ActionModeEnum.copy) &&
                   widget.createdForDay != null
               ? Expanded(
                   child: Column(

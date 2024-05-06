@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CommonDimensions {
-
   /*
   CommonDimensions.maxHeightScreen(context)
    */

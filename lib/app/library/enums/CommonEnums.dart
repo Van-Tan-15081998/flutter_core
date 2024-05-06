@@ -5,8 +5,10 @@ enum ActionCreateNoteEnum { create, createForSelectedDay }
 enum ActionSubjectFolderItemEnum {
   update,
   delete,
+  createShortcut,
   deleteForever,
-  restore}
+  restore
+}
 
 enum RedirectFromEnum {
   home,
@@ -31,7 +33,7 @@ enum RedirectFromEnum {
   templateCreateNote
 }
 
-  enum TaskStatusEnum {
+enum TaskStatusEnum {
   newStatus,
   pendingStatus,
   inProgressStatus,

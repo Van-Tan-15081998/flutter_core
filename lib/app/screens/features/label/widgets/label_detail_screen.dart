@@ -13,6 +13,7 @@ import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../databases/label_db_manager.dart';
@@ -33,20 +34,19 @@ class LabelDetailScreen extends StatefulWidget {
 }
 
 class _LabelDetailScreenState extends State<LabelDetailScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
   }
 
-  _onUpdateLabel() async {
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LabelCreateScreen(
-                  label: widget.label,
-                  actionMode: ActionModeEnum.update,
-                )));
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   Future<bool> _onDeleteLabel(BuildContext context) async {
@@ -122,7 +122,8 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(5.0),
-                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  decoration: CommonStyles.titleScreenDecorationStyle(
+                      settingNotifier.isSetBackgroundImage),
                   child: Row(
                     children: [
                       Flexible(
@@ -133,7 +134,8 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                 word: 'screen.title.detail'),
                             style: CommonStyles.screenTitleTextStyle(
                                 fontSize: 22.0,
-                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                                color: ThemeDataCenter.getScreenTitleTextColor(
+                                    context))),
                       ),
                     ],
                   ),
@@ -430,6 +432,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                   ),
                                   widget.label.deletedAt == null
                                       ? CoreElevatedButton.iconOnly(
+                                          buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
                                             Navigator.push(
                                                 context,
@@ -449,6 +452,8 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                         )
                                       : Column(children: [
                                           CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
                                             onPressed: () {
                                               _onRestoreLabelFromTrash(context)
                                                   .then((result) {
@@ -494,9 +499,12 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                           ),
                                           const SizedBox(height: 2.0),
                                           CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
                                             onPressed: () async {
                                               if (await CoreHelperWidget
-                                                  .confirmFunction(context: context)) {
+                                                  .confirmFunction(
+                                                      context: context)) {
                                                 _onDeleteLabelForever(context)
                                                     .then((result) {
                                                   if (result) {

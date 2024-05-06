@@ -14,6 +14,7 @@ import '../../../../../core/components/actions/common_buttons/CoreElevatedButton
 import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../../label/models/label_model.dart';
 import '../../subjects/models/subject_condition_model.dart';
@@ -54,6 +55,8 @@ class TemplateWidget extends StatefulWidget {
 }
 
 class _TemplateWidgetState extends State<TemplateWidget> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final flutter_quill.QuillController _titleQuillController =
       flutter_quill.QuillController.basic();
 
@@ -108,6 +111,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
         print('Document rỗng.');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   setDocuments() {
@@ -614,6 +624,8 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                   message: 'Update',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       if (widget.onUpdate !=
                                                           null) {
@@ -633,6 +645,8 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                   message: 'Create note',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       if (widget
                                                               .onCreateNoteFromTemplate !=
@@ -656,6 +670,8 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                 message: 'Restore',
                                                 child:
                                                     CoreElevatedButton.iconOnly(
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
                                                   onPressed: () {
                                                     if (widget
                                                             .onRestoreFromTrash !=
@@ -679,6 +695,8 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                 message: 'Delete forever',
                                                 child:
                                                     CoreElevatedButton.iconOnly(
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
                                                   onPressed: () {
                                                     if (widget
                                                             .onDeleteForever !=

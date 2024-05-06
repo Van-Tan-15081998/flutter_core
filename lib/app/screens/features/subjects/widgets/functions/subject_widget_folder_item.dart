@@ -18,6 +18,7 @@ class SubjectWidgetFolderItem extends StatefulWidget {
   final VoidCallback? onUpdate;
   final VoidCallback? onDelete;
   final VoidCallback? onDeleteForever;
+  final VoidCallback? onCreateShortcut;
   final VoidCallback? onRestoreFromTrash;
   final VoidCallback? onFilterChildrenOnly;
   final VoidCallback? onFilterParent;
@@ -29,6 +30,7 @@ class SubjectWidgetFolderItem extends StatefulWidget {
       required this.onUpdate,
       required this.onDelete,
       required this.onDeleteForever,
+      required this.onCreateShortcut,
       required this.onRestoreFromTrash,
       required this.onFilterChildrenOnly,
       required this.onFilterParent})
@@ -130,6 +132,11 @@ class _SubjectWidgetFolderItemState extends State<SubjectWidgetFolderItem> {
                                         )));
                           }
                         } else if (action ==
+                            ActionSubjectFolderItemEnum.createShortcut) {
+                          if (widget.onCreateShortcut != null) {
+                            widget.onCreateShortcut!();
+                          }
+                        } else if (action ==
                             ActionSubjectFolderItemEnum.delete) {
                           if (widget.onDelete != null) {
                             widget.onDelete!();
@@ -144,6 +151,14 @@ class _SubjectWidgetFolderItemState extends State<SubjectWidgetFolderItem> {
                             leading: FaIcon(FontAwesomeIcons.pen),
                             title:
                                 Text('Update', style: TextStyle(fontSize: 14)),
+                          ),
+                        ),
+                        const PopupMenuItem<ActionSubjectFolderItemEnum>(
+                          value: ActionSubjectFolderItemEnum.createShortcut,
+                          child: ListTile(
+                            leading: FaIcon(FontAwesomeIcons.shareFromSquare),
+                            title: Text('Create shortcut',
+                                style: TextStyle(fontSize: 14)),
                           ),
                         ),
                         const PopupMenuItem<ActionSubjectFolderItemEnum>(

@@ -90,6 +90,13 @@ flutter:
     - assets/audio/open-popup.mp3
     - assets/audio/minimal-pop-click.mp3
     - assets/audio/message-incoming.mp3
+    - assets/audio/background_musics/Best_Time.mp3
+    - assets/audio/background_musics/The_Best_Time.mp3
+    - assets/audio/background_musics/NostalgicWaltz.mp3
+    - assets/audio/background_musics/BossaNova.mp3
+    - assets/audio/background_musics/Ciudades.mp3
+    - assets/audio/background_musics/DreamOfSummer.mp3
+    - assets/audio/background_musics/FeelBossaNova.mp3
     - assets/images/planet-background-image.jpg
     - assets/images/cartoon-background-image.jpg
     - assets/images/background-image-01.jpg

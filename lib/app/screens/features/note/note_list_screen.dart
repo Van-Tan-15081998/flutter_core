@@ -54,6 +54,7 @@ class NoteListScreen extends StatefulWidget {
 }
 
 class _NoteListScreenState extends State<NoteListScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton = CommonAudioOnPressButton();
   final ScrollController _scrollController = ScrollController();
 
   /*
@@ -394,6 +395,20 @@ class _NoteListScreenState extends State<NoteListScreen> {
             : null);
   }
 
+  Future<bool> _onPinNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.pin(
+        note,
+        note.isPinned == null
+            ? DateTime.now().millisecondsSinceEpoch
+            : null);
+  }
+
+  Future<bool> _onUnlockNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.lock(
+        note,
+        null);
+  }
+
   void _getFilteredSubject() async {
     SubjectModel? localFilteredSubject =
         await SubjectDatabaseManager.getById(_noteConditionModel.subjectId!);
@@ -619,6 +634,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
               ),
               const SizedBox(height: 20.0),
               CoreElevatedButton.iconOnly(
+                buttonAudio: commonAudioOnPressButton,
                 onPressed: () {
                   setState(() {
                     /// Reload Data
@@ -1008,6 +1024,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     animateTransitions: true,
                     transitionDuration: const Duration(milliseconds: 500),
                     itemBuilder: (context, item, index) => NoteWidget(
+                      key: ValueKey<int>(item.id!),
                       index: index + 1,
                       note: item,
                       labels: _getNoteLabels(item.labels!),
@@ -1106,6 +1123,52 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                 'Note');
                           }
                         });
+                      },
+                      onPin: () {
+                        _onPinNote(context, item).then((result) {
+                          if (result) {
+                            setState(() {
+                              item.isPinned = item.isPinned == null
+                                  ? DateTime.now().millisecondsSinceEpoch
+                                  : null;
+                            });
+
+                            CommonAudioOnPressButton audio =
+                            CommonAudioOnPressButton();
+                            audio.playAudioOnFavourite();
+                          } else {
+                            CoreNotification.show(
+                                context,
+                                CoreNotificationStatus.error,
+                                CoreNotificationAction.update,
+                                'Note');
+                          }
+                        });
+                      },
+                      onUnlock: () async {
+                           if (await CoreHelperWidget.confirmFunction(context: context)) {
+                             _onUnlockNote(context, item).then((result) {
+                               if (result) {
+                                 setState(() {
+                                   item.isLocked = item.isLocked == null
+                                    ? DateTime.now().millisecondsSinceEpoch
+                                        : null;
+                                    });
+
+                              CoreNotification.show(
+                                  context,
+                                  CoreNotificationStatus.success,
+                                  CoreNotificationAction.update,
+                                  'Note');
+                              } else {
+                                CoreNotification.show(
+                                    context,
+                                    CoreNotificationStatus.error,
+                                    CoreNotificationAction.update,
+                                    'Note');
+                              }
+                              });
+                        }
                       },
                       onFilterBySubject: () {
                         if (item.subjectId != null) {
@@ -1281,11 +1344,15 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                                                             ),
                                                                           ],
                                                                         ),
-                                                                      ),),
-                                                                ),),
+                                                                      ),
+                                                                  ),
+                                                                ),
+                                                            ),
                                                           ),
-                                                        ],),
-                                                      ),),
+                                                        ],
+                                                        ),
+                                                      ),
+                                                  ),
                                                 ),
                                               ),
                                             ],
@@ -1305,6 +1372,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
   @override
   void dispose() {
     _pagingController.dispose();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -1381,6 +1449,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
             onPressed: () {
               _resetConditions();
             },
@@ -1393,6 +1462,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
           ),
           const SizedBox(width: 5),
           CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
               await showDialog<bool>(
                 context: context,
@@ -1452,6 +1522,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                 MainAxisAlignment.spaceAround,
                             children: [
                               CoreElevatedButton.iconOnly(
+                                  buttonAudio: commonAudioOnPressButton,
                                   icon: const Icon(Icons.close_rounded),
                                   onPressed: () {
                                     if (_searchController.text.isNotEmpty) {
@@ -1468,6 +1539,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                   coreButtonStyle: ThemeDataCenter
                                       .getCoreScreenButtonStyle(context: context)),
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const Icon(Icons.search_rounded),
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
@@ -1508,6 +1580,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
           ),
           const SizedBox(width: 5),
           CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
               await showDialog<bool>(
                   context: context,
@@ -1523,6 +1596,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
           const SizedBox(width: 5),
           _selectedDay == null
               ? CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -1635,6 +1709,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(

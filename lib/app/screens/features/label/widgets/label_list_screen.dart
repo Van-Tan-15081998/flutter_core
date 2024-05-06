@@ -16,6 +16,7 @@ import '../../../../library/common/dimensions/CommonDimensions.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../home/home_screen.dart';
 import '../../../setting/providers/setting_notifier.dart';
@@ -40,6 +41,8 @@ class LabelListScreen extends StatefulWidget {
 }
 
 class _LabelListScreenState extends State<LabelListScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   List<LabelModel> labels = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -251,6 +254,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
               }),
               const SizedBox(height: 20.0),
               CoreElevatedButton.iconOnly(
+                buttonAudio: commonAudioOnPressButton,
                 icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
                 onPressed: () {
                   setState(() {
@@ -274,6 +278,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
   @override
   void dispose() {
     _pagingController.dispose();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -359,6 +364,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -385,7 +391,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
@@ -395,7 +402,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                   CommonLanguages.languageStringDefault(),
                               word: 'screen.title.labels'),
                           style: CommonStyles.screenTitleTextStyle(
-                              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                              color: ThemeDataCenter.getScreenTitleTextColor(
+                                  context))),
                     ),
                   ],
                 ),
@@ -479,7 +487,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                   });
                 },
                 onDeleteForever: () async {
-                  if (await CoreHelperWidget.confirmFunction(context: context)) {
+                  if (await CoreHelperWidget.confirmFunction(
+                      context: context)) {
                     _onDeleteLabelForever(context, item).then((result) {
                       if (result) {
                         labelNotifier.onCountAll();
@@ -595,6 +604,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () {
             _resetConditions();
             _reloadPage();
@@ -609,6 +619,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         const SizedBox(width: 5),
         const SizedBox(width: 5),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
@@ -665,6 +676,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   CoreElevatedButton.iconOnly(
+                                      buttonAudio: commonAudioOnPressButton,
                                       icon: const Icon(Icons.close_rounded),
                                       onPressed: () {
                                         if (_searchController.text.isNotEmpty) {
@@ -683,6 +695,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                           .getCoreScreenButtonStyle(
                                               context: context)),
                                   CoreElevatedButton.iconOnly(
+                                      buttonAudio: commonAudioOnPressButton,
                                       icon: const Icon(Icons.search_rounded),
                                       onPressed: () {
                                         if (_formKey.currentState!.validate()) {
@@ -722,6 +735,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         ),
         const SizedBox(width: 5.0),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
@@ -736,6 +750,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         ),
         const SizedBox(width: 5),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () {
             Navigator.push(
               context,

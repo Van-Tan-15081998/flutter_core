@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
+import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../../../setting/providers/setting_notifier.dart';
 import '../../../note/models/note_condition_model.dart';
@@ -47,6 +48,8 @@ class SubjectWidget extends StatefulWidget {
 }
 
 class _SubjectWidgetState extends State<SubjectWidget> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   late int countChildren;
   late int countNotes;
 
@@ -72,6 +75,13 @@ class _SubjectWidgetState extends State<SubjectWidget> {
         countNotes = result;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   Future<int> _onCountChildren() async {
@@ -411,6 +421,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Update',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
@@ -442,6 +454,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Create sub subject',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
@@ -471,6 +485,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Notes',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       NoteConditionModel
                                                           noteConditionModel =
@@ -503,6 +519,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Create note',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
@@ -533,6 +551,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Parent subject',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       if (widget
                                                               .onFilterParent !=
@@ -552,6 +572,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   message: 'Sub subjects',
                                                   child: CoreElevatedButton
                                                       .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       if (widget
                                                               .onFilterChildren !=
@@ -581,6 +603,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                               message: 'Restore',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   if (widget
                                                           .onRestoreFromTrash !=
@@ -603,6 +627,8 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                               message: 'Delete forever',
                                               child:
                                                   CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   if (widget.onDeleteForever !=
                                                       null) {

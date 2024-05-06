@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 import '../../actions/common_buttons/CoreButtonStyle.dart';
 import '../../actions/common_buttons/CoreElevatedButton.dart';
 import '../dialogs/CoreConfirmDialog.dart';
@@ -26,6 +27,15 @@ class CoreStandardBottomSheet extends StatefulWidget {
 }
 
 class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
+  CommonAudioOnPressButton commonAudioOnPressButton = CommonAudioOnPressButton();
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   Future<bool> confirmFunction() async {
     bool result = false;
     await showDialog<bool>(
@@ -105,6 +115,7 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         CoreElevatedButton.icon(
+                          buttonAudio: commonAudioOnPressButton,
                           icon: const Icon(Icons.cancel),
                           label: const Text('Cancel'),
                           onPressed: () async {
@@ -126,6 +137,7 @@ class _CoreStandardBottomSheetState extends State<CoreStandardBottomSheet> {
                           width: 5,
                         ),
                         CoreElevatedButton.icon(
+                          buttonAudio: commonAudioOnPressButton,
                           icon: const Icon(Icons.save),
                           label: const Text('Save'),
                           onPressed: () {},

@@ -16,6 +16,7 @@ import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/converters/CommonConverters.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/models/label_model.dart';
@@ -48,6 +49,8 @@ class NoteDetailScreen extends StatefulWidget {
 }
 
 class _NoteDetailScreenState extends State<NoteDetailScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   /*
   Editor parameters
    */
@@ -88,6 +91,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   Future<bool> _onRestoreNoteFromTrash(BuildContext context) async {
     return await NoteDatabaseManager.restoreFromTrash(
         widget.note, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<bool> _onUnlockNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.lock(note, null);
   }
 
   @override
@@ -134,6 +141,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         print('Document empty.');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   setDocuments() {
@@ -396,7 +410,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(5.0),
-                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  decoration: CommonStyles.titleScreenDecorationStyle(
+                      settingNotifier.isSetBackgroundImage),
                   child: Row(
                     children: [
                       Flexible(
@@ -407,7 +422,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                 word: 'screen.title.detail'),
                             style: CommonStyles.screenTitleTextStyle(
                                 fontSize: 22.0,
-                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                                color: ThemeDataCenter.getScreenTitleTextColor(
+                                    context))),
                       ),
                     ],
                   ),
@@ -457,7 +473,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             endActionPane: ActionPane(
               motion: const ScrollMotion(),
               children: [
-                widget.note.deletedAt == null
+                widget.note.deletedAt == null && widget.note.isLocked == null
                     ? SlidableAction(
                         flex: 1,
                         onPressed: (context) {
@@ -527,6 +543,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                widget.note.isLocked != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            5.0, 0, 5.0, 0),
+                                        child: Icon(Icons.lock,
+                                            size: 22,
+                                            color: ThemeDataCenter
+                                                .getLockSlidableActionColorStyle(
+                                                    context)),
+                                      )
+                                    : Container(),
                                 Container(
                                   padding:
                                       settingNotifier.isSetBackgroundImage ==
@@ -624,6 +651,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
+                                widget.note.isLocked != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            5.0, 0, 5.0, 0),
+                                        child: Icon(Icons.lock,
+                                            size: 22,
+                                            color: ThemeDataCenter
+                                                .getLockSlidableActionColorStyle(
+                                                    context)),
+                                      )
+                                    : Container(),
                                 Container(
                                   padding:
                                       settingNotifier.isSetBackgroundImage ==
@@ -840,22 +878,86 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                 .subjectsInFolderMode
                                         ? Container(
                                             child: widget.note.deletedAt == null
-                                                ? Tooltip(
-                                                    message: 'Update',
-                                                    child: CoreElevatedButton
-                                                        .iconOnly(
-                                                      onPressed: () {
-                                                        _onUpdate();
-                                                      },
-                                                      coreButtonStyle:
-                                                          ThemeDataCenter
-                                                              .getUpdateButtonStyle(
-                                                                  context),
-                                                      icon: const Icon(
-                                                          Icons
-                                                              .edit_note_rounded,
-                                                          size: 26.0),
-                                                    ),
+                                                ? Row(
+                                                    children: [
+                                                      widget.note.isLocked ==
+                                                              null
+                                                          ? Tooltip(
+                                                              message: 'Update',
+                                                              child:
+                                                                  CoreElevatedButton
+                                                                      .iconOnly(
+                                                                buttonAudio:
+                                                                    commonAudioOnPressButton,
+                                                                onPressed: () {
+                                                                  _onUpdate();
+                                                                },
+                                                                coreButtonStyle:
+                                                                    ThemeDataCenter
+                                                                        .getUpdateButtonStyle(
+                                                                            context),
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .edit_note_rounded,
+                                                                    size: 26.0),
+                                                              ),
+                                                            )
+                                                          : Tooltip(
+                                                              message: 'UnLock',
+                                                              child:
+                                                                  CoreElevatedButton
+                                                                      .iconOnly(
+                                                                buttonAudio:
+                                                                    commonAudioOnPressButton,
+                                                                onPressed:
+                                                                    () async {
+                                                                  if (await CoreHelperWidget
+                                                                      .confirmFunction(
+                                                                          context:
+                                                                              context)) {
+                                                                    _onUnlockNote(
+                                                                            context,
+                                                                            widget
+                                                                                .note)
+                                                                        .then(
+                                                                            (result) {
+                                                                      if (result) {
+                                                                        setState(
+                                                                            () {
+                                                                          widget
+                                                                              .note
+                                                                              .isLocked = widget.note.isLocked ==
+                                                                                  null
+                                                                              ? DateTime.now().millisecondsSinceEpoch
+                                                                              : null;
+                                                                        });
+
+                                                                        CoreNotification.show(
+                                                                            context,
+                                                                            CoreNotificationStatus.success,
+                                                                            CoreNotificationAction.update,
+                                                                            'Note');
+                                                                      } else {
+                                                                        CoreNotification.show(
+                                                                            context,
+                                                                            CoreNotificationStatus.error,
+                                                                            CoreNotificationAction.update,
+                                                                            'Note');
+                                                                      }
+                                                                    });
+                                                                  }
+                                                                },
+                                                                coreButtonStyle:
+                                                                    ThemeDataCenter
+                                                                        .getUpdateButtonStyle(
+                                                                            context),
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .lock_open_rounded,
+                                                                    size: 26.0),
+                                                              ),
+                                                            )
+                                                    ],
                                                   )
                                                 : Column(
                                                     children: [
@@ -864,6 +966,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                         child:
                                                             CoreElevatedButton
                                                                 .iconOnly(
+                                                          buttonAudio:
+                                                              commonAudioOnPressButton,
                                                           onPressed: () {
                                                             _onRestoreNoteFromTrash(
                                                                     context)
@@ -926,10 +1030,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                         child:
                                                             CoreElevatedButton
                                                                 .iconOnly(
+                                                          buttonAudio:
+                                                              commonAudioOnPressButton,
                                                           onPressed: () async {
                                                             if (await CoreHelperWidget
                                                                 .confirmFunction(
-                                                                context: context)) {
+                                                                    context:
+                                                                        context)) {
                                                               _onDeleteNoteForever(
                                                                       context)
                                                                   .then(

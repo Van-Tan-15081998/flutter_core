@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../library/common/converters/CommonConverters.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
+import '../../../library/common/utils/CommonAudioBackground.dart';
 import '../functions/SettingSharedPreferences.dart';
 
 class SettingNotifier with ChangeNotifier {
@@ -32,6 +32,10 @@ class SettingNotifier with ChangeNotifier {
   String? _avatarDescriptionString;
   String? get avatarDescriptionString => _avatarDescriptionString;
 
+  String? _playingBackgroundMusicSourceString;
+  String? get playingBackgroundMusicSourceString =>
+      _playingBackgroundMusicSourceString;
+
   SettingNotifier() {
     init();
   }
@@ -41,6 +45,8 @@ class SettingNotifier with ChangeNotifier {
     _avatarDescriptionString = await getAvatarDescriptionString();
     _backgroundImageSourceString = await getBackgroundImageSourceString();
     _languageString = await getLanguageString();
+    _playingBackgroundMusicSourceString =
+        await getPlayingBackgroundMusicSourceString();
 
     _isSetColorAccordingSubjectColor =
         await getIsSetColorAccordingSubjectColor();
@@ -181,12 +187,13 @@ class SettingNotifier with ChangeNotifier {
   Future<String?> getAvatarDescriptionString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getAvatarDescriptionString();
 
     if (result == null) {
       // Set default
-      await settingSharedPreferences.setAvatarDescriptionString('Hi!, press and hold to change the description');
+      await settingSharedPreferences.setAvatarDescriptionString(
+          'Hi!, press and hold to change the description');
 
       // Get again
       result = await getAvatarDescriptionString();
@@ -208,6 +215,24 @@ class SettingNotifier with ChangeNotifier {
 
       // Get again
       result = await getBackgroundImageSourceString();
+    }
+
+    return result;
+  }
+
+  Future<String?> getPlayingBackgroundMusicSourceString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    result =
+        await settingSharedPreferences.getPlayingBackgroundMusicSourceString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setPlayingBackgroundMusicSourceString("ALL");
+
+      // Get again
+      result = await getPlayingBackgroundMusicSourceString();
     }
 
     return result;
@@ -373,8 +398,9 @@ class SettingNotifier with ChangeNotifier {
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
-    await settingSharedPreferences.setAvatarDescriptionString(avatarDescriptionString);
+        SettingSharedPreferences();
+    await settingSharedPreferences
+        .setAvatarDescriptionString(avatarDescriptionString);
 
     result = await settingSharedPreferences.getAvatarDescriptionString();
 
@@ -401,6 +427,28 @@ class SettingNotifier with ChangeNotifier {
 
     if (result != null) {
       _backgroundImageSourceString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setPlayingBackgroundMusicSourceString(
+      String playingBackgroundMusicSourceStr) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    await settingSharedPreferences
+        .setPlayingBackgroundMusicSourceString(playingBackgroundMusicSourceStr);
+
+    result =
+        await settingSharedPreferences.getPlayingBackgroundMusicSourceString();
+
+    if (result != null) {
+      _playingBackgroundMusicSourceString = result;
       notifyListeners();
 
       return true;

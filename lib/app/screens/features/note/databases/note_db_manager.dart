@@ -127,6 +127,70 @@ class NoteDatabaseManager {
     }
   }
 
+  //
+  static Future<bool> pin(NoteModel note, int? isPin) async {
+    try {
+      NoteModel? pinModel;
+      pinModel = await _onPin(note, isPin);
+
+      if (pinModel != null) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  static Future<NoteModel?> _onPin(NoteModel note, int? isPin) async {
+    try {
+      int result = await DatabaseProvider.pinNote(note, isPin);
+
+      if (result != 0) {
+        NoteModel? pinModel = await getById(note.id!);
+
+        return pinModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+  //
+
+  //
+  static Future<bool> lock(NoteModel note, int? isLock) async {
+    try {
+      NoteModel? lockModel;
+      lockModel = await _onLock(note, isLock);
+
+      if (lockModel != null) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  static Future<NoteModel?> _onLock(NoteModel note, int? isLock) async {
+    try {
+      int result = await DatabaseProvider.lockNote(note, isLock);
+
+      if (result != 0) {
+        NoteModel? lockModel = await getById(note.id!);
+
+        return lockModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+  //
+
   static Future<bool> delete(NoteModel note, int deleteTime) async {
     try {
       NoteModel? deletedModel;

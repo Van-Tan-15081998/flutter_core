@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_create_screen.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
@@ -18,12 +19,17 @@ import '../../library/common/dimensions/CommonDimensions.dart';
 import '../../library/common/languages/CommonLanguages.dart';
 import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
+import '../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../library/enums/CommonEnums.dart';
 import '../features/label/providers/label_notifier.dart';
 import '../features/label/widgets/label_list_screen.dart';
 import '../features/note/databases/note_db_manager.dart';
 import '../features/note/providers/note_notifier.dart';
+import '../features/subjects/databases/subject_db_manager.dart';
+import '../features/subjects/models/subject_condition_model.dart';
+import '../features/subjects/models/subject_model.dart';
 import '../features/subjects/providers/subject_notifier.dart';
+import '../features/subjects/widgets/functions/subject_shortcut_widget.dart';
 import '../features/subjects/widgets/subject_list_folder_mode_screen.dart';
 import '../features/template/providers/template_notifier.dart';
 import '../features/template/template_list_screen.dart';
@@ -42,6 +48,8 @@ class HomeScreen extends StatefulWidget {
 enum NavigationBarEnum { masterHome, masterSearch, masterAdd, masterDrawer }
 
 class _HomeScreenState extends State<HomeScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   late BannerAd bannerAd;
   bool isAdLoaded = false;
   initBannerAd() {
@@ -55,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         }, onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          print(error);
         }),
         request: const AdRequest());
 
@@ -71,9 +78,16 @@ class _HomeScreenState extends State<HomeScreen> {
   int countAllNotes = 0;
   int countAllLabels = 0;
   int countAllTasks = 0;
+  bool isOpenShortcutList = false;
+  List<SubjectModel> _subjectShortcutList = [];
+
   String avatarDescriptionString = '';
   String avatarDescriptionStringEdit = '';
   bool isOpenFormChangeAvatarDescription = false;
+
+  Future<bool> _onUnShortcut(BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.createShortcut(subject, null);
+  }
 
   Widget _buildAd() {
     if (isAdLoaded) {
@@ -258,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Tooltip(
                                     message: 'View',
                                     child: CoreElevatedButton(
+                                      buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
                                         Navigator.push(
                                           context,
@@ -391,18 +406,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Tooltip(
                                     message: 'View',
                                     child: CoreElevatedButton(
+                                      buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) =>
-                                        //         const SubjectListScreen(
-                                        //       subjectConditionModel: null,
-                                        //       redirectFrom: null,
-                                        //           breadcrumb: null,
-                                        //     ),
-                                        //   ),
-                                        // );
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -472,8 +477,117 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.w500),
                                       ),
+                                      _subjectShortcutList.isNotEmpty ? Expanded(
+                                          child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          InkWell(
+                                            highlightColor: Colors.black45,
+                                            onTap: () {
+                                              setState(() {
+                                                isOpenShortcutList =
+                                                    !isOpenShortcutList;
+                                              });
+                                            },
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.black45,
+                                                    width: 1.0,
+                                                  ),
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                          Radius.circular(
+                                                              10.0)),
+                                                  color: Colors.white
+                                                      .withOpacity(0.65)),
+                                              child: const Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    15.0, 6.0, 15.0, 6.0),
+                                                child: Text('Shortcuts'),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      )) : Container()
                                     ],
-                                  )
+                                  ),
+                                  isOpenShortcutList
+                                      ? Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                children: List.generate(
+                                                    _subjectShortcutList.length,
+                                                    (index) => FadeIn(
+                                                          duration:
+                                                              const Duration(
+                                                                  milliseconds:
+                                                                      200),
+                                                          animate: true,
+                                                          child:
+                                                              SubjectShortcutWidget(
+                                                                  key: ValueKey<
+                                                                      int>(_subjectShortcutList[
+                                                                          index]
+                                                                      .id!),
+                                                                  index:
+                                                                      index + 1,
+                                                                  subject:
+                                                                      _subjectShortcutList[
+                                                                          index],
+                                                                  onGoToDestination:
+                                                                      () {
+                                                                    Navigator
+                                                                        .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                SubjectListFolderModeScreen(
+                                                                          subjectConditionModel:
+                                                                              null,
+                                                                          redirectFrom:
+                                                                              null,
+                                                                          breadcrumb: [
+                                                                            _subjectShortcutList[index]
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                  onDeleteShortcut:
+                                                                      () async {
+                                                                    _onUnShortcut(
+                                                                            context,
+                                                                            _subjectShortcutList[
+                                                                                index])
+                                                                        .then(
+                                                                            (result) {
+                                                                      if (result) {
+                                                                        setState(
+                                                                            () {
+                                                                          _subjectShortcutList
+                                                                              .removeAt(index);
+                                                                        });
+                                                                      } else {
+                                                                        CoreNotification.show(
+                                                                            context,
+                                                                            CoreNotificationStatus.error,
+                                                                            CoreNotificationAction.update,
+                                                                            'Subject');
+                                                                      }
+                                                                    });
+                                                                  }),
+                                                        )),
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      : Container()
                                 ],
                               ),
                             ),
@@ -534,6 +648,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Tooltip(
                                     message: 'View',
                                     child: CoreElevatedButton(
+                                      buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
                                         Navigator.push(
                                           context,
@@ -665,6 +780,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Tooltip(
                                     message: 'View',
                                     child: CoreElevatedButton(
+                                      buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
                                         Navigator.push(
                                           context,
@@ -755,12 +871,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<List<SubjectModel>?> _fetchSubjectShortcut() async {
+    List<SubjectModel>? localLabelList =
+        await SubjectDatabaseManager.shortcuts();
+
+    return localLabelList;
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
     initBannerAd();
+
+    _fetchSubjectShortcut().then((subjectsResult) {
+      if (subjectsResult != null && subjectsResult.isNotEmpty) {
+        setState(() {
+          _subjectShortcutList = subjectsResult;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   onGetCountAll() async {
@@ -813,6 +951,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 CommonLanguages.languageStringDefault(),
             word: 'tooltip.button.createNote'),
         child: CoreElevatedButton.iconOnly(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () {
             Navigator.push(
               context,
@@ -897,6 +1036,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<List<Color>> colorizeColors = [
+    [Colors.white54, Colors.white, Colors.black12],
     [
       Colors.green,
       Colors.blue,
@@ -943,34 +1083,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    // SizedBox(
-                    //   height: 50.0,
-                    //   child: DefaultTextStyle(
-                    //     style: const TextStyle(
-                    //       fontSize: 35,
-                    //       color: Colors.white,
-                    //       shadows: [
-                    //         Shadow(
-                    //           blurRadius: 7.0,
-                    //           color: Colors.white,
-                    //           offset: Offset(0, 0),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: AnimatedTextKit(
-                    //       repeatForever: true,
-                    //       animatedTexts: [
-                    //         FlickerAnimatedText(
-                    //           'Hi Notes',
-                    //           textStyle: GoogleFonts.montserrat(
-                    //               fontStyle: FontStyle.italic,
-                    //               fontSize: 35.0,
-                    //               fontWeight: FontWeight.bold),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
                     const SizedBox(
                       height: 10.0,
                     ),
@@ -1012,7 +1124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     myController.text =
                                         avatarDescriptionStringEdit;
                                     isOpenFormChangeAvatarDescription =
-                                    !isOpenFormChangeAvatarDescription;
+                                        !isOpenFormChangeAvatarDescription;
 
                                     myFocusNode.requestFocus();
                                   });
@@ -1028,7 +1140,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       colors: colorizeColors[
                                           CommonConverters.getRandomNumber(
-                                              maxNumber: colorizeColors.length)],
+                                              maxNumber:
+                                                  colorizeColors.length)],
                                     ),
                                   ],
                                   totalRepeatCount: 30,
@@ -1053,9 +1166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style:
                                         const TextStyle(color: Colors.white54),
                                     onChanged: (value) {
-                                      setState(() {
                                         avatarDescriptionStringEdit = value;
-                                      });
                                     },
                                     controller: myController,
                                     focusNode: myFocusNode,
@@ -1079,6 +1190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon:
                                     const Icon(Icons.close_rounded, size: 25.0),
                                 onPressed: () {
@@ -1094,6 +1206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 width: 10.0,
                               ),
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const Icon(Icons.check, size: 25.0),
                                 onPressed: () {
                                   if (_formKey.currentState!.validate()) {
@@ -1134,6 +1247,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CoreElevatedButton(
+              buttonAudio: commonAudioOnPressButton,
               coreButtonStyle:
                   ThemeDataCenter.getCoreScreenButtonStyle(context: context),
               child: Row(
@@ -1162,6 +1276,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CoreElevatedButton(
+              buttonAudio: commonAudioOnPressButton,
               coreButtonStyle:
                   ThemeDataCenter.getCoreScreenButtonStyle(context: context),
               child: Row(

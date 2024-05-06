@@ -13,6 +13,7 @@ import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../databases/label_db_manager.dart';
@@ -31,6 +32,8 @@ class LabelCreateScreen extends StatefulWidget {
 }
 
 class _LabelCreateScreenState extends State<LabelCreateScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   String _color =
@@ -80,6 +83,13 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
   }
 
   @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final labelNotifier = Provider.of<LabelNotifier>(context);
     final settingNotifier = Provider.of<SettingNotifier>(context);
@@ -94,7 +104,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
@@ -110,7 +121,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                   word: 'screen.title.update'),
                           style: CommonStyles.screenTitleTextStyle(
                               fontSize: 22.0,
-                              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                              color: ThemeDataCenter.getScreenTitleTextColor(
+                                  context))),
                     ),
                   ],
                 ),
@@ -414,62 +426,61 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                 children: [
                                   Expanded(
                                       child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                            children: List.generate(
-                                                CommonStyles
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                        children: List.generate(
+                                            CommonStyles
                                                     .commonSubjectColorStringList()
-                                                    .length,
-                                                    (index) => Container(
+                                                .length,
+                                            (index) => Container(
                                                   decoration: BoxDecoration(
                                                     border: Border.all(
                                                       color: _color ==
-                                                          CommonStyles
-                                                              .commonSubjectColorStringList()[
-                                                          index]
+                                                              CommonStyles
+                                                                      .commonSubjectColorStringList()[
+                                                                  index]
                                                           ? Colors.blue
-                                                          : Colors
-                                                          .transparent,
+                                                          : Colors.transparent,
                                                       width: 1.0,
                                                     ),
                                                     borderRadius:
-                                                    const BorderRadius
-                                                        .all(
-                                                        Radius.circular(
-                                                            10.0)),
+                                                        const BorderRadius.all(
+                                                            Radius.circular(
+                                                                10.0)),
                                                   ),
                                                   child: InkWell(
                                                     onTap: () {
                                                       setState(() {
                                                         _color = CommonStyles
-                                                            .commonSubjectColorStringList()[
-                                                        index];
+                                                                .commonSubjectColorStringList()[
+                                                            index];
                                                       });
                                                     },
                                                     borderRadius:
-                                                    BorderRadius.circular(
-                                                        15.0),
+                                                        BorderRadius.circular(
+                                                            15.0),
                                                     child: Padding(
                                                       padding:
-                                                      const EdgeInsets
-                                                          .all(5.0),
+                                                          const EdgeInsets.all(
+                                                              5.0),
                                                       child: Container(
                                                         decoration:
-                                                        BoxDecoration(
-                                                            border: Border
-                                                                .all(
-                                                              color: Colors
-                                                                  .black54,
-                                                              width: 1.0,
-                                                            ),
-                                                            borderRadius: const BorderRadius
-                                                                .all(
-                                                                Radius.circular(
-                                                                    15.0)),
-                                                            color: CommonStyles
-                                                                .commonSubjectColorStringList()[
-                                                            index]
-                                                                .toColor()),
+                                                            BoxDecoration(
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .black54,
+                                                                  width: 1.0,
+                                                                ),
+                                                                borderRadius:
+                                                                    const BorderRadius
+                                                                            .all(
+                                                                        Radius.circular(
+                                                                            15.0)),
+                                                                color: CommonStyles
+                                                                            .commonSubjectColorStringList()[
+                                                                        index]
+                                                                    .toColor()),
                                                         child: const SizedBox(
                                                           height: 22.0,
                                                           width: 22.0,
@@ -478,7 +489,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                                     ),
                                                   ),
                                                 ))),
-                                      ))
+                                  ))
                                 ],
                               ),
                               Row(
@@ -494,16 +505,19 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                   ),
                                   const SizedBox(width: 10.0),
                                   CoreElevatedButton(
+                                    buttonAudio: commonAudioOnPressButton,
                                     onPressed: () async {
                                       myFocusNode.unfocus();
                                       await showDialog<bool>(
                                           context: context,
-                                          builder: (BuildContext context) => Form(
+                                          builder: (BuildContext context) =>
+                                              Form(
                                                 onWillPop: () async {
                                                   return true;
                                                 },
                                                 child: Dialog(
-                                                    shape: RoundedRectangleBorder(
+                                                    shape:
+                                                        RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               10.0),
@@ -521,7 +535,8 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                                             onColorChanged:
                                                                 (Color color) {
                                                               setState(() {
-                                                                _color = color.value
+                                                                _color = color
+                                                                    .value
                                                                     .toRadixString(
                                                                         16)
                                                                     .substring(

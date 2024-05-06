@@ -52,6 +52,8 @@ class SubjectListFolderModeScreen extends StatefulWidget {
 
 class _SubjectListFolderModeScreenState
     extends State<SubjectListFolderModeScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   List<LabelModel>? _labelList = [];
   List<SubjectModel>? _subjectList = [];
 
@@ -71,6 +73,12 @@ class _SubjectListFolderModeScreenState
   Future<bool> _onDeleteSubject(
       BuildContext context, SubjectModel subject) async {
     return await SubjectDatabaseManager.delete(
+        subject, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<bool> _onCreateShortcut(
+      BuildContext context, SubjectModel subject) async {
+    return await SubjectDatabaseManager.createShortcut(
         subject, DateTime.now().millisecondsSinceEpoch);
   }
 
@@ -104,6 +112,15 @@ class _SubjectListFolderModeScreenState
         note.isFavourite == null
             ? DateTime.now().millisecondsSinceEpoch
             : null);
+  }
+
+  Future<bool> _onPinNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.pin(note,
+        note.isPinned == null ? DateTime.now().millisecondsSinceEpoch : null);
+  }
+
+  Future<bool> _onUnlockNote(BuildContext context, NoteModel note) async {
+    return await NoteDatabaseManager.lock(note, null);
   }
 
   Future<List<SubjectModel>> _fetchPageDataSubject() async {
@@ -266,6 +283,7 @@ class _SubjectListFolderModeScreenState
   @override
   void dispose() {
     _breadcrumbScrollController.dispose;
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -395,6 +413,7 @@ class _SubjectListFolderModeScreenState
                 CommonLanguages.languageStringDefault(),
             word: 'tooltip.button.createNote'),
         child: CoreElevatedButton.iconOnly(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () async {
             bool? isCreated = await Navigator.push(
               context,
@@ -634,6 +653,33 @@ class _SubjectListFolderModeScreenState
                               }
                             }
                           },
+                          onCreateShortcut: () async {
+                            _onCreateShortcut(context, subjectFolders[index])
+                                .then((result) {
+                              if (result) {
+                                setState(() {
+                                  subjectFolders[index].isSetShortcut =
+                                      subjectFolders[index].isSetShortcut ==
+                                              null
+                                          ? DateTime.now()
+                                              .millisecondsSinceEpoch
+                                          : null;
+                                });
+
+                                CoreNotification.show(
+                                    context,
+                                    CoreNotificationStatus.success,
+                                    CoreNotificationAction.update,
+                                    'Subject');
+                              } else {
+                                CoreNotification.show(
+                                    context,
+                                    CoreNotificationStatus.error,
+                                    CoreNotificationAction.update,
+                                    'Subject');
+                              }
+                            });
+                          },
                           onDeleteForever: () {},
                           onRestoreFromTrash: () {},
                           onFilterChildrenOnly: () {
@@ -784,6 +830,7 @@ class _SubjectListFolderModeScreenState
             //   subject: _getNoteSubject(notes[index].subjectId),
             // ),
             (index) => SmallNoteWidget(
+                  key: ValueKey<int>(notes[index].id!),
                   index: index + 1,
                   note: notes[index],
                   isLastItem: index == notes.length - 1,
@@ -847,6 +894,54 @@ class _SubjectListFolderModeScreenState
                       }
                     });
                   },
+                  onPin: () {
+                    _onPinNote(context, notes[index]).then((result) {
+                      if (result) {
+                        setState(() {
+                          notes[index].isPinned = notes[index].isPinned == null
+                              ? DateTime.now().millisecondsSinceEpoch
+                              : null;
+                        });
+
+                        CommonAudioOnPressButton audio =
+                            CommonAudioOnPressButton();
+                        audio.playAudioOnFavourite();
+                      } else {
+                        CoreNotification.show(
+                            context,
+                            CoreNotificationStatus.error,
+                            CoreNotificationAction.update,
+                            'Note');
+                      }
+                    });
+                  },
+                  onUnlock: () async {
+                    if (await CoreHelperWidget.confirmFunction(
+                        context: context)) {
+                      _onUnlockNote(context, notes[index]).then((result) {
+                        if (result) {
+                          setState(() {
+                            notes[index].isLocked =
+                                notes[index].isLocked == null
+                                    ? DateTime.now().millisecondsSinceEpoch
+                                    : null;
+                          });
+
+                          CoreNotification.show(
+                              context,
+                              CoreNotificationStatus.success,
+                              CoreNotificationAction.update,
+                              'Note');
+                        } else {
+                          CoreNotification.show(
+                              context,
+                              CoreNotificationStatus.error,
+                              CoreNotificationAction.update,
+                              'Note');
+                        }
+                      });
+                    }
+                  },
                 )),
       ),
     );
@@ -863,6 +958,7 @@ class _SubjectListFolderModeScreenState
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -889,7 +985,8 @@ class _SubjectListFolderModeScreenState
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
@@ -899,7 +996,8 @@ class _SubjectListFolderModeScreenState
                                 CommonLanguages.languageStringDefault(),
                             word: 'screen.title.subjects'),
                         style: CommonStyles.screenTitleTextStyle(
-                            color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                            color: ThemeDataCenter.getScreenTitleTextColor(
+                                context)),
                       ),
                     ),
                   ],

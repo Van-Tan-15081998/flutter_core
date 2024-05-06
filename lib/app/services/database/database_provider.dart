@@ -18,13 +18,15 @@ class DatabaseProvider {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
           "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
           "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+      await db.execute(
+          "CREATE TABLE images(id INTEGER PRIMARY KEY, title TEXT NULL, path TEXT NULL, noteId INTEGER, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
     }, version: _version);
   }
 
@@ -57,6 +59,22 @@ class DatabaseProvider {
   static Future<int> favouriteNote(NoteModel note, int? isFavourite) async {
     final db = await _getDB();
     return await db.update("notes", {'isFavourite': isFavourite},
+        where: 'id = ?',
+        whereArgs: [note.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> pinNote(NoteModel note, int? isPin) async {
+    final db = await _getDB();
+    return await db.update("notes", {'isPinned': isPin},
+        where: 'id = ?',
+        whereArgs: [note.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> lockNote(NoteModel note, int? isLock) async {
+    final db = await _getDB();
+    return await db.update("notes", {'isLocked': isLock},
         where: 'id = ?',
         whereArgs: [note.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -156,8 +174,8 @@ class DatabaseProvider {
             ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
         orderBy: noteConditionModel.recentlyUpdated != null
-            ? "updatedAt DESC"
-            : "id DESC");
+            ? "updatedAt DESC, isPinned DESC"
+            : "isPinned DESC, id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -317,7 +335,7 @@ class DatabaseProvider {
   static Future<int> countAllSubjects() async {
     final db = await _getDB();
     int? countAll = Sqflite.firstIntValue(await db
-        .rawQuery('SELECT COUNT(*) FROM subjects WHERE deletedAt IS NULL AND parentId IS NULL'));
+        .rawQuery('SELECT COUNT(*) FROM subjects WHERE deletedAt IS NULL'));
 
     if (countAll == null) {
       return 0;
@@ -334,6 +352,15 @@ class DatabaseProvider {
   static Future<int> updateSubject(SubjectModel subject) async {
     final db = await _getDB();
     return await db.update("subjects", subject.toJson(),
+        where: 'id = ?',
+        whereArgs: [subject.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> createShortcutSubject(
+      SubjectModel subject, int? isSetShortcut) async {
+    final db = await _getDB();
+    return await db.update("subjects", {'isSetShortcut': isSetShortcut},
         where: 'id = ?',
         whereArgs: [subject.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -359,6 +386,21 @@ class DatabaseProvider {
 
     final List<Map<String, dynamic>> maps = await db.query("subjects",
         where: 'deletedAt IS NULL', orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => SubjectModel.fromJson(maps[index]));
+  }
+
+  static Future<List<SubjectModel>?> getSubjectShortcut() async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps = await db.query("subjects",
+        where: 'deletedAt IS NULL AND isSetShortcut IS NOT NULL',
+        orderBy: "isSetShortcut DESC, id DESC");
 
     if (maps.isEmpty) {
       return null;

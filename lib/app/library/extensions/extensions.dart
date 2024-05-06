@@ -15,6 +15,12 @@ extension ColorExtension on String {
   }
 }
 
+extension CutString on String {
+  cutString(int lengthToCut) {
+    return substring(0, length - lengthToCut);
+  }
+}
+
 extension AddColon on String {
   addColon() {
     return "$this:";

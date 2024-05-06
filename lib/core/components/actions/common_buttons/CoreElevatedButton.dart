@@ -16,6 +16,7 @@ class CoreElevatedButton extends ElevatedButton {
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -45,8 +46,7 @@ class CoreElevatedButton extends ElevatedButton {
         super(
         key: key,
         onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
+          buttonAudio.playAudioOnPress().then((value) {
             if(value) {
               onPressed!();
             }
@@ -68,6 +68,7 @@ class CoreElevatedButton extends ElevatedButton {
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -102,8 +103,7 @@ class CoreElevatedButton extends ElevatedButton {
         super(
         key: key,
         onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
+          buttonAudio.playAudioOnPress().then((value) {
             if(value) {
               onPressed!();
             }
@@ -145,6 +145,7 @@ class CoreElevatedButton extends ElevatedButton {
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
@@ -181,8 +182,7 @@ class CoreElevatedButton extends ElevatedButton {
         super(
         key: key,
         onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
+          buttonAudio.playAudioOnPress().then((value) {
             if(value) {
               onPressed!();
             }

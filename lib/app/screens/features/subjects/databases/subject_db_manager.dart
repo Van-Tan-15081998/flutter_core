@@ -10,6 +10,12 @@ class SubjectDatabaseManager {
     return subjects;
   }
 
+  static Future<List<SubjectModel>?> shortcuts() async {
+    List<SubjectModel>? subjects = await DatabaseProvider.getSubjectShortcut();
+
+    return subjects;
+  }
+
   static Future<List<SubjectModel>?> onGetSubjectPagination(
       CorePaginationModel corePaginationModel,
       SubjectConditionModel subjectConditionModel) async {
@@ -182,6 +188,40 @@ class SubjectDatabaseManager {
     }
   }
 
+  //
+  static Future<bool> createShortcut(
+      SubjectModel subject, int? isSetShortcut) async {
+    try {
+      SubjectModel? createShortcutModel;
+      createShortcutModel = await _onCreateShortcut(subject, isSetShortcut);
+
+      if (createShortcutModel != null) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  static Future<SubjectModel?> _onCreateShortcut(
+      SubjectModel subject, int? isSetShortcut) async {
+    try {
+      int result =
+          await DatabaseProvider.createShortcutSubject(subject, isSetShortcut);
+
+      if (result != 0) {
+        SubjectModel? createShortcutModel = await getById(subject.id!);
+
+        return createShortcutModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<SubjectModel?> getById(int id) async {
     try {
       SubjectModel? result = await DatabaseProvider.getSubjectById(id);
@@ -226,8 +266,7 @@ class SubjectDatabaseManager {
       if (countNotes == 0 && countChildren == 0) {
         return true;
       }
-
-    }  catch (e) {
+    } catch (e) {
       return false;
     }
 

@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../../app/library/common/dimensions/CommonDimensions.dart';
 import '../../../../app/library/common/styles/CommonStyles.dart';
 import '../../../../app/library/common/themes/ThemeDataCenter.dart';
+import '../../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../app/screens/home/home_screen.dart';
 import '../../../../app/screens/setting/providers/setting_notifier.dart';
 import '../../helper_widgets/CoreHelperWidget.dart';
@@ -70,10 +71,19 @@ class CoreFullScreenDialog extends StatefulWidget {
 }
 
 class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
+  CommonAudioOnPressButton commonAudioOnPressButton = CommonAudioOnPressButton();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   Widget get _fullWidthPath {
@@ -99,6 +109,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
             child: Tooltip(
               message: 'Save',
               child: CoreElevatedButton.iconOnly(
+                buttonAudio: commonAudioOnPressButton,
                 icon: const Padding(
                   padding: EdgeInsets.fromLTRB(15.0, 0, 15.0, 0),
                   child: Icon(Icons.save_alt_rounded, size: 25.0),
@@ -121,6 +132,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
                   child: CoreElevatedButton.icon(
+                    buttonAudio: commonAudioOnPressButton,
                     icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
                     label: Text(widget.homeLabel!,
                         style: CommonStyles.buttonTextStyle),
@@ -198,6 +210,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 onPressed: () {
                                   if (widget.onUndo != null) {
                                     widget.onUndo!();
@@ -214,6 +227,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                     size: 18.0),
                               ),
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 onPressed: () {
                                   if (widget.onRedo != null) {
                                     widget.onRedo!();
@@ -230,6 +244,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                     size: 18.0),
                               ),
                               CoreElevatedButton.icon(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const FaIcon(FontAwesomeIcons.xmark,
                                     size: 18.0),
                                 label: const Text('Cancel'),
@@ -256,6 +271,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                         CoreFixedSizeButton.medium_40),
                               ),
                               CoreElevatedButton.icon(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const FaIcon(FontAwesomeIcons.floppyDisk,
                                     size: 18.0),
                                 label: Text('Save',

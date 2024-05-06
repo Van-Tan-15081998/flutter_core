@@ -17,6 +17,7 @@ import '../../../../library/common/dimensions/CommonDimensions.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../home/home_screen.dart';
 import '../../../setting/providers/setting_notifier.dart';
@@ -42,6 +43,8 @@ class SubjectListScreen extends StatefulWidget {
 }
 
 class _SubjectListScreenState extends State<SubjectListScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   List<SubjectModel> subjects = [];
   final ScrollController _scrollController = ScrollController();
 
@@ -302,6 +305,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
               }),
               const SizedBox(height: 20.0),
               CoreElevatedButton.iconOnly(
+                  buttonAudio: commonAudioOnPressButton,
                   icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
                   onPressed: () {
                     setState(() {
@@ -324,6 +328,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
   @override
   void dispose() {
     _pagingController.dispose();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -418,6 +423,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () {
             _resetConditions();
             _reloadPage();
@@ -431,6 +437,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         ),
         const SizedBox(width: 5),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
@@ -487,6 +494,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   CoreElevatedButton.iconOnly(
+                                    buttonAudio: commonAudioOnPressButton,
                                     icon: const Icon(Icons.close_rounded),
                                     onPressed: () {
                                       if (_searchController.text.isNotEmpty) {
@@ -505,6 +513,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                                             context: context),
                                   ),
                                   CoreElevatedButton.iconOnly(
+                                    buttonAudio: commonAudioOnPressButton,
                                     icon: const Icon(Icons.search_rounded),
                                     onPressed: () {
                                       if (_formKey.currentState!.validate()) {
@@ -545,6 +554,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         ),
         const SizedBox(width: 5.0),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
@@ -559,6 +569,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         ),
         const SizedBox(width: 5.0),
         CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
           onPressed: () {
             Navigator.push(
               context,
@@ -645,7 +656,8 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                       });
                     },
                     onDeleteForever: () async {
-                      if (await CoreHelperWidget.confirmFunction(context: context)) {
+                      if (await CoreHelperWidget.confirmFunction(
+                          context: context)) {
                         _onDeleteSubjectForever(context, item).then((result) {
                           if (result) {
                             subjectNotifier.onCountAll();
@@ -771,6 +783,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -797,7 +810,8 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
@@ -807,7 +821,8 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                                 CommonLanguages.languageStringDefault(),
                             word: 'screen.title.subjects'),
                         style: CommonStyles.screenTitleTextStyle(
-                            color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                            color: ThemeDataCenter.getScreenTitleTextColor(
+                                context)),
                       ),
                     ),
                   ],
@@ -823,10 +838,11 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const SubjectListFolderModeScreen(
-                              subjectConditionModel: null,
-                              redirectFrom: null,
-                              breadcrumb: null)),
+                          builder: (context) =>
+                              const SubjectListFolderModeScreen(
+                                  subjectConditionModel: null,
+                                  redirectFrom: null,
+                                  breadcrumb: null)),
                       (route) => false,
                     );
                   },

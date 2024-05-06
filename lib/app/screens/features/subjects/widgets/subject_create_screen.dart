@@ -14,6 +14,7 @@ import '../../../../../core/components/notifications/CoreNotification.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../library/enums/CommonEnums.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../../note/note_list_screen.dart';
@@ -42,6 +43,8 @@ class SubjectCreateScreen extends StatefulWidget {
 }
 
 class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   String _color =
@@ -122,6 +125,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
   @override
   void dispose() {
     _subjectStreamController.close();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -185,23 +189,25 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
                       child: Text(
-                          widget.subject == null
-                              ? CommonLanguages.convert(
-                                  lang: settingNotifier.languageString ??
-                                      CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.create')
-                              : CommonLanguages.convert(
-                                  lang: settingNotifier.languageString ??
-                                      CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.update'),
-                          style: CommonStyles.screenTitleTextStyle(
-                              fontSize: 22.0,
-                              color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                        widget.subject == null
+                            ? CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'screen.title.create')
+                            : CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'screen.title.update'),
+                        style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 22.0,
+                            color: ThemeDataCenter.getScreenTitleTextColor(
+                                context)),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -228,6 +234,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                 title: _title,
                 color: _color,
                 parentId: selectedSubject?.id,
+                isSetShortcut: null,
                 createdAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.subject?.id);
 
@@ -273,6 +280,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                 title: _title,
                 color: _color,
                 parentId: selectedSubject?.id,
+                isSetShortcut: widget.subject?.isSetShortcut,
                 createdAt: widget.subject?.createdAt,
                 updatedAt: DateTime.now().millisecondsSinceEpoch,
                 id: widget.subject?.id);
@@ -610,6 +618,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                     ),
                                     const SizedBox(width: 10.0),
                                     CoreElevatedButton(
+                                      buttonAudio: commonAudioOnPressButton,
                                       onPressed: () async {
                                         myFocusNode.unfocus();
                                         await showDialog<bool>(

@@ -17,6 +17,7 @@ import '../../../library/common/converters/CommonConverters.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/models/label_model.dart';
@@ -48,6 +49,8 @@ class TemplateDetailScreen extends StatefulWidget {
 }
 
 class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   /*
   Editor parameters
    */
@@ -131,6 +134,13 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
         print('Document empty.');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   setDocuments() {
@@ -274,10 +284,10 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => SubjectListScreen(
-                                subjectConditionModel: subjectConditionModel,
-                                redirectFrom: null,
-                              breadcrumb: null,
-                            )),
+                                  subjectConditionModel: subjectConditionModel,
+                                  redirectFrom: null,
+                                  breadcrumb: null,
+                                )),
                         (route) => false);
                   },
                   child: Container(
@@ -388,7 +398,8 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(5.0),
-                  decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                  decoration: CommonStyles.titleScreenDecorationStyle(
+                      settingNotifier.isSetBackgroundImage),
                   child: Row(
                     children: [
                       Flexible(
@@ -399,7 +410,8 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                 word: 'screen.title.detail'),
                             style: CommonStyles.screenTitleTextStyle(
                                 fontSize: 22.0,
-                                color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                                color: ThemeDataCenter.getScreenTitleTextColor(
+                                    context))),
                       ),
                     ],
                   ),
@@ -721,6 +733,8 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                         ? Tooltip(
                                             message: 'Update',
                                             child: CoreElevatedButton.iconOnly(
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
                                               onPressed: () {
                                                 _onUpdate();
                                               },
@@ -738,6 +752,8 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                 message: 'Restore',
                                                 child:
                                                     CoreElevatedButton.iconOnly(
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
                                                   onPressed: () {
                                                     _onRestoreTemplateFromTrash(
                                                             context)
@@ -794,10 +810,12 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                 message: 'Delete forever',
                                                 child:
                                                     CoreElevatedButton.iconOnly(
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
                                                   onPressed: () async {
                                                     if (await CoreHelperWidget
                                                         .confirmFunction(
-                                                        context: context)) {
+                                                            context: context)) {
                                                       _onDeleteTemplateForever(
                                                               context)
                                                           .then((result) {

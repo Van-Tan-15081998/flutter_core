@@ -9,6 +9,8 @@ import '../../../core/components/notifications/CoreNotification.dart';
 import '../../library/common/dimensions/CommonDimensions.dart';
 import '../../library/common/styles/CommonStyles.dart';
 import '../../library/common/themes/ThemeDataCenter.dart';
+import '../../library/common/utils/CommonAudioBackground.dart';
+import '../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../home/home_screen.dart';
 import 'providers/setting_notifier.dart';
 
@@ -20,11 +22,11 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   TextStyle itemLabelTextStyle(BuildContext context) {
-    return TextStyle(
-        color: ThemeDataCenter.getAloneTextColorStyle(context),
-        fontSize: 18.0,
-        fontWeight: FontWeight.w400);
+    return const TextStyle(
+        color: Color(0xFF1f1f1f), fontSize: 18.0, fontWeight: FontWeight.w400);
   }
 
   bool isSetColorAccordingSubjectColor = false;
@@ -1599,6 +1601,13 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settingNotifier = Provider.of<SettingNotifier>(context);
     isSetColorAccordingSubjectColor =
@@ -1785,11 +1794,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                             decoration: BoxDecoration(
-                              color: settingNotifier.isSetBackgroundImage ==
-                                      true
-                                  ? Colors.white.withOpacity(0.85)
-                                  : ThemeDataCenter
-                                      .getTableCalendarBackgroundColor(context),
+                              color: Colors.white.withOpacity(0.85),
                             ),
                             child: Column(
                               children: [
@@ -2032,7 +2037,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                                 (success) {
                                                   if (success) {
                                                     setState(() {
-                                                      isStickTitleOfNote = value;
+                                                      isStickTitleOfNote =
+                                                          value;
                                                     });
 
                                                     CoreNotification.show(
@@ -2275,12 +2281,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                               decoration: BoxDecoration(
-                                color:
-                                    settingNotifier.isSetBackgroundImage == true
-                                        ? Colors.white.withOpacity(0.85)
-                                        : ThemeDataCenter
-                                            .getTableCalendarBackgroundColor(
-                                                context),
+                                color: Colors.white.withOpacity(0.85),
                               ),
                               child: SizedBox(
                                 height: 450,
@@ -2427,6 +2428,247 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    Text('Background musics',
+                                        style: GoogleFonts.montserrat(
+                                            fontStyle: FontStyle.italic,
+                                            fontSize: 20,
+                                            color: Colors.white54,
+                                            fontWeight: FontWeight.w600)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          content: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.85),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 4.0),
+                                      child: Column(
+                                        children: [
+                                          CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
+                                            icon: const Icon(
+                                                Icons.playlist_play_rounded,
+                                                size: 25.0),
+                                            onPressed: () {
+                                              settingNotifier
+                                                  .setPlayingBackgroundMusicSourceString(
+                                                      "ALL");
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getCoreScreenButtonStyle(
+                                                    context: context),
+                                          ),
+                                          CoreElevatedButton.iconOnly(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
+                                            icon: settingNotifier
+                                                        .playingBackgroundMusicSourceString ==
+                                                    'TURNOFF'
+                                                ? const Icon(
+                                                    Icons.music_off_rounded,
+                                                    size: 25.0)
+                                                : const Icon(
+                                                    Icons.music_note_rounded,
+                                                    size: 25.0),
+                                            onPressed: () {
+                                              if (settingNotifier
+                                                      .playingBackgroundMusicSourceString !=
+                                                  'TURNOFF') {
+                                                settingNotifier
+                                                    .setPlayingBackgroundMusicSourceString(
+                                                        'TURNOFF');
+                                              } else {
+                                                settingNotifier
+                                                    .setPlayingBackgroundMusicSourceString(
+                                                        "ALL");
+                                              }
+                                            },
+                                            coreButtonStyle: ThemeDataCenter
+                                                .getCoreScreenButtonStyle(
+                                                    context: context),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                        child: Column(
+                                      children: [
+                                        settingNotifier
+                                                    .playingBackgroundMusicSourceString ==
+                                                'ALL'
+                                            ? Padding(
+                                                padding:
+                                                    const EdgeInsets.all(4.0),
+                                                child: InkWell(
+                                                  highlightColor:
+                                                      Colors.black45,
+                                                  onTap: () {},
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                          color:
+                                                              Colors.blueAccent,
+                                                          width: 2.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .all(
+                                                                Radius.circular(
+                                                                    10.0)),
+                                                        color: Colors.white
+                                                            .withOpacity(0.65)),
+                                                    child: const Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              15.0,
+                                                              6.0,
+                                                              15.0,
+                                                              6.0),
+                                                      child: Row(
+                                                        children: [
+                                                          Icon(
+                                                              Icons
+                                                                  .playlist_play_rounded,
+                                                              size: 25.0),
+                                                          Text(
+                                                              'Playing all now'),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ))
+                                            : Container(),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: List.generate(
+                                                      CommonAudioBackground
+                                                              .backgroundMusicList()
+                                                          .length,
+                                                      (index) => Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4.0),
+                                                          child: InkWell(
+                                                            highlightColor:
+                                                                Colors.black45,
+                                                            onTap: () {
+                                                              setState(() {
+                                                                settingNotifier.setPlayingBackgroundMusicSourceString(
+                                                                    CommonAudioBackground
+                                                                            .backgroundMusicList()[
+                                                                        index]);
+                                                              });
+                                                            },
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                            child: Container(
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: settingNotifier.playingBackgroundMusicSourceString ==
+                                                                                CommonAudioBackground.backgroundMusicList()[index]
+                                                                            ? Colors.blueAccent
+                                                                            : Colors.black45,
+                                                                        width: settingNotifier.playingBackgroundMusicSourceString ==
+                                                                                CommonAudioBackground.backgroundMusicList()[index]
+                                                                            ? 2.0
+                                                                            : 1.0,
+                                                                      ),
+                                                                      borderRadius: const BorderRadius
+                                                                              .all(
+                                                                          Radius.circular(
+                                                                              10.0)),
+                                                                      color: Colors
+                                                                          .white
+                                                                          .withOpacity(
+                                                                              0.65)),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .fromLTRB(
+                                                                        15.0,
+                                                                        6.0,
+                                                                        15.0,
+                                                                        6.0),
+                                                                child: Row(
+                                                                  children: [
+                                                                    const Icon(
+                                                                        Icons
+                                                                            .music_note_rounded,
+                                                                        size:
+                                                                            25.0),
+                                                                    Text(
+                                                                        'Sound 0${index + 1}'),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ))),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ))
+                                  ],
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25.0),
+                  Card(
+                    color: Colors.transparent,
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getBorderCardColorStyle(context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        StickyHeader(
+                          header: SizedBox(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.rectangle,
+                                color: Color(0xFF202124),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(4, 10, 0, 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
                                     Text(
                                         CommonLanguages.convert(
                                             lang: settingNotifier
@@ -2447,11 +2689,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                             decoration: BoxDecoration(
-                              color: settingNotifier.isSetBackgroundImage ==
-                                      true
-                                  ? Colors.white.withOpacity(0.85)
-                                  : ThemeDataCenter
-                                      .getTableCalendarBackgroundColor(context),
+                              color: Colors.white.withOpacity(0.85),
                             ),
                             child: Column(
                               children: [
@@ -2488,22 +2726,46 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
+  void _onPopAction(BuildContext context) {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const HomeScreen(
+                  title: 'Hi Notes',
+                )),
+        (route) => false,
+      );
+    }
+  }
+
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
+    return IconButton(
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
+      icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+      onPressed: () {
+        _onPopAction(context);
+      },
+    );
+  }
+
   AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
     return AppBar(
       iconTheme: IconThemeData(
         color: ThemeDataCenter.getScreenTitleTextColor(context),
         size: 26,
       ),
-      leading: IconButton(
-        icon: const FaIcon(FontAwesomeIcons.chevronLeft),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
+      leading: _buildAppbarLeading(context, settingNotifier),
       actions: [
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -2523,13 +2785,35 @@ class _SettingScreenState extends State<SettingScreen> {
       backgroundColor: settingNotifier.isSetBackgroundImage == true
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
-      title: Text(
-          CommonLanguages.convert(
-              lang: settingNotifier.languageString ??
-                  CommonLanguages.languageStringDefault(),
-              word: 'screen.title.setting'),
-          style: CommonStyles.screenTitleTextStyle(
-              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+      title: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(5.0),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'screen.title.setting'),
+                          style: CommonStyles.screenTitleTextStyle(
+                              color: ThemeDataCenter.getScreenTitleTextColor(
+                                  context))),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      titleSpacing: 0,
     );
   }
 }

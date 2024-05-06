@@ -3,15 +3,17 @@ class SubjectModel {
   final String title;
   final String color;
   final int? parentId;
+  int? isSetShortcut;
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
 
-  const SubjectModel(
+  SubjectModel(
       {required this.title,
       required this.color,
       required this.parentId,
       required this.createdAt,
+      this.isSetShortcut,
       this.updatedAt,
       this.deletedAt,
       this.id});
@@ -21,6 +23,7 @@ class SubjectModel {
       title: json['title'],
       color: json['color'],
       parentId: json['parentId'],
+      isSetShortcut: json['isSetShortcut'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       deletedAt: json['deletedAt']);
@@ -30,6 +33,7 @@ class SubjectModel {
         'title': title,
         'color': color,
         'parentId': parentId,
+        'isSetShortcut': isSetShortcut,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt

@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
@@ -23,6 +24,7 @@ import '../../home/home_screen.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
+import '../note/models/note_condition_model.dart';
 import '../note/models/note_model.dart';
 import '../note/note_create_screen.dart';
 import '../subjects/databases/subject_db_manager.dart';
@@ -38,13 +40,18 @@ class TemplateListScreen extends StatefulWidget {
   final TemplateConditionModel? templateConditionModel;
   final RedirectFromEnum? redirectFrom;
 
-  const TemplateListScreen({super.key, required this.templateConditionModel, required this.redirectFrom});
+  const TemplateListScreen(
+      {super.key,
+      required this.templateConditionModel,
+      required this.redirectFrom});
 
   @override
   State<TemplateListScreen> createState() => _TemplateListScreenState();
 }
 
 class _TemplateListScreenState extends State<TemplateListScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final ScrollController _scrollController = ScrollController();
 
   /*
@@ -57,6 +64,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   bool _filterByDeleted = false;
   bool _filterByRecentlyUpdated = false;
   bool _filterByFavourite = false;
+  bool _filterByDate = false;
 
   List<LabelModel>? labelList = [];
   List<SubjectModel>? subjectList = [];
@@ -71,6 +79,20 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   final CorePaginationModel _corePaginationModel =
       CorePaginationModel(currentPageIndex: 0, itemPerPage: _pageSize);
   TemplateConditionModel _templateConditionModel = TemplateConditionModel();
+
+  /*
+  Table Calendar
+   */
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.disabled;
+  // RangeSelectionMode.toggledOn; // Can be toggled on/off by longPressing a date
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  final _firstDay = DateTime(
+      DateTime.now().year - 5, DateTime.now().month, DateTime.now().day);
+  final _lastDay = DateTime(
+      DateTime.now().year + 5, DateTime.now().month, DateTime.now().day);
+  final Map<DateTime, List<dynamic>> _noteEvents = {};
 
   /*
   Function fetch page data
@@ -289,7 +311,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   copyNote: noteFromTemplate,
                   subject: null,
                   actionMode: ActionModeEnum.copy,
-              redirectFrom: RedirectFromEnum.templateCreateNote,
+                  redirectFrom: RedirectFromEnum.templateCreateNote,
+                  createdForDay: _selectedDay != null
+                      ? DateTime(_selectedDay!.year, _selectedDay!.month,
+                              _selectedDay!.day)
+                          .millisecondsSinceEpoch
+                      : null,
                 )));
   }
 
@@ -442,6 +469,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
               }),
               const SizedBox(height: 20.0),
               CoreElevatedButton.iconOnly(
+                  buttonAudio: commonAudioOnPressButton,
                   icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
                   onPressed: () {
                     setState(() {
@@ -464,6 +492,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   @override
   void dispose() {
     _pagingController.dispose();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -473,9 +502,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const HomeScreen(
-              title: 'Hi Notes',
-            )),
-            (route) => false,
+                  title: 'Hi Notes',
+                )),
+        (route) => false,
       );
     } else {
       if (Navigator.canPop(context)) {
@@ -484,9 +513,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     }
   }
 
-  Widget? _buildAppbarLeading(BuildContext context, SettingNotifier settingNotifier) {
+  Widget? _buildAppbarLeading(
+      BuildContext context, SettingNotifier settingNotifier) {
     return IconButton(
-      style: CommonStyles.appbarLeadingBackButtonStyle(whiteBlur: settingNotifier.isSetBackgroundImage == true ? true : false),
+      style: CommonStyles.appbarLeadingBackButtonStyle(
+          whiteBlur:
+              settingNotifier.isSetBackgroundImage == true ? true : false),
       icon: const FaIcon(FontAwesomeIcons.chevronLeft),
       onPressed: () {
         _onPopAction(context);
@@ -506,7 +538,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
       },
       child: Scaffold(
         extendBodyBehindAppBar:
-        settingNotifier.isSetBackgroundImage == true ? true : false,
+            settingNotifier.isSetBackgroundImage == true ? true : false,
         backgroundColor: settingNotifier.isSetBackgroundImage == true
             ? Colors.transparent
             : ThemeDataCenter.getBackgroundColor(context),
@@ -515,17 +547,22 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             ? DecoratedBox(
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage(
-                          settingNotifier.backgroundImageSourceString ?? CommonStyles.backgroundImageSourceStringDefault()),
+                      image: AssetImage(settingNotifier
+                              .backgroundImageSourceString ??
+                          CommonStyles.backgroundImageSourceStringDefault()),
                       fit: BoxFit.cover),
                 ),
                 child: _buildBody(templateNotifier, settingNotifier),
               )
             : _buildBody(templateNotifier, settingNotifier),
-        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
-        floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
+        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
+            ? null
+            : _buildBottomNavigationBar(context),
+        floatingActionButton: settingNotifier.isSetBackgroundImage == true
+            ? _buildBottomNavigationBarActionList(context)
+            : null,
         floatingActionButtonLocation:
-        FloatingActionButtonLocation.miniCenterDocked,
+            FloatingActionButtonLocation.miniCenterDocked,
       ),
     );
   }
@@ -541,6 +578,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
           child: CoreElevatedButton.iconOnly(
+            buttonAudio: commonAudioOnPressButton,
             icon: const Icon(Icons.home_rounded, size: 25.0),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
@@ -567,15 +605,63 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
-                      child: Text(CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.templates'),
-                          style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context)),
+                      child: Text(
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'screen.title.templates'),
+                          style: CommonStyles.screenTitleTextStyle(
+                              color: ThemeDataCenter.getScreenTitleTextColor(
+                                  context)),
                           overflow: TextOverflow.ellipsis),
                     ),
                   ],
+                ),
+              ),
+            ),
+            Tooltip(
+              message: 'Created note for one day',
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.65)
+                          : Colors.transparent,
+                      border: Border.all(
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Icon(
+                        Icons.calendar_month_rounded,
+                        size: 22,
+                        color:
+                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _filterByDate = !_filterByDate;
+
+                      if (!_filterByDate) {
+                        _selectedDay = null;
+                        _focusedDay = DateTime.now();
+                      }
+                    });
+                  },
                 ),
               ),
             ),
@@ -617,171 +703,171 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
 
   Row _buildBottomNavigationBarActionList(BuildContext context) {
     return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          CoreElevatedButton(
-            onPressed: () {
-              _resetConditions();
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.refresh_rounded,
-              size: 25.0,
-            ),
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
+          onPressed: () {
+            _resetConditions();
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.refresh_rounded,
+            size: 25.0,
           ),
-          const SizedBox(width: 5),
-          CoreElevatedButton(
-            onPressed: () async {
-              await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) => Form(
-                        child: CoreBasicDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceAround,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Form(
-                                  key: _formKey,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      CoreTextFormField(
-                                        style: TextStyle(
-                                            color: ThemeDataCenter
-                                                .getAloneTextColorStyle(
-                                                    context)),
-                                        onChanged: (String value) {
-                                          if (value.isNotEmpty) {
-                                            setState(() {
-                                              _searchText = value.trim();
-                                            });
-                                          }
-                                        },
-                                        controller: _searchController,
-                                        focusNode: _searchFocusNode,
-                                        validateString:
-                                            'Please enter search string!',
-                                        maxLength: 60,
-                                        icon: Icon(Icons.edit,
-                                            color: ThemeDataCenter
-                                                .getFormFieldLabelColorStyle(
-                                                    context)),
-                                        label: 'Search',
-                                        labelColor: ThemeDataCenter
-                                            .getFormFieldLabelColorStyle(
-                                                context),
-                                        placeholder: 'Search on templates',
-                                        helper: '',
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 20.0),
-                                Row(
+        ),
+        const SizedBox(width: 5),
+        CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
+          onPressed: () async {
+            await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => Form(
+                      child: CoreBasicDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
                                   children: [
-                                    CoreElevatedButton.iconOnly(
-                                        icon: const Icon(Icons.close_rounded),
-                                        onPressed: () {
-                                          if (_searchController
-                                              .text.isNotEmpty) {
-                                            setState(() {
-                                              _searchController.text = "";
-                                              _searchText = "";
-                                              _templateConditionModel
-                                                  .searchText = _searchText;
-                                            });
-                                            // Reload Page
-                                            _reloadPage();
-                                          }
-                                        },
-                                        coreButtonStyle: ThemeDataCenter
-                                            .getCoreScreenButtonStyle(
-                                                context: context)),
-                                    CoreElevatedButton.iconOnly(
-                                      icon: const Icon(Icons.search_rounded),
-                                      onPressed: () {
-                                        if (_formKey.currentState!
-                                            .validate()) {
+                                    CoreTextFormField(
+                                      style: TextStyle(
+                                          color: ThemeDataCenter
+                                              .getAloneTextColorStyle(context)),
+                                      onChanged: (String value) {
+                                        if (value.isNotEmpty) {
                                           setState(() {
-                                            // Set Condition
-                                            if (_searchController
-                                                .text.isNotEmpty) {
-                                              _templateConditionModel
-                                                  .searchText = _searchText;
-
-                                              // Reload Data
-                                              _reloadPage();
-
-                                              // Close Dialog
-                                              Navigator.of(context).pop();
-                                            }
+                                            _searchText = value.trim();
                                           });
+                                        }
+                                      },
+                                      controller: _searchController,
+                                      focusNode: _searchFocusNode,
+                                      validateString:
+                                          'Please enter search string!',
+                                      maxLength: 60,
+                                      icon: Icon(Icons.edit,
+                                          color: ThemeDataCenter
+                                              .getFormFieldLabelColorStyle(
+                                                  context)),
+                                      label: 'Search',
+                                      labelColor: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(context),
+                                      placeholder: 'Search on templates',
+                                      helper: '',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20.0),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  CoreElevatedButton.iconOnly(
+                                      buttonAudio: commonAudioOnPressButton,
+                                      icon: const Icon(Icons.close_rounded),
+                                      onPressed: () {
+                                        if (_searchController.text.isNotEmpty) {
+                                          setState(() {
+                                            _searchController.text = "";
+                                            _searchText = "";
+                                            _templateConditionModel.searchText =
+                                                _searchText;
+                                          });
+                                          // Reload Page
+                                          _reloadPage();
                                         }
                                       },
                                       coreButtonStyle: ThemeDataCenter
                                           .getCoreScreenButtonStyle(
-                                              context: context),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
+                                              context: context)),
+                                  CoreElevatedButton.iconOnly(
+                                    buttonAudio: commonAudioOnPressButton,
+                                    icon: const Icon(Icons.search_rounded),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        setState(() {
+                                          // Set Condition
+                                          if (_searchController
+                                              .text.isNotEmpty) {
+                                            _templateConditionModel.searchText =
+                                                _searchText;
+
+                                            // Reload Data
+                                            _reloadPage();
+
+                                            // Close Dialog
+                                            Navigator.of(context).pop();
+                                          }
+                                        });
+                                      }
+                                    },
+                                    coreButtonStyle: ThemeDataCenter
+                                        .getCoreScreenButtonStyle(
+                                            context: context),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
-                      ));
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.search,
-              size: 25.0,
-            ),
+                      ),
+                    ));
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.search,
+            size: 25.0,
           ),
-          const SizedBox(width: 5),
-          CoreElevatedButton(
-            onPressed: () async {
-              await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) => _filterPopup(context));
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.filter_list_alt,
-              size: 25.0,
-            ),
+        ),
+        const SizedBox(width: 5),
+        CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
+          onPressed: () async {
+            await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => _filterPopup(context));
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.filter_list_alt,
+            size: 25.0,
           ),
-          const SizedBox(width: 5),
-          CoreElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const TemplateCreateScreen(
-                        subject: null, actionMode: ActionModeEnum.create)),
-              );
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.add,
-              size: 25.0,
-            ),
+        ),
+        const SizedBox(width: 5),
+        CoreElevatedButton(
+          buttonAudio: commonAudioOnPressButton,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const TemplateCreateScreen(
+                      subject: null, actionMode: ActionModeEnum.create)),
+            );
+          },
+          coreButtonStyle:
+              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+          child: const Icon(
+            Icons.add,
+            size: 25.0,
           ),
-        ],
-      );
+        ),
+      ],
+    );
   }
 
   Widget _buildBody(
@@ -791,9 +877,86 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         settingNotifier.isSetBackgroundImage == true
             ? SizedBox(height: CommonDimensions.scaffoldAppBarHeight(context))
             : Container(),
+        _filterByDate
+            ? FadeIn(
+                duration: const Duration(milliseconds: 200),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: settingNotifier.isSetBackgroundImage == true
+                        ? Colors.white.withOpacity(0.85)
+                        : ThemeDataCenter.getTableCalendarBackgroundColor(
+                            context),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(8.0),
+                    ),
+                    boxShadow: settingNotifier.isSetBackgroundImage == true
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: const Color(0xFF1f1f1f).withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 3,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                  ),
+                  child: TableCalendar(
+                    eventLoader: (date) {
+                      return _noteEvents[date] ?? [];
+                    },
+                    firstDay: _firstDay,
+                    lastDay: _lastDay,
+                    focusedDay: _focusedDay,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    calendarFormat: _calendarFormat,
+                    rangeSelectionMode: _rangeSelectionMode,
+                    onDaySelected: (selectedDay, focusedDay) {
+                      if (!isSameDay(_selectedDay, selectedDay)) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      }
+                    },
+                    onFormatChanged: (format) {
+                      if (_calendarFormat != format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      }
+                    },
+                    onPageChanged: (focusedDay) {
+                      _focusedDay = focusedDay;
+                    },
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1f1f1f)),
+                      weekendStyle: TextStyle(
+                          fontWeight: FontWeight.w500, color: Colors.red),
+                    ),
+                    calendarStyle: const CalendarStyle(
+                      defaultTextStyle: TextStyle(
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1f1f1f)),
+                      weekendTextStyle: TextStyle(
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF1f1f1f)),
+                      outsideTextStyle: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
         Expanded(
           child: PagedListView<int, TemplateModel>(
-            padding: EdgeInsets.only(top: CommonDimensions.scaffoldAppBarHeight(context)/5),
+            padding: EdgeInsets.only(
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
@@ -831,7 +994,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   });
                 },
                 onDeleteForever: () async {
-                  if (await CoreHelperWidget.confirmFunction(context: context)) {
+                  if (await CoreHelperWidget.confirmFunction(
+                      context: context)) {
                     _onDeleteTemplateForever(context, item).then((result) {
                       if (result) {
                         templateNotifier.onCountAll();
@@ -921,11 +1085,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     Container(
                       padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
                       decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(24.0)),
-                          color: settingNotifier
-                              .isSetBackgroundImage ==
-                              true
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(24.0)),
+                          color: settingNotifier.isSetBackgroundImage == true
                               ? Colors.white.withOpacity(0.65)
                               : Colors.transparent),
                       child: Row(
@@ -938,13 +1100,17 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                           const SizedBox(width: 5),
                           BounceInRight(
                             child: Text(
-                                CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'notification.noItem.template'),
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.noItem.template'),
                                 style: GoogleFonts.montserrat(
                                     fontStyle: FontStyle.italic,
                                     fontSize: 16.0,
-                                    color: ThemeDataCenter.getAloneTextColorStyle(context),
-                                    fontWeight: FontWeight.w500)
-                            ),
+                                    color:
+                                        ThemeDataCenter.getAloneTextColorStyle(
+                                            context),
+                                    fontWeight: FontWeight.w500)),
                           ),
                         ],
                       ),

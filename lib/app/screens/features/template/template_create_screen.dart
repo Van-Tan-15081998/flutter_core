@@ -16,6 +16,7 @@ import '../../../../core/stores/icons/CoreStoreIcons.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../../setting/providers/setting_notifier.dart';
 import '../label/databases/label_db_manager.dart';
@@ -47,6 +48,8 @@ class TemplateCreateScreen extends StatefulWidget {
 }
 
 class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   final ScrollController _controllerScrollController = ScrollController();
   final _formKey = GlobalKey<FormState>();
 
@@ -295,6 +298,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
   @override
   void dispose() {
     _subjectStreamController.close();
+    commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
@@ -355,6 +359,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                       itemCount: CoreStoreIcons.emojis.length,
                       itemBuilder: (context, index) {
                         return CoreElevatedButton.iconOnly(
+                          buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
@@ -411,6 +416,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                       itemCount: CoreStoreIcons.natureAndAnimals.length,
                       itemBuilder: (context, index) {
                         return CoreElevatedButton.iconOnly(
+                          buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
                             if (_titleFocusNodeHasFocus) {
                               setState(() {
@@ -1037,6 +1043,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
   _buildCloseButtonSetEmojiOnToolbar() {
     if (isShowDialogSetEmoji) {
       return CoreElevatedButton.iconOnly(
+        buttonAudio: commonAudioOnPressButton,
         icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
         onPressed: () {
           setState(() {
@@ -1068,6 +1075,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
   _buildCloseButtonSetLabelOnToolbar() {
     if (isShowDialogSetLabel) {
       return CoreElevatedButton.iconOnly(
+        buttonAudio: commonAudioOnPressButton,
         icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
         onPressed: () {
           setState(() {
@@ -1227,7 +1235,8 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(5.0),
-                decoration: CommonStyles.titleScreenDecorationStyle(settingNotifier.isSetBackgroundImage),
+                decoration: CommonStyles.titleScreenDecorationStyle(
+                    settingNotifier.isSetBackgroundImage),
                 child: Row(
                   children: [
                     Flexible(
@@ -1243,7 +1252,8 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                   word: 'screen.title.update'),
                           style: CommonStyles.screenTitleTextStyle(
                               fontSize: 22.0,
-                              color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                              color: ThemeDataCenter.getScreenTitleTextColor(
+                                  context))),
                     ),
                   ],
                 ),
@@ -1268,9 +1278,9 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
           final description = jsonEncode(
               _detailContentQuillController.document.toDelta().toJson());
 
-          if (_detailContentQuillController.document.isEmpty()) {
+          if (_titleQuillController.document.isEmpty() && _detailContentQuillController.document.isEmpty()) {
             CoreNotification.showMessage(context,
-                CoreNotificationStatus.warning, 'Please enter your content!');
+                CoreNotificationStatus.warning, 'Please enter your content or title!');
             return;
           }
 
@@ -1708,6 +1718,7 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                     child: Row(
                       children: [
                         CoreElevatedButton.icon(
+                          buttonAudio: commonAudioOnPressButton,
                           icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
                           label: Text('Choose labels',
                               style: CommonStyles.buttonTextStyle),

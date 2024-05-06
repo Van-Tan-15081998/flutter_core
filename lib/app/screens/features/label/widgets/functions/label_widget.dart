@@ -8,6 +8,7 @@ import '../../../../../../core/components/actions/common_buttons/CoreElevatedBut
 import '../../../../../library/common/converters/CommonConverters.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../../../setting/providers/setting_notifier.dart';
 import '../../models/label_model.dart';
@@ -34,10 +35,19 @@ class LabelWidget extends StatefulWidget {
 }
 
 class _LabelWidgetState extends State<LabelWidget> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
@@ -284,6 +294,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                   ? Tooltip(
                                       message: 'Update',
                                       child: CoreElevatedButton.iconOnly(
+                                        buttonAudio: commonAudioOnPressButton,
                                         onPressed: () {
                                           Navigator.push(
                                               context,
@@ -306,6 +317,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       Tooltip(
                                         message: 'Restore',
                                         child: CoreElevatedButton.iconOnly(
+                                          buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
                                             if (widget.onRestoreFromTrash !=
                                                 null) {
@@ -323,6 +335,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       Tooltip(
                                         message: 'Delete forever',
                                         child: CoreElevatedButton.iconOnly(
+                                          buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
                                             if (widget.onDeleteForever !=
                                                 null) {

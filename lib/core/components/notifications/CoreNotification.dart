@@ -21,6 +21,7 @@ class CoreNotification {
         context, status, getNotificationContent(status, action, resourceName));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    // audio.dispose();
   }
 
   static showMessage(
@@ -31,6 +32,7 @@ class CoreNotification {
     final snackBar = buildContent(context, status, message);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    // audio.dispose();
   }
 
   static SnackBar buildContent(BuildContext context,
@@ -46,26 +48,23 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.green[400],
-                            child: const Icon(
-                              Icons.done_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.green[400],
+                          child: const Icon(
+                            Icons.done_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -103,26 +102,23 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red[400],
-                            child: const Icon(
-                              Icons.error_outline_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.red[400],
+                          child: const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -160,26 +156,23 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.orange[400],
-                            child: const Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.orange[400],
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -211,32 +204,29 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Color(0xff1f1f1f),
+          backgroundColor: const Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Color(0xff1f1f1f),
-                            child: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: const Color(0xff1f1f1f),
+                          child: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -433,7 +423,7 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Color(0xff1f1f1f),
+          backgroundColor: const Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(

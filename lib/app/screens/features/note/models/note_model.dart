@@ -7,6 +7,8 @@ class NoteModel {
   final String? labels; // label id list
   final int? subjectId;
   int? isFavourite;
+  int? isPinned;
+  int? isLocked;
   final int? createdAt;
   final int? createdAtDayFormat;
   final int? createdForDay;
@@ -20,6 +22,8 @@ class NoteModel {
       this.labels,
       this.subjectId,
       this.isFavourite,
+      this.isPinned,
+      this.isLocked,
       this.createdAtDayFormat,
       this.createdForDay,
       this.updatedAt,
@@ -33,6 +37,8 @@ class NoteModel {
       labels: json['labels'],
       subjectId: json['subjectId'],
       isFavourite: json['isFavourite'],
+      isPinned: json['isPinned'],
+      isLocked: json['isLocked'],
       createdAt: json['createdAt'],
       createdAtDayFormat: json['createdAtDayFormat'],
       createdForDay: json['createdForDay'],
@@ -59,6 +65,8 @@ class NoteModel {
         'labels': labels,
         'subjectId': subjectId,
         'isFavourite': isFavourite,
+        'isPinned': isPinned,
+        'isLocked': isLocked,
         'createdAt': createdAt,
         'createdAtDayFormat': createdAtDayFormat,
         'createdForDay': createdForDay,
