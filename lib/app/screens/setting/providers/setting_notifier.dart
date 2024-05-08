@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../library/common/converters/CommonConverters.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
@@ -32,6 +34,9 @@ class SettingNotifier with ChangeNotifier {
   String? _avatarDescriptionString;
   String? get avatarDescriptionString => _avatarDescriptionString;
 
+  String? _avatarImageSourceString;
+  String? get avatarImageSourceString => _avatarImageSourceString;
+
   String? _playingBackgroundMusicSourceString;
   String? get playingBackgroundMusicSourceString =>
       _playingBackgroundMusicSourceString;
@@ -43,6 +48,7 @@ class SettingNotifier with ChangeNotifier {
   init() async {
     _themeString = await getThemeString();
     _avatarDescriptionString = await getAvatarDescriptionString();
+    _avatarImageSourceString = await getAvatarImageSourceString();
     _backgroundImageSourceString = await getBackgroundImageSourceString();
     _languageString = await getLanguageString();
     _playingBackgroundMusicSourceString =
@@ -197,6 +203,36 @@ class SettingNotifier with ChangeNotifier {
 
       // Get again
       result = await getAvatarDescriptionString();
+    }
+
+    return result;
+  }
+
+
+  Future<String?> getAvatarImageSourceString() async {
+    String? result;
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    result = await settingSharedPreferences.getAvatarImageSourceString();
+
+    if (result == null) {
+      // Set default
+      await settingSharedPreferences.setAvatarImageSourceString(
+          '');
+
+      // Get again
+      result = await getAvatarImageSourceString();
+    }
+
+    if (result != null && result.isNotEmpty ) {
+      bool isExist = await File(result).exists();
+
+      if  (!isExist) {
+        await settingSharedPreferences.setAvatarImageSourceString(
+            '');
+
+        result = await getAvatarImageSourceString();
+      }
     }
 
     return result;
@@ -406,6 +442,26 @@ class SettingNotifier with ChangeNotifier {
 
     if (result != null) {
       _avatarDescriptionString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setAvatarImageSourceString(String avatarImageSourceString) async {
+    String? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+    SettingSharedPreferences();
+    await settingSharedPreferences
+        .setAvatarImageSourceString(avatarImageSourceString);
+
+    result = await settingSharedPreferences.getAvatarImageSourceString();
+
+    if (result != null) {
+      _avatarImageSourceString = result;
       notifyListeners();
 
       return true;

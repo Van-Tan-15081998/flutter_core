@@ -169,10 +169,10 @@ class _NoteWidgetState extends State<NoteWidget> {
 
   Widget onGetTitle(SettingNotifier settingNotifier) {
     String defaultTitle =
-        '${CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'card.title.youWroteAt')} ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
+        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      child: Text(defaultTitle),
+      child: Text(defaultTitle, style: const TextStyle(fontSize: 16.0, color: Color(0xFF1f1f1f))),
     );
   }
 
@@ -888,14 +888,14 @@ class _NoteWidgetState extends State<NoteWidget> {
                           children: <Widget>[
                             StickyHeader(
                               header: _buildHeader(context, settingNotifier),
-                              content: _buildContent(),
+                              content: _buildContent(settingNotifier),
                             )
                           ],
                         )
                       : Column(
                           children: [
                             _buildHeader(context, settingNotifier),
-                            _buildContent(),
+                            _buildContent(settingNotifier),
                           ],
                         )),
               Padding(
@@ -1007,7 +1007,7 @@ class _NoteWidgetState extends State<NoteWidget> {
                           )
                         : Container(),
                     const SizedBox(width: 5.0),
-                    widget.note.isLocked == null
+                    widget.note.isLocked == null && widget.note.deletedAt == null
                         ? InkWell(
                             onLongPress: () {
                               if (widget.onDelete != null) {
@@ -1051,7 +1051,7 @@ class _NoteWidgetState extends State<NoteWidget> {
     );
   }
 
-  Column _buildContent() {
+  Column _buildContent(SettingNotifier settingNotifier) {
     return Column(
       children: [
         _buildSubject(),
@@ -1068,12 +1068,12 @@ class _NoteWidgetState extends State<NoteWidget> {
                 padding: const EdgeInsets.all(6.0),
                 child: Row(
                   children: [
-                    Text("[id:${widget.note.id!}] ",
-                        style: const TextStyle(
-                            fontSize: 13.0, color: Colors.black45)),
-                    const Text("Content",
+                    Text(CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'screen.title.content'),
                         style:
-                            TextStyle(fontSize: 13.0, color: Colors.black45)),
+                            const TextStyle(fontSize: 13.0, color: Colors.black45)),
                   ],
                 )),
             collapsed: Column(

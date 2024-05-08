@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../../../setting/providers/setting_notifier.dart';
@@ -145,28 +146,41 @@ class _SubjectWidgetFolderItemState extends State<SubjectWidgetFolderItem> {
                       },
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuEntry<ActionSubjectFolderItemEnum>>[
-                        const PopupMenuItem<ActionSubjectFolderItemEnum>(
+                        PopupMenuItem<ActionSubjectFolderItemEnum>(
                           value: ActionSubjectFolderItemEnum.update,
                           child: ListTile(
-                            leading: FaIcon(FontAwesomeIcons.pen),
-                            title:
-                                Text('Update', style: TextStyle(fontSize: 14)),
+                            leading: const FaIcon(FontAwesomeIcons.pen),
+                            title: Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'button.title.update'),
+                                style: const TextStyle(fontSize: 14)),
                           ),
                         ),
-                        const PopupMenuItem<ActionSubjectFolderItemEnum>(
+                        PopupMenuItem<ActionSubjectFolderItemEnum>(
                           value: ActionSubjectFolderItemEnum.createShortcut,
                           child: ListTile(
-                            leading: FaIcon(FontAwesomeIcons.shareFromSquare),
-                            title: Text('Create shortcut',
-                                style: TextStyle(fontSize: 14)),
+                            leading:
+                                const FaIcon(FontAwesomeIcons.shareFromSquare),
+                            title: Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'button.title.createShortcut'),
+                                style: const TextStyle(fontSize: 14)),
                           ),
                         ),
-                        const PopupMenuItem<ActionSubjectFolderItemEnum>(
+                        PopupMenuItem<ActionSubjectFolderItemEnum>(
                           value: ActionSubjectFolderItemEnum.delete,
                           child: ListTile(
-                            leading: FaIcon(FontAwesomeIcons.trash),
-                            title:
-                                Text('Delete', style: TextStyle(fontSize: 14)),
+                            leading: const FaIcon(FontAwesomeIcons.trash),
+                            title: Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'button.title.delete'),
+                                style: const TextStyle(fontSize: 14)),
                           ),
                         ),
                       ],

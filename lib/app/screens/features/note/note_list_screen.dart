@@ -69,6 +69,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
   bool _filterBySubject = false;
   bool _filterByRecentlyUpdated = false;
   bool _filterByFavourite = false;
+  bool _filterByCreatedForDay = false;
 
   List<LabelModel>? _labelList = [];
   List<SubjectModel>? _subjectList = [];
@@ -312,6 +313,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
       _filterByDate = false;
       _filterByFavourite = false;
       _filterByRecentlyUpdated = false;
+      _filterByCreatedForDay = false;
 
       _filterBySubject = false;
       filteredSubject = null;
@@ -326,6 +328,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
       _noteConditionModel.recentlyUpdated = null;
       _noteConditionModel.subjectId = null;
       _noteConditionModel.favourite = null;
+      _noteConditionModel.createdForDay = null;
 
       _reloadPage();
     });
@@ -342,7 +345,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
         _noteConditionModel.isDeleted == true ||
         _noteConditionModel.recentlyUpdated == true ||
         _noteConditionModel.subjectId != null ||
-        _noteConditionModel.favourite == true) {
+        _noteConditionModel.favourite == true || _noteConditionModel.createdForDay == true) {
       return true;
     }
     return false;
@@ -420,235 +423,285 @@ class _NoteListScreenState extends State<NoteListScreen> {
     }
   }
 
-  Widget _filterPopup(BuildContext context) {
+  Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              filteredSubject != null
-                  ? Row(
-                      children: [
-                        Text('Subject: ', style: CommonStyles.buttonTextStyle),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      2.0, 2.0, 2.0, 2.0),
-                                  child: DottedBorder(
-                                    borderType: BorderType.RRect,
-                                    radius: const Radius.circular(12),
-                                    color: filteredSubject!.color.toColor(),
-                                    child: ClipRRect(
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(12),
-                                      ),
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(6.0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.palette_rounded,
-                                                color: filteredSubject!.color
-                                                    .toColor(),
-                                              ),
-                                              const SizedBox(width: 6.0),
-                                              Flexible(
-                                                child: Text(
-                                                  filteredSubject!.title,
-                                                  style: const TextStyle(
-                                                      fontSize: 16.0,
-                                                      fontWeight:
-                                                          FontWeight.w400),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                filteredSubject != null
+                    ? Row(
+                        children: [
+                          Text(CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'form.filter.subject').addColon(), style: CommonStyles.labelFilterTextStyle),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        2.0, 2.0, 2.0, 2.0),
+                                    child: DottedBorder(
+                                      borderType: BorderType.RRect,
+                                      radius: const Radius.circular(12),
+                                      color: filteredSubject!.color.toColor(),
+                                      child: ClipRRect(
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(12),
+                                        ),
+                                        child: Container(
+                                          color: Colors.white,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(6.0),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.palette_rounded,
+                                                  color: filteredSubject!.color
+                                                      .toColor(),
                                                 ),
-                                              )
-                                            ],
+                                                const SizedBox(width: 6.0),
+                                                Flexible(
+                                                  child: Text(
+                                                    filteredSubject!.title,
+                                                    style: const TextStyle(
+                                                        fontSize: 16.0,
+                                                        fontWeight:
+                                                            FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    )
-                  : Container(),
-              _noteConditionModel.createdAtStartOfDay != null &&
-                      _noteConditionModel.createdAtEndOfDay != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: StatefulBuilder(builder:
-                          (BuildContext context, StateSetter setState) {
-                        return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text('Date: ',
-                                    style: CommonStyles.buttonTextStyle),
-                              ),
-                              _noteConditionModel.createdAtStartOfDay != null &&
-                                      _noteConditionModel.createdAtEndOfDay !=
-                                          null
-                                  ? Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                          Text(
-                                              'From: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtStartOfDay!))}',
-                                              style:
-                                                  CommonStyles.dateTextStyle),
-                                          Text(
-                                              'To: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtEndOfDay!))}',
-                                              style: CommonStyles.dateTextStyle)
-                                        ])
-                                  : Container(),
-                            ]);
-                      }),
-                    )
-                  : Container(),
-              _noteConditionModel.searchText != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
+                              ],
+                            ),
+                          )
+                        ],
+                      )
+                    : Container(),
+                _noteConditionModel.createdAtStartOfDay != null &&
+                        _noteConditionModel.createdAtEndOfDay != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: StatefulBuilder(builder:
+                            (BuildContext context, StateSetter setState) {
                           return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Search keywords: ',
-                                  style: CommonStyles.buttonTextStyle),
-                              const SizedBox(width: 10.0),
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        '"${_noteConditionModel.searchText!}"',
-                                        style: const TextStyle(
-                                            color: Color(0xFF1f1f1f),
-                                            fontSize: 16.0),
-                                      ),
-                                    ),
-                                  ],
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                          CommonLanguages.languageStringDefault(),
+                              word: 'form.filter.creationTime').addColon(),
+                                      style: CommonStyles.labelFilterTextStyle),
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    )
-                  : Container(),
-              const SizedBox(height: 20.0),
-              StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Notes in the trash',
-                          style: CommonStyles.buttonTextStyle),
-                      Checkbox(
-                        checkColor: Colors.white,
-                        value: _filterByDeleted,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _filterByDeleted = value!;
-                            if (_filterByDeleted) {
-                              _noteConditionModel.isDeleted = _filterByDeleted;
-                            } else {
-                              _noteConditionModel.isDeleted = null;
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20.0),
-              StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Favourite notes',
-                          style: CommonStyles.buttonTextStyle),
-                      Checkbox(
-                        checkColor: Colors.white,
-                        value: _filterByFavourite,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _filterByFavourite = value!;
-                            if (_filterByFavourite) {
-                              _noteConditionModel.favourite =
-                                  _filterByFavourite;
-                            } else {
-                              _noteConditionModel.favourite = null;
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20.0),
-              StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Recently Updated',
-                          style: CommonStyles.buttonTextStyle),
-                      Checkbox(
-                        checkColor: Colors.white,
-                        value: _filterByRecentlyUpdated,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            _filterByRecentlyUpdated = value!;
-                            if (_filterByRecentlyUpdated) {
-                              _noteConditionModel.recentlyUpdated =
-                                  _filterByRecentlyUpdated;
-                            } else {
-                              _noteConditionModel.recentlyUpdated = null;
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20.0),
-              CoreElevatedButton.iconOnly(
-                buttonAudio: commonAudioOnPressButton,
-                onPressed: () {
-                  setState(() {
-                    /// Reload Data
-                    _reloadPage();
+                                _noteConditionModel.createdAtStartOfDay != null &&
+                                        _noteConditionModel.createdAtEndOfDay !=
+                                            null
+                                    ? Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                            Text(
+                                                'From: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtStartOfDay!))}',
+                                                style:
+                                                    CommonStyles.labelFilterTextStyle),
+                                            Text(
+                                                'To: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtEndOfDay!))}',
+                                                style: CommonStyles.labelFilterTextStyle)
+                                          ])
+                                    : Container(),
+                              ]);
+                        }),
+                      )
+                    : Container(),
+                _noteConditionModel.searchText != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.searchKeyword').addColon(),
+                                    style: CommonStyles.labelFilterTextStyle),
+                                const SizedBox(width: 10.0),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          '"${_noteConditionModel.searchText!}"',
+                                          style: const TextStyle(
+                                              color: Color(0xFF1f1f1f),
+                                              fontSize: 16.0),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      )
+                    : Container(),
+                const SizedBox(height: 20.0),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.trash').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
+                        Checkbox(
+                          checkColor: Colors.white,
+                          value: _filterByDeleted,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _filterByDeleted = value!;
+                              if (_filterByDeleted) {
+                                _noteConditionModel.isDeleted = _filterByDeleted;
+                              } else {
+                                _noteConditionModel.isDeleted = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20.0),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.favourite').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
+                        Checkbox(
+                          checkColor: Colors.white,
+                          value: _filterByFavourite,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _filterByFavourite = value!;
+                              if (_filterByFavourite) {
+                                _noteConditionModel.favourite =
+                                    _filterByFavourite;
+                              } else {
+                                _noteConditionModel.favourite = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20.0),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.recentlyUpdated').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
+                        Checkbox(
+                          checkColor: Colors.white,
+                          value: _filterByRecentlyUpdated,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _filterByRecentlyUpdated = value!;
+                              if (_filterByRecentlyUpdated) {
+                                _noteConditionModel.recentlyUpdated =
+                                    _filterByRecentlyUpdated;
+                              } else {
+                                _noteConditionModel.recentlyUpdated = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20.0),
+                StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.dueDate').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
+                        Checkbox(
+                          checkColor: Colors.white,
+                          value: _filterByCreatedForDay,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              _filterByCreatedForDay = value!;
+                              if (_filterByCreatedForDay) {
+                                _noteConditionModel.createdForDay = _filterByCreatedForDay;
+                              } else {
+                                _noteConditionModel.createdForDay = null;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
+                CoreElevatedButton.iconOnly(
+                  buttonAudio: commonAudioOnPressButton,
+                  onPressed: () {
+                    setState(() {
+                      /// Reload Data
+                      _reloadPage();
 
-                    /// Close Dialog
-                    Navigator.of(context).pop();
-                  });
-                },
-                coreButtonStyle:
-                    ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-                icon: const Icon(Icons.check_rounded, size: 25.0),
-              ),
-            ],
+                      /// Close Dialog
+                      Navigator.of(context).pop();
+                    });
+                  },
+                  coreButtonStyle:
+                      ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+                  icon: const Icon(Icons.check_rounded, size: 25.0),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1041,22 +1094,26 @@ class _NoteListScreenState extends State<NoteListScreen> {
                               _pagingController.itemList!.remove(item);
                             });
 
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.success,
-                                CoreNotificationAction.delete,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.deleted'));
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.delete,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
                       onDeleteForever: () async {
-                        if (await CoreHelperWidget.confirmFunction(context: context)) {
+                        if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
                           _onDeleteNoteForever(context, item).then((result) {
                             if (result) {
                               noteNotifier.onCountAll();
@@ -1065,17 +1122,21 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                 _pagingController.itemList!.remove(item);
                               });
 
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.success,
-                                  CoreNotificationAction.delete,
-                                  'Note');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.deleted'));
                             } else {
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.error,
-                                  CoreNotificationAction.delete,
-                                  'Note');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.error'));
                             }
                           });
                         }
@@ -1089,17 +1150,21 @@ class _NoteListScreenState extends State<NoteListScreen> {
                               _pagingController.itemList!.remove(item);
                             });
 
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.success,
-                                CoreNotificationAction.restore,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.restored'));
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.restore,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
@@ -1112,15 +1177,15 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                   : null;
                             });
 
-                            CommonAudioOnPressButton audio =
-                            CommonAudioOnPressButton();
-                            audio.playAudioOnFavourite();
+                            commonAudioOnPressButton.playAudioOnFavourite();
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.update,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
@@ -1133,20 +1198,20 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                   : null;
                             });
 
-                            CommonAudioOnPressButton audio =
-                            CommonAudioOnPressButton();
-                            audio.playAudioOnFavourite();
+                            commonAudioOnPressButton.playAudioOnFavourite();
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.update,
-                                'Note');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
                       onUnlock: () async {
-                           if (await CoreHelperWidget.confirmFunction(context: context)) {
+                           if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmUnlock: true)) {
                              _onUnlockNote(context, item).then((result) {
                                if (result) {
                                  setState(() {
@@ -1155,17 +1220,21 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                         : null;
                                     });
 
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.success,
-                                  CoreNotificationAction.update,
-                                  'Note');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.unlocked'));
                               } else {
-                                CoreNotification.show(
-                                    context,
+                                CoreNotification.showMessage(
+                                    context, settingNotifier,
                                     CoreNotificationStatus.error,
-                                    CoreNotificationAction.update,
-                                    'Note');
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages.languageStringDefault(),
+                                        word: 'notification.action.error'));
                               }
                               });
                         }
@@ -1425,25 +1494,25 @@ class _NoteListScreenState extends State<NoteListScreen> {
           ),
           child: _buildBody(context, noteNotifier, settingNotifier),
         ) : _buildBody(context, noteNotifier, settingNotifier),
-        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context),
-      floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context) : null,
+        bottomNavigationBar: settingNotifier.isSetBackgroundImage == true ? null : _buildBottomNavigationBar(context, settingNotifier),
+      floatingActionButton: settingNotifier.isSetBackgroundImage == true ? _buildBottomNavigationBarActionList(context, settingNotifier) : null,
         floatingActionButtonLocation:
         FloatingActionButtonLocation.miniCenterDocked,
       ),
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
         data: const IconThemeData(color: Colors.white),
-        child: _buildBottomNavigationBarActionList(context),
+        child: _buildBottomNavigationBarActionList(context, settingNotifier),
       ),
     );
   }
 
-  Widget _buildBottomNavigationBarActionList(BuildContext context) {
+  Widget _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1584,7 +1653,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
             onPressed: () async {
               await showDialog<bool>(
                   context: context,
-                  builder: (BuildContext context) => _filterPopup(context));
+                  builder: (BuildContext context) => _filterPopup(context, settingNotifier));
             },
             coreButtonStyle:
                 ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -1677,18 +1746,24 @@ class _NoteListScreenState extends State<NoteListScreen> {
                   },
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<ActionCreateNoteEnum>>[
-                    const PopupMenuItem<ActionCreateNoteEnum>(
+                    PopupMenuItem<ActionCreateNoteEnum>(
                       value: ActionCreateNoteEnum.createForSelectedDay,
                       child: ListTile(
-                        leading: FaIcon(FontAwesomeIcons.calendarPlus),
-                        title: Text('Create for selected day', style: TextStyle(fontSize: 14)),
+                        leading: const FaIcon(FontAwesomeIcons.calendarPlus),
+                        title: Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'button.title.createNoteForSelectedDay'), style: const TextStyle(fontSize: 14)),
                       ),
                     ),
-                    const PopupMenuItem<ActionCreateNoteEnum>(
+                     PopupMenuItem<ActionCreateNoteEnum>(
                       value: ActionCreateNoteEnum.create,
                       child: ListTile(
-                        leading: FaIcon(FontAwesomeIcons.plus),
-                        title: Text('Create', style: TextStyle(fontSize: 14)),
+                        leading: const FaIcon(FontAwesomeIcons.plus),
+                        title: Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'button.title.createNote'), style: const TextStyle(fontSize: 14)),
                       ),
                     ),
                   ],
@@ -1740,7 +1815,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     Flexible(
                       child: Text(
                           CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.notes'),
-                        style: CommonStyles.screenTitleTextStyle(color: ThemeDataCenter.getScreenTitleTextColor(context))
+                        style: CommonStyles.screenTitleTextStyle(
+                          fontSize: 20.0,
+                            color: ThemeDataCenter.getScreenTitleTextColor(context))
                       ),
                     ),
                   ],
@@ -1748,7 +1825,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
               ),
             ),
             Tooltip(
-              message: 'Created day',
+              message: 'Created time',
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
                 child: InkWell(
@@ -1841,7 +1918,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                         }
                       });
                     } catch (exception) {
-                      CoreNotification.showMessage(context,
+                      CoreNotification.showMessage(context, settingNotifier,
                           CoreNotificationStatus.warning, 'System error!');
                     }
                   },
@@ -1871,7 +1948,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                             await showDialog<bool>(
                                 context: context,
                                 builder: (BuildContext context) =>
-                                    _filterPopup(context));
+                                    _filterPopup(context, settingNotifier));
                           },
                         ),
                       ),

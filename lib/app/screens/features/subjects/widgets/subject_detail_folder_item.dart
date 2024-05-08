@@ -73,7 +73,7 @@ class _SubjectDetailFolderItemState extends State<SubjectDetailFolderItem> {
                         CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.subjects')
+                                word: 'screen.title.subSubjects')
                             .toString(),
                         style: GoogleFonts.montserrat(
                             fontStyle: FontStyle.italic,

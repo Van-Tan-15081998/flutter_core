@@ -132,11 +132,14 @@ class _SettingScreenState extends State<SettingScreen> {
                           isSetThemeNeverDoubt = false;
                           isSetThemeProgramCatalog = false;
 
-                          CoreNotification.show(
+                          CoreNotification.showMessage(
                               context,
+                              settingNotifier,
                               CoreNotificationStatus.success,
-                              CoreNotificationAction.update,
-                              'Theme');
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'notification.action.updatedSetting'));
                         }
                       });
                     } else {}
@@ -214,11 +217,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -305,11 +311,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -396,11 +405,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -487,11 +499,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -578,11 +593,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -669,11 +687,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -760,11 +781,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -851,11 +875,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -942,11 +969,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1032,11 +1062,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1123,11 +1156,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1214,11 +1250,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1305,11 +1344,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1395,11 +1437,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemeNeverDoubt = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1486,11 +1531,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemePinks = false;
                       isSetThemeProgramCatalog = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1577,11 +1625,14 @@ class _SettingScreenState extends State<SettingScreen> {
                       isSetThemePinks = false;
                       isSetThemeNeverDoubt = false;
 
-                      CoreNotification.show(
+                      CoreNotification.showMessage(
                           context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.update,
-                          'Theme');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.updatedSetting'));
                     }
                   });
                 } else {
@@ -1781,7 +1832,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                                 CommonLanguages
                                                     .languageStringDefault(),
                                             word:
-                                                'screen.title.setting.display'),
+                                                'screen.title.settings.display'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -1812,7 +1863,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                  'Set note and template background color according to subject color',
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setBackgroundColorIsSubjectColor'),
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
@@ -1833,13 +1890,18 @@ class _SettingScreenState extends State<SettingScreen> {
                                                           value;
                                                     });
 
-                                                    CoreNotification.show(
+                                                    CoreNotification.showMessage(
                                                         context,
+                                                        settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
                                                   }
                                                 },
                                               );
@@ -1864,7 +1926,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                  'Note content expanded',
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setNoteContentExpanded'),
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
@@ -1885,13 +1953,18 @@ class _SettingScreenState extends State<SettingScreen> {
                                                           value;
                                                     });
 
-                                                    CoreNotification.show(
+                                                    CoreNotification.showMessage(
                                                         context,
+                                                        settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
                                                   }
                                                 },
                                               );
@@ -1916,7 +1989,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                  'Template content expanded',
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setTemplateContentExpanded'),
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
@@ -1937,13 +2016,18 @@ class _SettingScreenState extends State<SettingScreen> {
                                                           value;
                                                     });
 
-                                                    CoreNotification.show(
+                                                    CoreNotification.showMessage(
                                                         context,
+                                                        settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
                                                   }
                                                 },
                                               );
@@ -1969,7 +2053,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                  'Subject actions expanded',
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setSubjectActionsExpanded'),
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
@@ -1990,64 +2080,18 @@ class _SettingScreenState extends State<SettingScreen> {
                                                           value;
                                                     });
 
-                                                    CoreNotification.show(
+                                                    CoreNotification.showMessage(
                                                         context,
+                                                        settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
-                                                  }
-                                                },
-                                              );
-                                            },
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
-                                  child: StatefulBuilder(
-                                    builder: (BuildContext context,
-                                        StateSetter setState) {
-                                      return SwitchListTile(
-                                        dense: true,
-                                        contentPadding:
-                                            const EdgeInsets.fromLTRB(
-                                                2, 2, 2, 2),
-                                        title: Row(
-                                          children: [
-                                            Flexible(
-                                              child: Text('Stick title of note',
-                                                  style: itemLabelTextStyle(
-                                                      context)),
-                                            ),
-                                          ],
-                                        ),
-                                        value: isStickTitleOfNote,
-                                        onChanged: (bool value) {
-                                          setState(
-                                            () {
-                                              settingNotifier
-                                                  .setIsStickTitleOfNote(value)
-                                                  .then(
-                                                (success) {
-                                                  if (success) {
-                                                    setState(() {
-                                                      isStickTitleOfNote =
-                                                          value;
-                                                    });
-
-                                                    CoreNotification.show(
-                                                        context,
-                                                        CoreNotificationStatus
-                                                            .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
                                                   }
                                                 },
                                               );
@@ -2073,7 +2117,76 @@ class _SettingScreenState extends State<SettingScreen> {
                                           children: [
                                             Flexible(
                                               child: Text(
-                                                  'Set background image',
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setStickTitleOfNoteWhenScroll'),
+                                                  style: itemLabelTextStyle(
+                                                      context)),
+                                            ),
+                                          ],
+                                        ),
+                                        value: isStickTitleOfNote,
+                                        onChanged: (bool value) {
+                                          setState(
+                                            () {
+                                              settingNotifier
+                                                  .setIsStickTitleOfNote(value)
+                                                  .then(
+                                                (success) {
+                                                  if (success) {
+                                                    setState(() {
+                                                      isStickTitleOfNote =
+                                                          value;
+                                                    });
+
+                                                    CoreNotification.showMessage(
+                                                        context,
+                                                        settingNotifier,
+                                                        CoreNotificationStatus
+                                                            .success,
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
+                                                  }
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
+                                      return SwitchListTile(
+                                        dense: true,
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                                2, 2, 2, 2),
+                                        title: Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.settings.setBackgroundImage'),
                                                   style: itemLabelTextStyle(
                                                       context)),
                                             ),
@@ -2094,13 +2207,18 @@ class _SettingScreenState extends State<SettingScreen> {
                                                           value;
                                                     });
 
-                                                    CoreNotification.show(
+                                                    CoreNotification.showMessage(
                                                         context,
+                                                        settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .update,
-                                                        'Setting');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier
+                                                                    .languageString ??
+                                                                CommonLanguages
+                                                                    .languageStringDefault(),
+                                                            word:
+                                                                'notification.action.updatedSetting'));
                                                   }
                                                 },
                                               );
@@ -2144,13 +2262,17 @@ class _SettingScreenState extends State<SettingScreen> {
                                                                           index];
                                                                 });
 
-                                                                CoreNotification.show(
+                                                                CoreNotification.showMessage(
                                                                     context,
+                                                                    settingNotifier,
                                                                     CoreNotificationStatus
                                                                         .success,
-                                                                    CoreNotificationAction
-                                                                        .update,
-                                                                    'Setting');
+                                                                    CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages
+                                                                                .languageStringDefault(),
+                                                                        word:
+                                                                            'notification.action.updatedSetting'));
                                                               }
                                                             },
                                                           );
@@ -2268,7 +2390,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                                 CommonLanguages
                                                     .languageStringDefault(),
                                             word:
-                                                'screen.title.setting.languages'),
+                                                'screen.title.settings.languages'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2318,13 +2440,17 @@ class _SettingScreenState extends State<SettingScreen> {
                                                                           index];
                                                                 });
 
-                                                                CoreNotification.show(
+                                                                CoreNotification.showMessage(
                                                                     context,
+                                                                    settingNotifier,
                                                                     CoreNotificationStatus
                                                                         .success,
-                                                                    CoreNotificationAction
-                                                                        .update,
-                                                                    'Setting');
+                                                                    CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages
+                                                                                .languageStringDefault(),
+                                                                        word:
+                                                                            'notification.action.updatedSetting'));
                                                               }
                                                             },
                                                           );
@@ -2428,7 +2554,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text('Background musics',
+                                    Text(CommonLanguages.convert(
+                                        lang: settingNotifier
+                                            .languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word:
+                                        'screen.title.settings.backgroundMusic'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2676,7 +2808,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                                 CommonLanguages
                                                     .languageStringDefault(),
                                             word:
-                                                'screen.title.setting.colorThemes'),
+                                                'screen.title.settings.colorThemes'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2801,7 +2933,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
                                   CommonLanguages.languageStringDefault(),
-                              word: 'screen.title.setting'),
+                              word: 'screen.title.settings'),
                           style: CommonStyles.screenTitleTextStyle(
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context))),

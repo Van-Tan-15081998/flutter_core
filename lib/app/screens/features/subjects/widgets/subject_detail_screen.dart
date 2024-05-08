@@ -149,9 +149,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
                                       CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.detail'),
+                                  word: 'screen.title.detail.subject'),
                               style: CommonStyles.screenTitleTextStyle(
-                                  fontSize: 22.0,
+                                  fontSize: 16.0,
                                   color:
                                       ThemeDataCenter.getScreenTitleTextColor(
                                           context))),
@@ -165,7 +165,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
           ),
           actions: AppBarActionButtonEnum.home,
           isConfirmToClose: false,
-          homeLabel: 'Subjects',
+          homeLabel: CommonLanguages.convert(
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'screen.title.subjects'),
           onGoHome: () {
             Navigator.pushAndRemoveUntil(
               context,
@@ -210,11 +213,13 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                           if (result) {
                             subjectNotifier.onCountAll();
 
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.success,
-                                CoreNotificationAction.delete,
-                                'Subject');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.deleted'));
 
                             Navigator.push(
                               context,
@@ -227,11 +232,13 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                               ),
                             );
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.delete,
-                                'Subject');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
@@ -675,13 +682,14 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                 if (result) {
                                                   subjectNotifier.onCountAll();
 
-                                                  CoreNotification.show(
-                                                      context,
+                                                  CoreNotification.showMessage(
+                                                      context, settingNotifier,
                                                       CoreNotificationStatus
                                                           .success,
-                                                      CoreNotificationAction
-                                                          .restore,
-                                                      'Subject');
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier.languageString ??
+                                                              CommonLanguages.languageStringDefault(),
+                                                          word: 'notification.action.restored'));
 
                                                   Navigator.push(
                                                     context,
@@ -696,13 +704,14 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                     ),
                                                   );
                                                 } else {
-                                                  CoreNotification.show(
-                                                      context,
+                                                  CoreNotification.showMessage(
+                                                      context, settingNotifier,
                                                       CoreNotificationStatus
                                                           .error,
-                                                      CoreNotificationAction
-                                                          .restore,
-                                                      'Subject');
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier.languageString ??
+                                                              CommonLanguages.languageStringDefault(),
+                                                          word: 'notification.action.error'));
                                                 }
                                               });
                                             },
@@ -720,20 +729,21 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                             onPressed: () async {
                                               if (await CoreHelperWidget
                                                   .confirmFunction(
-                                                      context: context)) {
+                                                      context: context, settingNotifier: settingNotifier)) {
                                                 _onDeleteSubjectForever(context)
                                                     .then((result) {
                                                   if (result) {
                                                     subjectNotifier
                                                         .onCountAll();
 
-                                                    CoreNotification.show(
-                                                        context,
+                                                    CoreNotification.showMessage(
+                                                        context, settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .delete,
-                                                        'Subject');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier.languageString ??
+                                                                CommonLanguages.languageStringDefault(),
+                                                            word: 'notification.action.deleted'));
 
                                                     Navigator.push(
                                                       context,
@@ -748,13 +758,14 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                       ),
                                                     );
                                                   } else {
-                                                    CoreNotification.show(
-                                                        context,
+                                                    CoreNotification.showMessage(
+                                                        context, settingNotifier,
                                                         CoreNotificationStatus
                                                             .error,
-                                                        CoreNotificationAction
-                                                            .delete,
-                                                        'Subject');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier.languageString ??
+                                                                CommonLanguages.languageStringDefault(),
+                                                            word: 'notification.action.error'));
                                                   }
                                                 });
                                               }

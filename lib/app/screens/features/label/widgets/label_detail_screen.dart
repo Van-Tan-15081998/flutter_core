@@ -131,9 +131,9 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.detail'),
+                                word: 'screen.title.detail.label'),
                             style: CommonStyles.screenTitleTextStyle(
-                                fontSize: 22.0,
+                                fontSize: 16.0,
                                 color: ThemeDataCenter.getScreenTitleTextColor(
                                     context))),
                       ),
@@ -146,7 +146,10 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
         ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
-        homeLabel: 'Labels',
+        homeLabel: CommonLanguages.convert(
+            lang: settingNotifier.languageString ??
+                CommonLanguages.languageStringDefault(),
+            word: 'screen.title.labels'),
         onGoHome: () {
           Navigator.pushAndRemoveUntil(
             context,
@@ -191,11 +194,13 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                           if (result) {
                             labelNotifier.onCountAll();
 
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.success,
-                                CoreNotificationAction.delete,
-                                'Label');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.deleted'));
 
                             Navigator.push(
                               context,
@@ -207,11 +212,13 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                               ),
                             );
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.delete,
-                                'Label');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       },
@@ -443,6 +450,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                               ActionModeEnum
                                                                   .update,
                                                           label: widget.label,
+                                                          redirectFrom: null,
                                                         )));
                                           },
                                           coreButtonStyle: ThemeDataCenter
@@ -460,13 +468,14 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                 if (result) {
                                                   labelNotifier.onCountAll();
 
-                                                  CoreNotification.show(
-                                                      context,
+                                                  CoreNotification.showMessage(
+                                                      context, settingNotifier,
                                                       CoreNotificationStatus
                                                           .success,
-                                                      CoreNotificationAction
-                                                          .restore,
-                                                      'Label');
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier.languageString ??
+                                                              CommonLanguages.languageStringDefault(),
+                                                          word: 'notification.action.restored'));
 
                                                   Navigator.push(
                                                     context,
@@ -480,13 +489,14 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                     ),
                                                   );
                                                 } else {
-                                                  CoreNotification.show(
-                                                      context,
+                                                  CoreNotification.showMessage(
+                                                      context, settingNotifier,
                                                       CoreNotificationStatus
                                                           .error,
-                                                      CoreNotificationAction
-                                                          .restore,
-                                                      'Label');
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier.languageString ??
+                                                              CommonLanguages.languageStringDefault(),
+                                                          word: 'notification.action.error'));
                                                 }
                                               });
                                             },
@@ -504,19 +514,20 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                             onPressed: () async {
                                               if (await CoreHelperWidget
                                                   .confirmFunction(
-                                                      context: context)) {
+                                                      context: context, settingNotifier: settingNotifier)) {
                                                 _onDeleteLabelForever(context)
                                                     .then((result) {
                                                   if (result) {
                                                     labelNotifier.onCountAll();
 
-                                                    CoreNotification.show(
-                                                        context,
+                                                    CoreNotification.showMessage(
+                                                        context, settingNotifier,
                                                         CoreNotificationStatus
                                                             .success,
-                                                        CoreNotificationAction
-                                                            .delete,
-                                                        'Label');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier.languageString ??
+                                                                CommonLanguages.languageStringDefault(),
+                                                            word: 'notification.action.deleted'));
 
                                                     Navigator.push(
                                                       context,
@@ -530,13 +541,14 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                       ),
                                                     );
                                                   } else {
-                                                    CoreNotification.show(
-                                                        context,
+                                                    CoreNotification.showMessage(
+                                                        context, settingNotifier,
                                                         CoreNotificationStatus
                                                             .error,
-                                                        CoreNotificationAction
-                                                            .delete,
-                                                        'Label');
+                                                        CommonLanguages.convert(
+                                                            lang: settingNotifier.languageString ??
+                                                                CommonLanguages.languageStringDefault(),
+                                                            word: 'notification.action.error'));
                                                   }
                                                 });
                                               }

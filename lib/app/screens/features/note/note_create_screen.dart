@@ -17,21 +17,21 @@ import '../../../../core/components/actions/common_buttons/CoreElevatedButton.da
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
-import '../../../../core/stores/icons/CoreStoreIcons.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../library/enums/CommonEnums.dart';
 import '../label/databases/label_db_manager.dart';
 import '../label/models/label_model.dart';
+import '../label/widgets/label_create_screen.dart';
 import '../subjects/databases/subject_db_manager.dart';
 import '../subjects/models/subject_model.dart';
 import '../subjects/providers/subject_notifier.dart';
+import '../subjects/widgets/subject_create_screen.dart';
 import 'databases/note_db_manager.dart';
 import 'models/note_model.dart';
 import 'note_detail_screen.dart';
 import 'providers/note_notifier.dart';
-import 'widgets/functions/note_functions.dart';
 
 enum CurrentFocusNodeEnum { none, title, detailContent }
 
@@ -71,7 +71,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   final _formKey = GlobalKey<FormState>();
 
   bool isShowDialogSetLabel = false;
-  bool isShowDialogSetEmoji = false;
 
   bool isLock = false;
 
@@ -115,9 +114,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
   double optionActionContent = 0.0;
 
   double _detailContentContainerHeight = 300.0;
-
-  late StreamController<List<SubjectModel>?> _subjectStreamController;
-  late Stream<List<SubjectModel>?> _subjectStream;
 
   List<LabelModel>? selectedNoteLabels = [];
   List<LabelModel>? labelList = [];
@@ -170,13 +166,41 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     return subjects;
   }
 
+  _onReloadLabel() {
+    _fetchLabels().then((labels) {
+      if (labels != null && labels.isNotEmpty) {
+        setState(() {
+          labelList = labels;
+        });
+        _setSelectedLabels();
+      }
+    });
+  }
+
+  _onReloadSubjects(SettingNotifier settingNotifier) {
+    _fetchSubjects().then((subjects) {
+      if (subjects != null && subjects.isNotEmpty) {
+        setState(() {
+          subjectList = subjects;
+          if (subjectList != null && subjectList!.isNotEmpty) {
+            SubjectModel emptySubject = SubjectModel(
+              id: null,
+              title: '[Not select]',
+              color: 'ffffff',
+              parentId: null,
+              createdAt: null,
+            );
+            subjectList!.add(emptySubject);
+            selectedSubject = subjectList!.first;
+          }
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-
-    _subjectStreamController = StreamController<List<SubjectModel>?>();
-    _subjectStream = _subjectStreamController.stream;
-    _subjectStreamController.add(subjectList);
 
     // Fetch Labels and Subjects
     _fetchLabels().then((labels) {
@@ -191,21 +215,34 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
       if (subjects != null && subjects.isNotEmpty) {
         setState(() {
           /*
-          Limit the subject list for choose
+          Limit the subject list for choose (Create note for selected subject)
            */
           if (widget.subject != null && subjects.isNotEmpty) {
             List<SubjectModel>? mySubjects = subjects
                 .where((element) => element.id == widget.subject!.id)
                 .toList();
             if (mySubjects.isNotEmpty) {
-              subjectList!.add(mySubjects.first);
+              setState(() {
+                subjectList!.add(mySubjects.first);
+              });
             }
           } else if (widget.subject == null) {
-            subjectList = subjects;
+            setState(() {
+              subjectList = subjects;
+              if (subjectList != null) {
+                SubjectModel emptySubject = SubjectModel(
+                  id: null,
+                  title: '[Not select]',
+                  color: 'ffffff',
+                  parentId: null,
+                  createdAt: null,
+                );
+                subjectList!.add(emptySubject);
+              }
+            });
           }
         });
-
-        _subjectStreamController.add(subjectList);
+        _setSelectedSubject();
       }
     });
 
@@ -259,7 +296,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
         document: _detailContentDocument,
         selection: _detailContentTextSelection);
 
-    // Listen Focus And Hide Dialog SetText and SetEmoji
+    // Listen Focus And Hide Dialog SetText
     _titleFocusNode.addListener(() {
       if (_titleFocusNode.hasFocus) {
         setState(() {
@@ -269,7 +306,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
           _titleFocusNodeHasFocus = true;
           _detailContentFocusNodeHasFocus = false;
-          isShowDialogSetEmoji = false;
           isShowDialogSetLabel = false;
         });
       } else {
@@ -286,7 +322,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
           _detailContentFocusNodeHasFocus = true;
           _titleFocusNodeHasFocus = false;
-          isShowDialogSetEmoji = false;
           isShowDialogSetLabel = false;
         });
 
@@ -325,182 +360,14 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     });
   }
 
-  bool isShowOptionActionContent() {
-    if (isShowDialogSetEmoji) {
-      return true;
-    }
-    return false;
-  }
-
   @override
   void dispose() {
-    _subjectStreamController.close();
     commonAudioOnPressButton.dispose();
     super.dispose();
   }
 
-  Widget _buildOptionActionContent(BuildContext context, SettingNotifier settingNotifier) {
-    if (isShowDialogSetEmoji) {
-      return Container(
-          margin: const EdgeInsets.fromLTRB(0, 4.0, 0, 4.0),
-          padding: const EdgeInsets.all(4.0),
-          constraints: const BoxConstraints(maxHeight: 300.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: Color(0xff1f1f1f), // Màu đường viền
-                width: 1.0, // Độ dày của đường viền
-              ),
-              borderRadius: BorderRadius.circular(6.0)),
-          child: DefaultTabController(
-            length: 3,
-            child: Scaffold(
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-
-                /// Đặt kích thước tùy chỉnh cho AppBar
-                child: AppBar(
-                  automaticallyImplyLeading: false, // Ẩn nút back
-                  title: null,
-
-                  /// Ẩn tiêu đề
-                  elevation: 0,
-
-                  /// Loại bỏ độ đổ bóng
-                  bottom: TabBar(
-                    tabs: [
-                      Tab(icon: Text(CoreStoreIcons.emoji_001)),
-                      Tab(icon: Text(CoreStoreIcons.emoji_260)),
-                    ],
-                  ),
-                ),
-              ),
-              body: TabBarView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 60.0,
-
-                        /// Kích thước tối đa của một cột
-                        crossAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các cột
-                        mainAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các hàng
-                      ),
-                      itemCount: CoreStoreIcons.emojis.length,
-                      itemBuilder: (context, index) {
-                        return CoreElevatedButton.iconOnly(
-                          buttonAudio: commonAudioOnPressButton,
-                          onPressed: () {
-                            if (_titleFocusNodeHasFocus) {
-                              setState(() {
-                                NoteFunctions.addStringToQuillContent(
-                                    quillController: _titleQuillController,
-                                    selection: _titleTextSelection,
-                                    insertString: CoreStoreIcons.emojis[index]
-                                        .toString());
-                              });
-                            } else if (_detailContentFocusNodeHasFocus) {
-                              setState(() {
-                                NoteFunctions.addStringToQuillContent(
-                                    quillController:
-                                        _detailContentQuillController,
-                                    selection: _detailContentTextSelection,
-                                    insertString: CoreStoreIcons.emojis[index]
-                                        .toString());
-                              });
-                            }
-                          },
-                          coreButtonStyle: CoreButtonStyle.options(
-                              coreFixedSizeButton:
-                                  CoreFixedSizeButton.squareIcon4060,
-                              coreStyle: CoreStyle.outlined,
-                              coreColor: CoreColor.turtles,
-                              coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption:
-                                  const Color(0xff1f1f1f)),
-                          icon: Center(
-                            child: Text(
-                              CoreStoreIcons.emojis[index],
-                              style: const TextStyle(fontSize: 18.0),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(1.0),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 80.0),
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 60.0,
-
-                        /// Kích thước tối đa của một cột
-                        crossAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các cột
-                        mainAxisSpacing: 10.0,
-
-                        /// Khoảng cách giữa các hàng
-                      ),
-                      itemCount: CoreStoreIcons.natureAndAnimals.length,
-                      itemBuilder: (context, index) {
-                        return CoreElevatedButton.iconOnly(
-                          buttonAudio: commonAudioOnPressButton,
-                          onPressed: () {
-                            if (_titleFocusNodeHasFocus) {
-                              setState(() {
-                                NoteFunctions.addStringToQuillContent(
-                                    quillController: _titleQuillController,
-                                    selection: _titleTextSelection,
-                                    insertString: CoreStoreIcons
-                                        .natureAndAnimals[index]
-                                        .toString());
-                              });
-                            } else if (_detailContentFocusNodeHasFocus) {
-                              setState(() {
-                                NoteFunctions.addStringToQuillContent(
-                                    quillController:
-                                        _detailContentQuillController,
-                                    selection: _detailContentTextSelection,
-                                    insertString: CoreStoreIcons
-                                        .natureAndAnimals[index]
-                                        .toString());
-                              });
-                            }
-                          },
-                          coreButtonStyle: CoreButtonStyle.options(
-                              coreFixedSizeButton:
-                                  CoreFixedSizeButton.squareIcon4060,
-                              coreStyle: CoreStyle.outlined,
-                              coreColor: CoreColor.turtles,
-                              coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption:
-                                  const Color(0xff1f1f1f)),
-                          icon: Center(
-                            child: Text(
-                              CoreStoreIcons.natureAndAnimals[index],
-                              style: const TextStyle(fontSize: 18.0),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ));
-    }
-
+  Widget _buildOptionActionContent(
+      BuildContext context, SettingNotifier settingNotifier) {
     if (isShowDialogSetLabel) {
       if (labelList != null && labelList!.isNotEmpty) {
         return Container(
@@ -584,81 +451,35 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
               itemCount: labelList!.length),
         );
       } else {
-        return Center(child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              BounceInLeft(
-                  child: const FaIcon(FontAwesomeIcons.waze,
-                      size: 30.0,
-                      color: Colors.white54)),
-              const SizedBox(width: 5),
-              BounceInRight(
-                child: Text(
-                    CommonLanguages.convert(
-                        lang: settingNotifier.languageString ??
-                            CommonLanguages.languageStringDefault(),
-                        word: 'notification.noItem.label'),
-                    style: GoogleFonts.montserrat(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 16.0,
-                        color: Colors.white54,
-                        fontWeight: FontWeight.w500)),
-              ),
-            ],
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                BounceInLeft(
+                    child: const FaIcon(FontAwesomeIcons.waze,
+                        size: 30.0, color: Colors.white54)),
+                const SizedBox(width: 5),
+                BounceInRight(
+                  child: Text(
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'notification.noItem.label'),
+                      style: GoogleFonts.montserrat(
+                          fontStyle: FontStyle.italic,
+                          fontSize: 16.0,
+                          color: Colors.white54,
+                          fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
           ),
-        ),);
+        );
       }
     }
 
-    return Container();
-  }
-
-  _buildIconOnToolbar() {
-    if (_titleFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8.0, 4.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            setState(() {
-              FocusScope.of(context).unfocus();
-              isShowDialogSetEmoji = !isShowDialogSetEmoji;
-            });
-          },
-          icon: const Icon(
-            Icons.emoji_emotions_outlined,
-            size: 24,
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    } else if (_detailContentFocusNode.hasFocus) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 8.0, 4.0, 4.0),
-        child: flutter_quill.QuillIconButton(
-          size: 24.0 * flutter_quill.kIconButtonFactor,
-          onPressed: () {
-            setState(() {
-              FocusScope.of(context).unfocus();
-              isShowDialogSetEmoji = !isShowDialogSetEmoji;
-            });
-          },
-          icon: const Icon(
-            Icons.emoji_emotions_outlined,
-            size: 24,
-          ),
-          highlightElevation: 0,
-          hoverElevation: 0,
-          fillColor: Colors.white,
-          borderRadius: 2,
-        ),
-      );
-    }
     return Container();
   }
 
@@ -1105,38 +926,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
     return Container();
   }
 
-  _buildCloseButtonSetEmojiOnToolbar() {
-    if (isShowDialogSetEmoji) {
-      return CoreElevatedButton.iconOnly(
-        buttonAudio: commonAudioOnPressButton,
-        icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
-        onPressed: () {
-          setState(() {
-            isShowDialogSetEmoji = false;
-
-            if (_currentFocusNodeEnum == CurrentFocusNodeEnum.title) {
-              // _titleFocusNode.requestFocus();
-              FocusScope.of(context).requestFocus(_titleFocusNode);
-            } else if (_currentFocusNodeEnum ==
-                CurrentFocusNodeEnum.detailContent) {
-              // _detailContentFocusNode.requestFocus();
-              FocusScope.of(context).requestFocus(_detailContentFocusNode);
-            } else {
-              FocusScope.of(context).requestFocus(_detailContentFocusNode);
-            }
-          });
-        },
-        coreButtonStyle: CoreButtonStyle.options(
-            coreStyle: CoreStyle.outlined,
-            coreColor: CoreColor.dark,
-            coreRadius: CoreRadius.radius_6,
-            kitForegroundColorOption: const Color(0xff1f1f1f),
-            coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-      );
-    }
-    return Container();
-  }
-
   _buildCloseButtonSetLabelOnToolbar() {
     if (isShowDialogSetLabel) {
       return CoreElevatedButton.iconOnly(
@@ -1359,7 +1148,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
               _detailContentQuillController.document.toDelta().toJson());
 
           if (_detailContentQuillController.document.isEmpty()) {
-            CoreNotification.showMessage(context,
+            CoreNotification.showMessage(context, settingNotifier,
                 CoreNotificationStatus.warning, 'Please enter your content!');
             return;
           }
@@ -1380,8 +1169,8 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                         DateTime.now().month, DateTime.now().day)
                     .millisecondsSinceEpoch,
                 createdForDay: (widget.actionCreateNoteEnum ==
-                            ActionCreateNoteEnum.createForSelectedDay || widget.actionMode ==
-                    ActionModeEnum.copy) &&
+                                ActionCreateNoteEnum.createForSelectedDay ||
+                            widget.actionMode == ActionModeEnum.copy) &&
                         widget.createdForDay != null
                     ? widget.createdForDay
                     : null,
@@ -1398,8 +1187,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
               if (result) {
                 noteNotifier.onCountAll();
 
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.create, 'Note');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.created'));
 
                 if (widget.redirectFrom ==
                     RedirectFromEnum.subjectsInFolderMode) {
@@ -1417,8 +1209,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   );
                 }
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.create, 'Note');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           } else if (widget.note != null &&
@@ -1444,8 +1239,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
             _onUpdateNote(context, model).then((result) {
               if (result) {
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.update, 'Note');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.updated'));
 
                 _onGetUpdatedNote(context, model).then((getResult) {
                   if (getResult != null) {
@@ -1459,7 +1257,9 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               builder: (context) => NoteDetailScreen(
                                     note: getResult,
                                     labels: selectedNoteLabels,
-                                    subject: selectedSubject,
+                                    subject: selectedSubject?.id == null
+                                        ? null
+                                        : selectedSubject,
                                     redirectFrom: RedirectFromEnum.noteUpdate,
                                   )),
                           (route) => false);
@@ -1467,8 +1267,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                   }
                 });
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.update, 'Note');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           }
@@ -1482,14 +1285,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           children: [
             Row(
               children: [
-                _buildIconOnToolbar(),
                 _buildCheckboxButtonOnToolbar(),
                 _buildBoldTextOnToolbar(),
                 _buildItalicTextOnToolbar(),
                 _buildUnderlineTextOnToolbar(),
                 _buildUndoOnToolbar(),
                 _buildRedoOnToolbar(),
-                _buildCloseButtonSetEmojiOnToolbar(),
                 _buildCloseButtonSetLabelOnToolbar()
               ],
             ),
@@ -1515,7 +1316,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           key: _formKey,
           onWillPop: () async {
             _onBack();
-            if (await CoreHelperWidget.confirmFunction(context: context)) {
+            if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmExitScreen: true)) {
               return true;
             }
             return false;
@@ -1684,7 +1485,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 ),
                 const SizedBox(height: 15),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       margin: settingNotifier.isSetBackgroundImage == true
@@ -1717,79 +1518,142 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                         ),
                       ),
                     ),
+                    InkWell(
+                      onTap: () async {
+                        bool? isCreatedSubject = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SubjectCreateScreen(
+                                    parentSubject: null,
+                                    actionMode: ActionModeEnum.create,
+                                    redirectFrom: RedirectFromEnum.noteCreate,
+                                    breadcrumb: null,
+                                  )),
+                        );
+
+                        if (isCreatedSubject == true) {
+                          _onReloadSubjects(settingNotifier);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context),
+                              width: 1.0,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10.0)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 22,
+                            color: ThemeDataCenter
+                                .getDeleteSlidableActionColorStyle(context),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
-                StreamBuilder<List<SubjectModel>?>(
-                    stream: _subjectStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData &&
-                          snapshot.data != null &&
-                          snapshot.data!.isNotEmpty) {
-                        _setSelectedSubject();
-
-                        return Container(
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(12)),
-                              color:
-                                  settingNotifier.isSetBackgroundImage == true
-                                      ? Colors.white.withOpacity(0.65)
-                                      : Colors.transparent),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: DropdownButtonFormField(
-                                      isExpanded: true,
-                                      decoration: InputDecoration(
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Color(0xff343a40),
-                                              width: 2),
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderSide: const BorderSide(
-                                              color: Color(0xff343a40),
-                                              width: 2),
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                        filled: true,
-                                        fillColor: Colors.white,
+                subjectList != null && subjectList!.isNotEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(12)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField(
+                                    isExpanded: true,
+                                    decoration: InputDecoration(
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Color(0xff343a40), width: 2),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
                                       ),
-                                      dropdownColor: Colors.white,
-                                      value: selectedSubject,
-                                      onChanged: (SubjectModel? newValue) {
-                                        setState(() {
-                                          selectedSubject = newValue;
-                                        });
-                                      },
-                                      items: snapshot.data!.map((item) {
-                                        return DropdownMenuItem(
-                                          value: item,
-                                          child: Text(item.title,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1),
-                                        );
-                                      }).toList()),
+                                      border: OutlineInputBorder(
+                                        borderSide: const BorderSide(
+                                            color: Color(0xff343a40), width: 2),
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                    dropdownColor: Colors.white,
+                                    value: selectedSubject,
+                                    onChanged: (SubjectModel? newValue) {
+                                      setState(() {
+                                        selectedSubject = newValue;
+                                      });
+                                    },
+                                    items: subjectList!.map((item) {
+                                      return DropdownMenuItem(
+                                        value: item,
+                                        child: Text(item.title,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1),
+                                      );
+                                    }).toList()),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding:
+                                const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(24.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                BounceInLeft(
+                                    child: FaIcon(FontAwesomeIcons.waze,
+                                        size: 30.0,
+                                        color: ThemeDataCenter
+                                            .getAloneTextColorStyle(context))),
+                                const SizedBox(width: 5),
+                                BounceInRight(
+                                  child: Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'notification.noItem.subject'),
+                                      style: GoogleFonts.montserrat(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 16.0,
+                                          color: ThemeDataCenter
+                                              .getAloneTextColorStyle(context),
+                                          fontWeight: FontWeight.w500)),
                                 ),
                               ],
                             ),
                           ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        return Text('No subjects found',
-                            style: TextStyle(
-                                color:
-                                    ThemeDataCenter.getFormFieldLabelColorStyle(
-                                        context)));
-                      }
-                    }),
+                        ],
+                      ),
                 const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -1809,7 +1673,11 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                             ? const EdgeInsets.all(5.0)
                             : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                         child: Text(
-                          "Lock:",
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'form.field.title.lock')
+                              .addColon(),
                           style: GoogleFonts.montserrat(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
@@ -1836,7 +1704,7 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                 ),
                 const SizedBox(height: 15),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       margin: settingNotifier.isSetBackgroundImage == true
@@ -1869,47 +1737,134 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                         ),
                       ),
                     ),
+                    InkWell(
+                      onTap: () async {
+                        bool? isCreatedLabel = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LabelCreateScreen(
+                                    actionMode: ActionModeEnum.create,
+                                    redirectFrom: RedirectFromEnum.noteCreate,
+                                  )),
+                        );
+
+                        if (isCreatedLabel == true) {
+                          _onReloadLabel();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              color: ThemeDataCenter.getFilteringTextColorStyle(
+                                  context),
+                              width: 1.0,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10.0)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent),
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Icon(
+                            Icons.add_rounded,
+                            size: 22,
+                            color: ThemeDataCenter
+                                .getDeleteSlidableActionColorStyle(context),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      color: settingNotifier.isSetBackgroundImage == true
-                          ? Colors.white.withOpacity(0.65)
-                          : Colors.transparent),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        CoreElevatedButton.icon(
-                          buttonAudio: commonAudioOnPressButton,
-                          icon: const FaIcon(FontAwesomeIcons.tag, size: 18.0),
-                          label: Text('Choose labels',
-                              style: CommonStyles.buttonTextStyle),
-                          onPressed: () {
-                            if (_titleFocusNode.hasFocus) {
-                              _titleFocusNode.unfocus();
-                            }
-                            if (_detailContentFocusNode.hasFocus) {
-                              _detailContentFocusNode.unfocus();
-                            }
+                labelList != null && labelList!.isNotEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(12)),
+                            color: settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.65)
+                                : Colors.transparent),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              CoreElevatedButton.icon(
+                                buttonAudio: commonAudioOnPressButton,
+                                icon: const FaIcon(FontAwesomeIcons.tag,
+                                    size: 18.0),
+                                label: Text(CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'button.title.selectLabel'),
+                                    style: CommonStyles.buttonTextStyle),
+                                onPressed: () {
+                                  if (_titleFocusNode.hasFocus) {
+                                    _titleFocusNode.unfocus();
+                                  }
+                                  if (_detailContentFocusNode.hasFocus) {
+                                    _detailContentFocusNode.unfocus();
+                                  }
 
-                            setState(() {
-                              isShowDialogSetLabel = true;
-                            });
-                          },
-                          coreButtonStyle: CoreButtonStyle.options(
-                              coreStyle: CoreStyle.outlined,
-                              coreColor: CoreColor.dark,
-                              coreRadius: CoreRadius.radius_6,
-                              kitForegroundColorOption: Colors.black,
-                              coreFixedSizeButton:
-                                  CoreFixedSizeButton.medium_40),
+                                  setState(() {
+                                    isShowDialogSetLabel = true;
+                                  });
+                                },
+                                coreButtonStyle: CoreButtonStyle.options(
+                                    coreStyle: CoreStyle.outlined,
+                                    coreColor: CoreColor.dark,
+                                    coreRadius: CoreRadius.radius_6,
+                                    kitForegroundColorOption: Colors.black,
+                                    coreFixedSizeButton:
+                                        CoreFixedSizeButton.medium_40),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding:
+                                const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(24.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                BounceInLeft(
+                                    child: FaIcon(FontAwesomeIcons.waze,
+                                        size: 30.0,
+                                        color: ThemeDataCenter
+                                            .getAloneTextColorStyle(context))),
+                                const SizedBox(width: 5),
+                                BounceInRight(
+                                  child: Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'notification.noItem.label'),
+                                      style: GoogleFonts.montserrat(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 16.0,
+                                          color: ThemeDataCenter
+                                              .getAloneTextColorStyle(context),
+                                          fontWeight: FontWeight.w500)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                 _buildLabels(),
                 const SizedBox(
                   height: 500,
@@ -1940,13 +1895,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                           ? CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
                                   CommonLanguages.languageStringDefault(),
-                              word: 'screen.title.create')
+                              word: 'screen.title.create.note')
                           : CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
                                   CommonLanguages.languageStringDefault(),
-                              word: 'screen.title.update'),
+                              word: 'screen.title.update.note'),
                       style: CommonStyles.screenTitleTextStyle(
-                          fontSize: 22.0,
+                          fontSize: 16.0,
                           color:
                               ThemeDataCenter.getScreenTitleTextColor(context)),
                     ),
@@ -1957,39 +1912,67 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
           ),
           const SizedBox(width: 5),
           (widget.actionCreateNoteEnum ==
-                      ActionCreateNoteEnum.createForSelectedDay || widget.actionMode == ActionModeEnum.copy) &&
+                          ActionCreateNoteEnum.createForSelectedDay ||
+                      widget.actionMode == ActionModeEnum.copy) &&
                   widget.createdForDay != null
               ? Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'note for',
-                        style: TextStyle(
-                            color:
-                                ThemeDataCenter.getAloneTextColorStyle(context),
-                            fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              DateFormat('dd/MM/yyyy')
-                                  .format(DateTime.fromMillisecondsSinceEpoch(
-                                      widget.createdForDay!))
-                                  .toString(),
-                              style: TextStyle(
-                                  color: ThemeDataCenter.getAloneTextColorStyle(
-                                      context),
-                                  fontSize: 14),
-                              overflow: TextOverflow.ellipsis,
+                  child: Container(
+                    padding:
+                    settingNotifier.isSetBackgroundImage ==
+                        true
+                        ? const EdgeInsets.all(2.0)
+                        : const EdgeInsets.all(0),
+                    decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(
+                            Radius.circular(6.0)),
+                        color: settingNotifier
+                            .isSetBackgroundImage ==
+                            true
+                            ? Colors.white.withOpacity(0.65)
+                            : Colors.transparent),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'screen.title.selectedDate').addColon(),
+                                style: TextStyle(
+                                    color:
+                                        ThemeDataCenter.getAloneTextColorStyle(context),
+                                    fontSize: 12),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                DateFormat('dd/MM/yyyy')
+                                    .format(DateTime.fromMillisecondsSinceEpoch(
+                                        widget.createdForDay!))
+                                    .toString(),
+                                style: TextStyle(
+                                    color: ThemeDataCenter.getAloneTextColorStyle(
+                                        context),
+                                    fontSize: 14),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : Container()

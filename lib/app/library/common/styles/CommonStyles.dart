@@ -52,7 +52,7 @@ class CommonStyles {
     return imageSourceStringList;
   }
 
-  static String avatarImageSourceStringList() {
+  static String avatarImageSourceString() {
     return 'assets/images/avatars/app_avatar.png';
   }
 
@@ -170,9 +170,15 @@ class CommonStyles {
       color: const Color(0xFF404040),
       fontWeight: FontWeight.w600);
 
+  static TextStyle labelFilterTextStyle = GoogleFonts.montserrat(
+      fontStyle: FontStyle.normal,
+      fontSize: 16,
+      color: const Color(0xFF1f1f1f),
+      fontWeight: FontWeight.w500);
+
   static TextStyle labelTextStyle = GoogleFonts.montserrat(
       fontStyle: FontStyle.italic,
-      fontSize: 16,
+      fontSize: 14,
       color: const Color(0xFF404040),
       fontWeight: FontWeight.w600);
 

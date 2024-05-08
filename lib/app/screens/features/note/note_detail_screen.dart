@@ -192,9 +192,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
-  Widget _onGetTitle() {
+  Widget _onGetTitle(SettingNotifier settingNotifier) {
     String defaultTitle =
-        'You wrote at ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
+    CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -202,17 +202,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   bool checkTitleEmpty() {
-    if (widget.note.title != null && widget.note.title!.isNotEmpty) {
-      List<dynamic> deltaMap = jsonDecode(widget.note.title!);
-
-      flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
-
-      var list = delta.toList();
-      if (list.length == 1) {
-        if (list[0].key == 'insert' && list[0].data == '\n') {
-          return false;
-        }
-      }
+    if (_titleQuillController.document.isEmpty()) {
+      return false;
     }
     return true;
   }
@@ -419,9 +410,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.detail'),
+                                word: 'screen.title.detail.note'),
                             style: CommonStyles.screenTitleTextStyle(
-                                fontSize: 22.0,
+                                fontSize: 16.0,
                                 color: ThemeDataCenter.getScreenTitleTextColor(
                                     context))),
                       ),
@@ -434,7 +425,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
-        homeLabel: 'Notes',
+        homeLabel: CommonLanguages.convert(
+            lang: settingNotifier.languageString ??
+                CommonLanguages.languageStringDefault(),
+            word: 'screen.title.notes'),
         onGoHome: () {
           Navigator.pushAndRemoveUntil(
             context,
@@ -483,11 +477,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                               Provider.of<NoteNotifier>(context, listen: false)
                                   .onCountAll();
 
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.success,
-                                  CoreNotificationAction.delete,
-                                  'Note');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.deleted'));
 
                               if (widget.redirectFrom ==
                                   RedirectFromEnum.subjectsInFolderMode) {
@@ -506,11 +502,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                 );
                               }
                             } else {
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.error,
-                                  CoreNotificationAction.delete,
-                                  'Note');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.error'));
                             }
                           });
                         },
@@ -872,7 +870,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                     _scrollController,
                                                 scrollable: false,
                                                 showCursor: false)
-                                            : _onGetTitle()),
+                                            : _onGetTitle(settingNotifier)),
                                     widget.redirectFrom !=
                                             RedirectFromEnum
                                                 .subjectsInFolderMode
@@ -914,7 +912,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                   if (await CoreHelperWidget
                                                                       .confirmFunction(
                                                                           context:
-                                                                              context)) {
+                                                                              context, settingNotifier: settingNotifier)) {
                                                                     _onUnlockNote(
                                                                             context,
                                                                             widget
@@ -932,17 +930,21 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                               : null;
                                                                         });
 
-                                                                        CoreNotification.show(
-                                                                            context,
+                                                                        CoreNotification.showMessage(
+                                                                            context, settingNotifier,
                                                                             CoreNotificationStatus.success,
-                                                                            CoreNotificationAction.update,
-                                                                            'Note');
+                                                                            CommonLanguages.convert(
+                                                                                lang: settingNotifier.languageString ??
+                                                                                    CommonLanguages.languageStringDefault(),
+                                                                                word: 'notification.action.unlocked'));
                                                                       } else {
-                                                                        CoreNotification.show(
-                                                                            context,
+                                                                        CoreNotification.showMessage(
+                                                                            context, settingNotifier,
                                                                             CoreNotificationStatus.error,
-                                                                            CoreNotificationAction.update,
-                                                                            'Note');
+                                                                            CommonLanguages.convert(
+                                                                                lang: settingNotifier.languageString ??
+                                                                                    CommonLanguages.languageStringDefault(),
+                                                                                word: 'notification.action.error'));
                                                                       }
                                                                     });
                                                                   }
@@ -994,21 +996,23 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                       false,
                                                                 );
 
-                                                                CoreNotification.show(
-                                                                    context,
+                                                                CoreNotification.showMessage(
+                                                                    context, settingNotifier,
                                                                     CoreNotificationStatus
                                                                         .success,
-                                                                    CoreNotificationAction
-                                                                        .restore,
-                                                                    'Note');
+                                                                    CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages.languageStringDefault(),
+                                                                        word: 'notification.action.restored'));
                                                               } else {
-                                                                CoreNotification.show(
-                                                                    context,
+                                                                CoreNotification.showMessage(
+                                                                    context, settingNotifier,
                                                                     CoreNotificationStatus
                                                                         .error,
-                                                                    CoreNotificationAction
-                                                                        .restore,
-                                                                    'Note');
+                                                                    CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages.languageStringDefault(),
+                                                                        word: 'notification.action.error'));
                                                               }
                                                             });
                                                           },
@@ -1036,7 +1040,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                             if (await CoreHelperWidget
                                                                 .confirmFunction(
                                                                     context:
-                                                                        context)) {
+                                                                        context, settingNotifier: settingNotifier)) {
                                                               _onDeleteNoteForever(
                                                                       context)
                                                                   .then(
@@ -1062,21 +1066,23 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                         false,
                                                                   );
 
-                                                                  CoreNotification.show(
-                                                                      context,
+                                                                  CoreNotification.showMessage(
+                                                                      context, settingNotifier,
                                                                       CoreNotificationStatus
                                                                           .success,
-                                                                      CoreNotificationAction
-                                                                          .delete,
-                                                                      'Note');
+                                                                      CommonLanguages.convert(
+                                                                          lang: settingNotifier.languageString ??
+                                                                              CommonLanguages.languageStringDefault(),
+                                                                          word: 'notification.action.deleted'));
                                                                 } else {
-                                                                  CoreNotification.show(
-                                                                      context,
+                                                                  CoreNotification.showMessage(
+                                                                      context, settingNotifier,
                                                                       CoreNotificationStatus
                                                                           .error,
-                                                                      CoreNotificationAction
-                                                                          .delete,
-                                                                      'Note');
+                                                                      CommonLanguages.convert(
+                                                                          lang: settingNotifier.languageString ??
+                                                                              CommonLanguages.languageStringDefault(),
+                                                                          word: 'notification.action.error'));
                                                                 }
                                                               });
                                                             }

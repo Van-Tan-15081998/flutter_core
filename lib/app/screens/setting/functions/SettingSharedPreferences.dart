@@ -95,6 +95,15 @@ class SettingSharedPreferences {
     await prefs.setString('avatarDescriptionString', avatarDescriptionStr);
   }
 
+  Future<void> setAvatarImageSourceString(String avatarImageSourceStr) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? avatarImageSourceString =
+    prefs.getString('avatarImageSourceString');
+
+    await prefs.setString('avatarImageSourceString', avatarImageSourceStr);
+  }
+
   Future<void> setPlayingBackgroundMusicSourceString(
       String playingBackgroundMusicSourceStr) async {
     final SharedPreferences prefs = await _prefs;
@@ -195,6 +204,15 @@ GETTER
         prefs.getString('avatarDescriptionString');
 
     return avatarDescriptionString;
+  }
+
+  Future<String?> getAvatarImageSourceString() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final String? avatarImageSourceString =
+    prefs.getString('avatarImageSourceString');
+
+    return avatarImageSourceString;
   }
 
   Future<String?> getPlayingBackgroundMusicSourceString() async {

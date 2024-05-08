@@ -161,8 +161,10 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
   }
 
   Widget onGetTitle(SettingNotifier settingNotifier) {
-    String defaultTitle =
-        '${CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'card.title.youWroteAt')} ${CommonConverters.toTimeString(time: widget.note.createdAt!)}';
+    String defaultTitle = CommonLanguages.convert(
+        lang: settingNotifier.languageString ??
+            CommonLanguages.languageStringDefault(),
+        word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -170,17 +172,8 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
   }
 
   bool checkTitleEmpty() {
-    if (widget.note.title != null && widget.note.title!.isNotEmpty) {
-      List<dynamic> deltaMap = jsonDecode(widget.note.title!);
-
-      flutter_quill.Delta delta = flutter_quill.Delta.fromJson(deltaMap);
-
-      var list = delta.toList();
-      if (list.length == 1) {
-        if (list[0].key == 'insert' && list[0].data == '\n') {
-          return false;
-        }
-      }
+    if (_titleQuillController.document.isEmpty()) {
+      return false;
     }
     return true;
   }
@@ -717,14 +710,14 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                         children: <Widget>[
                           StickyHeader(
                             header: _buildHeader(context, settingNotifier),
-                            content: _buildContent(),
+                            content: _buildContent(settingNotifier),
                           )
                         ],
                       )
                     : Column(
                         children: <Widget>[
                           _buildHeader(context, settingNotifier),
-                          _buildContent(),
+                          _buildContent(settingNotifier),
                         ],
                       )),
             Padding(
@@ -872,7 +865,7 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
     );
   }
 
-  Column _buildContent() {
+  Column _buildContent(SettingNotifier settingNotifier) {
     return Column(
       children: [
         _buildLabels(),
@@ -888,10 +881,11 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                 padding: const EdgeInsets.all(6.0),
                 child: Row(
                   children: [
-                    Text("[id:${widget.note.id!}] ",
-                        style: const TextStyle(
-                            fontSize: 13.0, color: Colors.black45)),
-                    const Text("Content",
+                    Text(
+                        CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'screen.title.content'),
                         style:
                             TextStyle(fontSize: 13.0, color: Colors.black45)),
                   ],

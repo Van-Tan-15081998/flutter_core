@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -58,7 +59,7 @@ class _SubjectListFolderModeScreenState
   List<SubjectModel>? _subjectList = [];
 
   List<SubjectModel> subjectFolders = [];
-  List<NoteModel> notes = [];
+  // List<NoteModel> notes = [];
   final ScrollController _breadcrumbScrollController = ScrollController();
 
   List<SubjectModel> breadcrumb = [];
@@ -68,7 +69,18 @@ class _SubjectListFolderModeScreenState
    Parameters For Search & Filter
    */
   SubjectConditionModel _subjectConditionModel = SubjectConditionModel();
+
+  /*
+   Parameters For Pagination
+   */
+  static const _pageSize = 10;
+  final PagingController<int, NoteModel> _pagingController =
+      PagingController(firstPageKey: 0);
+
+  final CorePaginationModel _corePaginationModel =
+      CorePaginationModel(currentPageIndex: 0, itemPerPage: _pageSize);
   NoteConditionModel _noteConditionModel = NoteConditionModel();
+  final ScrollController _scrollController = ScrollController();
 
   Future<bool> _onDeleteSubject(
       BuildContext context, SubjectModel subject) async {
@@ -149,21 +161,32 @@ class _SubjectListFolderModeScreenState
     }
   }
 
-  Future<List<NoteModel>> _fetchPageDataNote() async {
+  _updateNoteConditions() {
+    // Check current subject parent to set condition
+    if (currentParentSubject != null) {
+      _noteConditionModel.subjectId = currentParentSubject!.id;
+      _noteConditionModel.onlyNoneSubject = null;
+    } else {
+      _noteConditionModel.subjectId = null;
+      _noteConditionModel.onlyNoneSubject = true;
+    }
+  }
+
+  _scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<List<NoteModel>> _fetchPageDataNote(int pageKey) async {
     try {
-      // Check current subject parent to set condition
-      if (currentParentSubject != null) {
-        _noteConditionModel.subjectId = currentParentSubject!.id;
-        _noteConditionModel.onlyNoneSubject = null;
-      } else {
-        _noteConditionModel.subjectId = null;
-        _noteConditionModel.onlyNoneSubject = true;
-      }
+      _updateNoteConditions();
 
       List<NoteModel>? result = [];
       result = await NoteDatabaseManager.onGetNotePagination(
-          CorePaginationModel(currentPageIndex: 0, itemPerPage: 10000),
-          _noteConditionModel);
+          _corePaginationModel, _noteConditionModel);
 
       if (result == null) {
         return [];
@@ -238,17 +261,27 @@ class _SubjectListFolderModeScreenState
         });
   }
 
+  /*
+  Reload Page
+   */
+  _reloadNotePage() {
+    _updateNoteConditions();
+    _corePaginationModel.currentPageIndex = 0;
+    _pagingController.refresh();
+  }
+
   Future<bool> _reloadPage() async {
     await _fetchPageDataSubject().then((items) async {
       setState(() {
         subjectFolders = items;
       });
 
-      await _fetchPageDataNote().then((items) {
-        setState(() {
-          notes = items;
-        });
-      });
+      // await _fetchPageDataNote().then((items) {
+      //   setState(() {
+      //     notes = items;
+      //   });
+      // });
+      _reloadNotePage();
     });
     return true;
   }
@@ -263,6 +296,44 @@ class _SubjectListFolderModeScreenState
     }
 
     _onInitData();
+
+    // Init For Pagination
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPageDataNote(pageKey).then((items) {
+        if (items.isNotEmpty) {
+          final isLastPage = items.length < _pageSize;
+
+          if (_corePaginationModel.currentPageIndex == 0) {
+            _scrollToTop();
+          }
+
+          if (isLastPage) {
+            _pagingController.appendLastPage(items);
+          } else {
+            _pagingController.appendPage(items, pageKey + 1);
+            _corePaginationModel.currentPageIndex++;
+          }
+        } else {
+          _pagingController.appendLastPage([]);
+        }
+      });
+    });
+
+    _pagingController.addStatusListener((status) {
+      if (status == PagingStatus.subsequentPageError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Something went wrong while fetching a new page.',
+            ),
+            action: SnackBarAction(
+              label: 'Retry',
+              onPressed: () => _pagingController.retryLastFailedRequest(),
+            ),
+          ),
+        );
+      }
+    });
   }
 
   /*
@@ -624,12 +695,19 @@ class _SubjectListFolderModeScreenState
                             if (!isCanDeleteSubject) {
                               await CoreHelperWidget.confirmFunction(
                                   context: context,
+                                  settingNotifier: settingNotifier,
                                   isOnlyWarning: true,
-                                  title:
-                                      'Không thể xóa! Vui lòng xóa toàn bộ chủ đề con và ghi chú của chủ đề mà bạn muốn xóa!');
+                                  title: CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages
+                                              .languageStringDefault(),
+                                      word:
+                                          'notification.action.cannotDelete.subject'));
                             } else {
                               if (await CoreHelperWidget.confirmFunction(
-                                  context: context)) {
+                                  context: context,
+                                  settingNotifier: settingNotifier,
+                                  confirmDelete: true)) {
                                 _onDeleteSubject(context, subjectFolders[index])
                                     .then((result) {
                                   if (result) {
@@ -637,17 +715,28 @@ class _SubjectListFolderModeScreenState
 
                                     _reloadPage();
 
-                                    CoreNotification.show(
+                                    CoreNotification.showMessage(
                                         context,
+                                        settingNotifier,
                                         CoreNotificationStatus.success,
-                                        CoreNotificationAction.delete,
-                                        'Subject');
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'notification.action.deleted'));
                                   } else {
-                                    CoreNotification.show(
+                                    CoreNotification.showMessage(
                                         context,
+                                        settingNotifier,
                                         CoreNotificationStatus.error,
-                                        CoreNotificationAction.delete,
-                                        'Subject');
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'notification.action.error'));
                                   }
                                 });
                               }
@@ -666,17 +755,25 @@ class _SubjectListFolderModeScreenState
                                           : null;
                                 });
 
-                                CoreNotification.show(
+                                CoreNotification.showMessage(
                                     context,
+                                    settingNotifier,
                                     CoreNotificationStatus.success,
-                                    CoreNotificationAction.update,
-                                    'Subject');
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'notification.action.updated'));
                               } else {
-                                CoreNotification.show(
+                                CoreNotification.showMessage(
                                     context,
+                                    settingNotifier,
                                     CoreNotificationStatus.error,
-                                    CoreNotificationAction.update,
-                                    'Subject');
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'notification.action.error'));
                               }
                             });
                           },
@@ -741,48 +838,8 @@ class _SubjectListFolderModeScreenState
                       )
                     ],
                   ),
-            notesWidget: notes.isNotEmpty
-                ? _buildNotesWidget(context, settingNotifier, noteNotifier)
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding:
-                            const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                        decoration: BoxDecoration(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(24.0)),
-                            color: settingNotifier.isSetBackgroundImage == true
-                                ? Colors.white.withOpacity(0.65)
-                                : Colors.transparent),
-                        child: Row(
-                          children: [
-                            BounceInLeft(
-                              child: FaIcon(FontAwesomeIcons.waze,
-                                  size: 30.0,
-                                  color: ThemeDataCenter.getAloneTextColorStyle(
-                                      context)),
-                            ),
-                            const SizedBox(width: 5),
-                            BounceInRight(
-                              child: Text(
-                                  CommonLanguages.convert(
-                                      lang: settingNotifier.languageString ??
-                                          CommonLanguages
-                                              .languageStringDefault(),
-                                      word: 'notification.noItem.note'),
-                                  style: GoogleFonts.montserrat(
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 16.0,
-                                      color: ThemeDataCenter
-                                          .getAloneTextColorStyle(context),
-                                      fontWeight: FontWeight.w500)),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
+            notesWidget: _buildNotesPagedListViewWidget(
+                context, settingNotifier, noteNotifier),
           ),
         ),
       ],
@@ -817,132 +874,190 @@ class _SubjectListFolderModeScreenState
     return subjects.isNotEmpty ? subjects.first : null;
   }
 
-  Widget _buildNotesWidget(BuildContext context,
+  Widget _buildNotesPagedListViewWidget(BuildContext context,
       SettingNotifier settingNotifier, NoteNotifier noteNotifier) {
-    return SingleChildScrollView(
-      child: Column(
-        children: List.generate(
-            notes.length,
-            // (index) => SmallNoteWidget(
-            //   note: notes[index],
-            //   index: index + 1,
-            //   labels: _getNoteLabels(notes[index].labels!),
-            //   subject: _getNoteSubject(notes[index].subjectId),
-            // ),
-            (index) => SmallNoteWidget(
-                  key: ValueKey<int>(notes[index].id!),
-                  index: index + 1,
-                  note: notes[index],
-                  isLastItem: index == notes.length - 1,
-                  labels: _getNoteLabels(notes[index].labels!),
-                  subject: _getNoteSubject(notes[index].subjectId),
-                  onView: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => NoteDetailScreen(
-                                  note: notes[index],
-                                  labels: _getNoteLabels(notes[index].labels!),
-                                  subject:
-                                      _getNoteSubject(notes[index].subjectId),
-                                  redirectFrom:
-                                      RedirectFromEnum.subjectsInFolderMode,
-                                )));
-                  },
-                  onUpdate: () {
-                    _onUpdateNote(context, notes[index]);
-                  },
-                  onDelete: () {
-                    _onDeleteNote(context, notes[index]).then((result) {
-                      if (result) {
-                        noteNotifier.onCountAll();
-                        _reloadPage();
+    return PagedListView<int, NoteModel>(
+      padding: const EdgeInsets.only(bottom: 150.0),
+      scrollController: _scrollController,
+      pagingController: _pagingController,
+      builderDelegate: PagedChildBuilderDelegate<NoteModel>(
+        animateTransitions: true,
+        transitionDuration: const Duration(milliseconds: 500),
+        itemBuilder: (context, item, index) => SmallNoteWidget(
+          key: ValueKey<int>(item.id!),
+          index: index + 1,
+          note: item,
+          isLastItem: null,
+          labels: _getNoteLabels(item.labels!),
+          subject: _getNoteSubject(item.subjectId),
+          onView: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => NoteDetailScreen(
+                          note: item,
+                          labels: _getNoteLabels(item.labels!),
+                          subject: _getNoteSubject(item.subjectId),
+                          redirectFrom: RedirectFromEnum.subjectsInFolderMode,
+                        )));
+          },
+          onUpdate: () {
+            _onUpdateNote(context, item);
+          },
+          onDelete: () {
+            _onDeleteNote(context, item).then((result) {
+              if (result) {
+                noteNotifier.onCountAll();
+                _reloadPage();
 
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.success,
-                            CoreNotificationAction.delete,
-                            'Note');
-                      } else {
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.error,
-                            CoreNotificationAction.delete,
-                            'Note');
-                      }
-                    });
-                  },
-                  onFavourite: () {
-                    _onFavouriteNote(context, notes[index]).then((result) {
-                      if (result) {
-                        setState(() {
-                          notes[index].isFavourite =
-                              notes[index].isFavourite == null
-                                  ? DateTime.now().millisecondsSinceEpoch
-                                  : null;
-                        });
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.deleted'));
+              } else {
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
+              }
+            });
+          },
+          onFavourite: () {
+            _onFavouriteNote(context, item).then((result) {
+              if (result) {
+                setState(() {
+                  item.isFavourite = item.isFavourite == null
+                      ? DateTime.now().millisecondsSinceEpoch
+                      : null;
+                });
 
-                        CommonAudioOnPressButton audio =
-                            CommonAudioOnPressButton();
-                        audio.playAudioOnFavourite();
-                      } else {
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.error,
-                            CoreNotificationAction.update,
-                            'Note');
-                      }
-                    });
-                  },
-                  onPin: () {
-                    _onPinNote(context, notes[index]).then((result) {
-                      if (result) {
-                        setState(() {
-                          notes[index].isPinned = notes[index].isPinned == null
-                              ? DateTime.now().millisecondsSinceEpoch
-                              : null;
-                        });
+                CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+                audio.playAudioOnFavourite();
+              } else {
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
+              }
+            });
+          },
+          onPin: () {
+            _onPinNote(context, item).then((result) {
+              if (result) {
+                setState(() {
+                  item.isPinned = item.isPinned == null
+                      ? DateTime.now().millisecondsSinceEpoch
+                      : null;
+                });
 
-                        CommonAudioOnPressButton audio =
-                            CommonAudioOnPressButton();
-                        audio.playAudioOnFavourite();
-                      } else {
-                        CoreNotification.show(
-                            context,
-                            CoreNotificationStatus.error,
-                            CoreNotificationAction.update,
-                            'Note');
-                      }
-                    });
-                  },
-                  onUnlock: () async {
-                    if (await CoreHelperWidget.confirmFunction(
-                        context: context)) {
-                      _onUnlockNote(context, notes[index]).then((result) {
-                        if (result) {
-                          setState(() {
-                            notes[index].isLocked =
-                                notes[index].isLocked == null
-                                    ? DateTime.now().millisecondsSinceEpoch
-                                    : null;
-                          });
+                CommonAudioOnPressButton audio = CommonAudioOnPressButton();
+                audio.playAudioOnFavourite();
+              } else {
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
+              }
+            });
+          },
+          onUnlock: () async {
+            if (await CoreHelperWidget.confirmFunction(
+                context: context,
+                settingNotifier: settingNotifier,
+                confirmUnlock: true)) {
+              _onUnlockNote(context, item).then((result) {
+                if (result) {
+                  setState(() {
+                    item.isLocked = item.isLocked == null
+                        ? DateTime.now().millisecondsSinceEpoch
+                        : null;
+                  });
 
-                          CoreNotification.show(
-                              context,
-                              CoreNotificationStatus.success,
-                              CoreNotificationAction.update,
-                              'Note');
-                        } else {
-                          CoreNotification.show(
-                              context,
-                              CoreNotificationStatus.error,
-                              CoreNotificationAction.update,
-                              'Note');
-                        }
-                      });
-                    }
-                  },
-                )),
+                  CoreNotification.showMessage(
+                      context,
+                      settingNotifier,
+                      CoreNotificationStatus.success,
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'notification.action.unlocked'));
+                } else {
+                  CoreNotification.showMessage(
+                      context,
+                      settingNotifier,
+                      CoreNotificationStatus.error,
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'notification.action.error'));
+                }
+              });
+            }
+          },
+        ),
+        firstPageErrorIndicatorBuilder: (context) => Center(
+          child: Text(
+            'Error loading data!',
+            style: TextStyle(
+              color: ThemeDataCenter.getAloneTextColorStyle(context),
+            ),
+          ),
+        ),
+        noItemsFoundIndicatorBuilder: (context) => Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(24.0)),
+                    color: settingNotifier.isSetBackgroundImage == true
+                        ? Colors.white.withOpacity(0.65)
+                        : Colors.transparent),
+                child: Row(
+                  children: [
+                    BounceInLeft(
+                      child: FaIcon(FontAwesomeIcons.waze,
+                          size: 30.0,
+                          color:
+                              ThemeDataCenter.getAloneTextColorStyle(context)),
+                    ),
+                    const SizedBox(width: 5),
+                    BounceInRight(
+                      child: Text(
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.noItem.note'),
+                          style: GoogleFonts.montserrat(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 16.0,
+                              color: ThemeDataCenter.getAloneTextColorStyle(
+                                  context),
+                              fontWeight: FontWeight.w500)),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -996,6 +1111,7 @@ class _SubjectListFolderModeScreenState
                                 CommonLanguages.languageStringDefault(),
                             word: 'screen.title.subjects'),
                         style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 20.0,
                             color: ThemeDataCenter.getScreenTitleTextColor(
                                 context)),
                       ),

@@ -407,9 +407,9 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.detail'),
+                                word: 'screen.title.detail.template'),
                             style: CommonStyles.screenTitleTextStyle(
-                                fontSize: 22.0,
+                                fontSize: 16.0,
                                 color: ThemeDataCenter.getScreenTitleTextColor(
                                     context))),
                       ),
@@ -422,7 +422,10 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
         ),
         actions: AppBarActionButtonEnum.home,
         isConfirmToClose: false,
-        homeLabel: 'Templates',
+        homeLabel: CommonLanguages.convert(
+            lang: settingNotifier.languageString ??
+                CommonLanguages.languageStringDefault(),
+            word: 'screen.title.templates'),
         onGoHome: () {
           Navigator.pushAndRemoveUntil(
             context,
@@ -481,17 +484,21 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                 (route) => false,
                               );
 
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.success,
-                                  CoreNotificationAction.delete,
-                                  'Template');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.deleted'));
                             } else {
-                              CoreNotification.show(
-                                  context,
+                              CoreNotification.showMessage(
+                                  context, settingNotifier,
                                   CoreNotificationStatus.error,
-                                  CoreNotificationAction.delete,
-                                  'Template');
+                                  CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.error'));
                             }
                           });
                         },
@@ -778,21 +785,23 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                           (route) => false,
                                                         );
 
-                                                        CoreNotification.show(
-                                                            context,
+                                                        CoreNotification.showMessage(
+                                                            context, settingNotifier,
                                                             CoreNotificationStatus
                                                                 .success,
-                                                            CoreNotificationAction
-                                                                .restore,
-                                                            'Template');
+                                                            CommonLanguages.convert(
+                                                                lang: settingNotifier.languageString ??
+                                                                    CommonLanguages.languageStringDefault(),
+                                                                word: 'notification.action.restored'));
                                                       } else {
-                                                        CoreNotification.show(
-                                                            context,
+                                                        CoreNotification.showMessage(
+                                                            context, settingNotifier,
                                                             CoreNotificationStatus
                                                                 .error,
-                                                            CoreNotificationAction
-                                                                .restore,
-                                                            'Template');
+                                                            CommonLanguages.convert(
+                                                                lang: settingNotifier.languageString ??
+                                                                    CommonLanguages.languageStringDefault(),
+                                                                word: 'notification.action.error'));
                                                       }
                                                     });
                                                   },
@@ -815,7 +824,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                   onPressed: () async {
                                                     if (await CoreHelperWidget
                                                         .confirmFunction(
-                                                            context: context)) {
+                                                            context: context, settingNotifier: settingNotifier)) {
                                                       _onDeleteTemplateForever(
                                                               context)
                                                           .then((result) {
@@ -840,21 +849,23 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                                             (route) => false,
                                                           );
 
-                                                          CoreNotification.show(
-                                                              context,
+                                                          CoreNotification.showMessage(
+                                                              context, settingNotifier,
                                                               CoreNotificationStatus
                                                                   .success,
-                                                              CoreNotificationAction
-                                                                  .delete,
-                                                              'Template');
+                                                              CommonLanguages.convert(
+                                                                  lang: settingNotifier.languageString ??
+                                                                      CommonLanguages.languageStringDefault(),
+                                                                  word: 'notification.action.deleted'));
                                                         } else {
-                                                          CoreNotification.show(
-                                                              context,
+                                                          CoreNotification.showMessage(
+                                                              context, settingNotifier,
                                                               CoreNotificationStatus
                                                                   .error,
-                                                              CoreNotificationAction
-                                                                  .delete,
-                                                              'Template');
+                                                              CommonLanguages.convert(
+                                                                  lang: settingNotifier.languageString ??
+                                                                      CommonLanguages.languageStringDefault(),
+                                                                  word: 'notification.action.error'));
                                                         }
                                                       });
                                                     }

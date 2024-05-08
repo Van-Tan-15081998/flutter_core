@@ -71,7 +71,8 @@ class CoreFullScreenDialog extends StatefulWidget {
 }
 
 class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
-  CommonAudioOnPressButton commonAudioOnPressButton = CommonAudioOnPressButton();
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
 
   @override
   void initState() {
@@ -191,7 +192,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
           ? Colors.transparent
           : ThemeDataCenter.getBackgroundColor(context),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.all(6.0),
+        padding: const EdgeInsets.fromLTRB(6.0, 6.0, 6.0, 0),
         child: widget.isShowBottomActionButton!
             ? Container(
                 padding: const EdgeInsets.fromLTRB(4, 1, 4, 0),
@@ -251,7 +252,8 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                 onPressed: () async {
                                   if (widget.isConfirmToClose!) {
                                     if (await CoreHelperWidget.confirmFunction(
-                                        context: context)) {
+                                        context: context,
+                                        settingNotifier: settingNotifier)) {
                                       if (Navigator.canPop(context)) {
                                         Navigator.pop(context);
                                       }

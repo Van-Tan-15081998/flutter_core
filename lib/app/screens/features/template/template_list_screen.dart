@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -346,7 +347,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             : null);
   }
 
-  Widget _filterPopup(BuildContext context) {
+  Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
         shape:
@@ -365,8 +366,11 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Search keywords: ',
-                                  style: CommonStyles.buttonTextStyle),
+                              Text(CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.filter.searchKeyword').addColon(),
+                                  style: CommonStyles.labelFilterTextStyle),
                               const SizedBox(width: 10.0),
                               Expanded(
                                 child: Row(
@@ -393,8 +397,11 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text('Templates in the trash',
-                            style: CommonStyles.buttonTextStyle),
+                        child: Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.trash').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
                         checkColor: Colors.white,
@@ -420,8 +427,11 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text('Favourite templates',
-                            style: CommonStyles.buttonTextStyle),
+                        child: Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.favourite').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
                         checkColor: Colors.white,
@@ -447,8 +457,11 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text('Recently Updated',
-                            style: CommonStyles.buttonTextStyle),
+                        child: Text(CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.recentlyUpdated').addColon(),
+                            style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
                         checkColor: Colors.white,
@@ -557,9 +570,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             : _buildBody(templateNotifier, settingNotifier),
         bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
             ? null
-            : _buildBottomNavigationBar(context),
+            : _buildBottomNavigationBar(context, settingNotifier),
         floatingActionButton: settingNotifier.isSetBackgroundImage == true
-            ? _buildBottomNavigationBarActionList(context)
+            ? _buildBottomNavigationBarActionList(context, settingNotifier)
             : null,
         floatingActionButtonLocation:
             FloatingActionButtonLocation.miniCenterDocked,
@@ -616,6 +629,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                   CommonLanguages.languageStringDefault(),
                               word: 'screen.title.templates'),
                           style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 20.0,
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context)),
                           overflow: TextOverflow.ellipsis),
@@ -680,7 +694,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                           await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) =>
-                                  _filterPopup(context));
+                                  _filterPopup(context, settingNotifier));
                         }),
                   )
                 : Container()
@@ -691,17 +705,17 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
         data: const IconThemeData(color: Colors.white),
-        child: _buildBottomNavigationBarActionList(context),
+        child: _buildBottomNavigationBarActionList(context, settingNotifier),
       ),
     );
   }
 
-  Row _buildBottomNavigationBarActionList(BuildContext context) {
+  Row _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -839,7 +853,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
-                builder: (BuildContext context) => _filterPopup(context));
+                builder: (BuildContext context) => _filterPopup(context, settingNotifier));
           },
           coreButtonStyle:
               ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -956,7 +970,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         Expanded(
           child: PagedListView<int, TemplateModel>(
             padding: EdgeInsets.only(
-                top: CommonDimensions.scaffoldAppBarHeight(context) / 5),
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5, bottom: 150.0),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
@@ -979,23 +993,27 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         _pagingController.itemList!.remove(item);
                       });
 
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.delete,
-                          'Template');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.deleted'));
                     } else {
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.error,
-                          CoreNotificationAction.delete,
-                          'Template');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.error'));
                     }
                   });
                 },
                 onDeleteForever: () async {
                   if (await CoreHelperWidget.confirmFunction(
-                      context: context)) {
+                      context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
                     _onDeleteTemplateForever(context, item).then((result) {
                       if (result) {
                         templateNotifier.onCountAll();
@@ -1004,17 +1022,21 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                           _pagingController.itemList!.remove(item);
                         });
 
-                        CoreNotification.show(
-                            context,
+                        CoreNotification.showMessage(
+                            context, settingNotifier,
                             CoreNotificationStatus.success,
-                            CoreNotificationAction.delete,
-                            'Template');
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.deleted'));
                       } else {
-                        CoreNotification.show(
-                            context,
+                        CoreNotification.showMessage(
+                            context, settingNotifier,
                             CoreNotificationStatus.error,
-                            CoreNotificationAction.delete,
-                            'Template');
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.error'));
                       }
                     });
                   }
@@ -1028,17 +1050,21 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         _pagingController.itemList!.remove(item);
                       });
 
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.restore,
-                          'Template');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.restored'));
                     } else {
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.error,
-                          CoreNotificationAction.restore,
-                          'Template');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.error'));
                     }
                   });
                 },
@@ -1056,15 +1082,17 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                       //     CoreNotificationStatus.success,
                       //     CoreNotificationAction.update,
                       //     'Template');
-                      CommonAudioOnPressButton audio =
-                          CommonAudioOnPressButton();
-                      audio.playAudioOnFavourite();
+                      // CommonAudioOnPressButton audio =
+                      //     CommonAudioOnPressButton();
+                      commonAudioOnPressButton.playAudioOnFavourite();
                     } else {
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.error,
-                          CoreNotificationAction.update,
-                          'Template');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.error'));
                     }
                   });
                 },

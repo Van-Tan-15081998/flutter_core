@@ -199,13 +199,13 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                             ? CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.create')
+                                word: 'screen.title.create.subject')
                             : CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
                                     CommonLanguages.languageStringDefault(),
-                                word: 'screen.title.update'),
+                                word: 'screen.title.update.subject'),
                         style: CommonStyles.screenTitleTextStyle(
-                            fontSize: 22.0,
+                            fontSize: 16.0,
                             color: ThemeDataCenter.getScreenTitleTextColor(
                                 context)),
                         overflow: TextOverflow.ellipsis,
@@ -242,8 +242,11 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
               if (result) {
                 subjectNotifier.onCountAll();
 
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.create, 'Subject');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.created'));
 
                 if (widget.redirectFrom == RedirectFromEnum.notes) {
                   Navigator.push(
@@ -256,6 +259,8 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                               )));
                 } else if (widget.redirectFrom ==
                     RedirectFromEnum.subjectsInFolderMode) {
+                  Navigator.pop(context, result);
+                } else if (widget.redirectFrom == RedirectFromEnum.noteCreate) {
                   Navigator.pop(context, result);
                 } else {
                   Navigator.pushAndRemoveUntil(
@@ -270,8 +275,11 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                   );
                 }
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.create, 'Subject');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           } else if (widget.subject != null &&
@@ -287,8 +295,11 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
 
             _onUpdateSubject(context, model).then((result) {
               if (result) {
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.update, 'Subject');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.updated'));
 
                 _onGetUpdatedSubject(context, model).then((getResult) {
                   if (getResult != null) {
@@ -309,8 +320,11 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                   }
                 });
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.update, 'Subject');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           }
@@ -324,7 +338,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
       child: WillPopScope(
         onWillPop: () async {
           onBack();
-          if (await CoreHelperWidget.confirmFunction(context: context)) {
+          if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmExitScreen: true)) {
             return true;
           }
           return false;

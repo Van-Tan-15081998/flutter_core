@@ -9,6 +9,13 @@ class NoteModel {
   int? isFavourite;
   int? isPinned;
   int? isLocked;
+
+  final int? label01Id;
+  final int? label02Id;
+  final int? label03Id;
+  final int? label04Id;
+  final int? label05Id;
+
   final int? createdAt;
   final int? createdAtDayFormat;
   final int? createdForDay;
@@ -24,6 +31,13 @@ class NoteModel {
       this.isFavourite,
       this.isPinned,
       this.isLocked,
+
+        this.label01Id,
+        this.label02Id,
+        this.label03Id,
+        this.label04Id,
+        this.label05Id,
+
       this.createdAtDayFormat,
       this.createdForDay,
       this.updatedAt,

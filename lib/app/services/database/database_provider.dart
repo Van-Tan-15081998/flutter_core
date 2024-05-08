@@ -160,6 +160,9 @@ class DatabaseProvider {
       CorePaginationModel corePaginationModel,
       NoteConditionModel noteConditionModel) async {
     final db = await _getDB();
+    int toDay =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .millisecondsSinceEpoch;
 
     final List<Map<String, dynamic>> maps = await db.query("notes",
         limit: corePaginationModel.itemPerPage,
@@ -171,11 +174,11 @@ class DatabaseProvider {
                 "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} ) OR (createdForDay >= ${noteConditionModel.createdAtStartOfDay} AND createdForDay <= ${noteConditionModel.createdAtEndOfDay}))" : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
             ' ${noteConditionModel.onlyNoneSubject == true ? " AND subjectID IS NULL" : ""}'
-            ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${noteConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${noteConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
+            ' ${noteConditionModel.createdForDay == true ? " AND createdForDay IS NOT NULL AND createdForDay > $toDay" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
-        orderBy: noteConditionModel.recentlyUpdated != null
-            ? "updatedAt DESC, isPinned DESC"
-            : "isPinned DESC, id DESC");
+        orderBy:  "isPinned DESC, ${noteConditionModel.isDeleted == true ? 'deletedAt DESC' : ''} ${noteConditionModel.createdForDay == true ? 'createdForDay ASC,' : ''} ${noteConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -550,11 +553,10 @@ class DatabaseProvider {
         where:
             ' ${templateConditionModel.isDeleted == null || templateConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
             ' ${templateConditionModel.subjectId != null ? " AND subjectID = ${templateConditionModel.subjectId}" : ""}'
-            ' ${templateConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${templateConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
+                ' ${templateConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
             ' ${templateConditionModel.searchText != null && templateConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${templateConditionModel.searchText}%\' OR description LIKE \'%${templateConditionModel.searchText}%\')" : ""}',
-        orderBy: templateConditionModel.recentlyUpdated != null
-            ? "updatedAt DESC"
-            : "id DESC");
+        orderBy: "${templateConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
 
     if (maps.isEmpty) {
       return null;

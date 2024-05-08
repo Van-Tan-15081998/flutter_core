@@ -305,6 +305,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                                                             ActionModeEnum
                                                                 .update,
                                                         label: widget.label,
+                                                        redirectFrom: null,
                                                       )));
                                         },
                                         coreButtonStyle: ThemeDataCenter

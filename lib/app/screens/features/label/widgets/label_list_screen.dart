@@ -189,7 +189,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
     return false;
   }
 
-  Widget _filterPopup(BuildContext context) {
+  Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
         shape:
@@ -208,8 +208,16 @@ class _LabelListScreenState extends State<LabelListScreen> {
                         return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Search keywords: ',
-                                  style: CommonStyles.buttonTextStyle),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'form.filter.searchKeyword'),
+                                      style: CommonStyles.labelFilterTextStyle),
+                                ],
+                              ),
                               const SizedBox(width: 10.0),
                               Expanded(
                                 child: Row(
@@ -235,7 +243,17 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('Deleted', style: CommonStyles.buttonTextStyle),
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'form.filter.trash'), style: CommonStyles.labelFilterTextStyle),
+                          ],
+                        ),
+                      ),
                       Checkbox(
                         checkColor: Colors.white,
                         value: _filterByDeleted,
@@ -343,9 +361,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
             : _buildBody(context, labelNotifier, settingNotifier),
         bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
             ? null
-            : _buildBottomNavigationBar(context),
+            : _buildBottomNavigationBar(context, settingNotifier),
         floatingActionButton: settingNotifier.isSetBackgroundImage == true
-            ? _buildBottomNavigationBarActionList(context)
+            ? _buildBottomNavigationBarActionList(context, settingNotifier)
             : null,
         floatingActionButtonLocation:
             FloatingActionButtonLocation.miniCenterDocked,
@@ -402,6 +420,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                   CommonLanguages.languageStringDefault(),
                               word: 'screen.title.labels'),
                           style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 20.0,
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context))),
                     ),
@@ -424,7 +443,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                           await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) =>
-                                  _filterPopup(context));
+                                  _filterPopup(context, settingNotifier));
                         }),
                   )
                 : Container()
@@ -445,7 +464,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
         Expanded(
           child: PagedListView<int, LabelModel>(
             padding: EdgeInsets.only(
-                top: CommonDimensions.scaffoldAppBarHeight(context) / 5),
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5, bottom: 150.0),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<LabelModel>(
@@ -460,6 +479,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                           builder: (context) => LabelCreateScreen(
                                 label: item,
                                 actionMode: ActionModeEnum.update,
+                            redirectFrom: null,
                               )));
                   setState(() {});
                 },
@@ -472,23 +492,27 @@ class _LabelListScreenState extends State<LabelListScreen> {
                         _pagingController.itemList!.remove(item);
                       });
 
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.delete,
-                          'Label');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.deleted'));
                     } else {
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.error,
-                          CoreNotificationAction.delete,
-                          'Label');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.error'));
                     }
                   });
                 },
                 onDeleteForever: () async {
                   if (await CoreHelperWidget.confirmFunction(
-                      context: context)) {
+                      context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
                     _onDeleteLabelForever(context, item).then((result) {
                       if (result) {
                         labelNotifier.onCountAll();
@@ -497,17 +521,21 @@ class _LabelListScreenState extends State<LabelListScreen> {
                           _pagingController.itemList!.remove(item);
                         });
 
-                        CoreNotification.show(
-                            context,
+                        CoreNotification.showMessage(
+                            context, settingNotifier,
                             CoreNotificationStatus.success,
-                            CoreNotificationAction.delete,
-                            'Label');
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.deleted'));
                       } else {
-                        CoreNotification.show(
-                            context,
+                        CoreNotification.showMessage(
+                            context, settingNotifier,
                             CoreNotificationStatus.error,
-                            CoreNotificationAction.delete,
-                            'Label');
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.error'));
                       }
                     });
                   }
@@ -521,17 +549,21 @@ class _LabelListScreenState extends State<LabelListScreen> {
                         _pagingController.itemList!.remove(item);
                       });
 
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.success,
-                          CoreNotificationAction.restore,
-                          'Label');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.restored'));
                     } else {
-                      CoreNotification.show(
-                          context,
+                      CoreNotification.showMessage(
+                          context, settingNotifier,
                           CoreNotificationStatus.error,
-                          CoreNotificationAction.restore,
-                          'Label');
+                          CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.error'));
                     }
                   });
                 },
@@ -589,17 +621,17 @@ class _LabelListScreenState extends State<LabelListScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
         data: const IconThemeData(color: Colors.white),
-        child: _buildBottomNavigationBarActionList(context),
+        child: _buildBottomNavigationBarActionList(context, settingNotifier),
       ),
     );
   }
 
-  Row _buildBottomNavigationBarActionList(BuildContext context) {
+  Row _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -739,7 +771,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
-                builder: (BuildContext context) => _filterPopup(context));
+                builder: (BuildContext context) => _filterPopup(context, settingNotifier));
           },
           coreButtonStyle:
               ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -756,7 +788,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
               context,
               MaterialPageRoute(
                   builder: (context) => const LabelCreateScreen(
-                      actionMode: ActionModeEnum.create)),
+                      actionMode: ActionModeEnum.create, redirectFrom: null,)),
             );
           },
           coreButtonStyle:

@@ -9,7 +9,6 @@ import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
-import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
@@ -17,11 +16,7 @@ import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../setting/providers/setting_notifier.dart';
 import '../../label/models/label_model.dart';
-import '../../subjects/models/subject_condition_model.dart';
 import '../../subjects/models/subject_model.dart';
-import '../../subjects/widgets/subject_list_screen.dart';
-import 'package:intl/intl.dart';
-
 import '../models/template_model.dart';
 import '../template_detail_screen.dart';
 

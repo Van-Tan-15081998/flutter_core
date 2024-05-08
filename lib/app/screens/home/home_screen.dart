@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:avatar_glow/avatar_glow.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart'
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -84,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String avatarDescriptionString = '';
   String avatarDescriptionStringEdit = '';
   bool isOpenFormChangeAvatarDescription = false;
+  String avatarImageSourceString = '';
 
   Future<bool> _onUnShortcut(BuildContext context, SubjectModel subject) async {
     return await SubjectDatabaseManager.createShortcut(subject, null);
@@ -477,42 +481,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                             fontSize: 16.0,
                                             fontWeight: FontWeight.w500),
                                       ),
-                                      _subjectShortcutList.isNotEmpty ? Expanded(
-                                          child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          InkWell(
-                                            highlightColor: Colors.black45,
-                                            onTap: () {
-                                              setState(() {
-                                                isOpenShortcutList =
-                                                    !isOpenShortcutList;
-                                              });
-                                            },
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                    color: Colors.black45,
-                                                    width: 1.0,
-                                                  ),
+                                      _subjectShortcutList.isNotEmpty
+                                          ? Expanded(
+                                              child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                InkWell(
+                                                  highlightColor:
+                                                      Colors.black45,
+                                                  onTap: () {
+                                                    setState(() {
+                                                      isOpenShortcutList =
+                                                          !isOpenShortcutList;
+                                                    });
+                                                  },
                                                   borderRadius:
-                                                      const BorderRadius.all(
-                                                          Radius.circular(
-                                                              10.0)),
-                                                  color: Colors.white
-                                                      .withOpacity(0.65)),
-                                              child: const Padding(
-                                                padding: EdgeInsets.fromLTRB(
-                                                    15.0, 6.0, 15.0, 6.0),
-                                                child: Text('Shortcuts'),
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      )) : Container()
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                          color: Colors.black45,
+                                                          width: 1.0,
+                                                        ),
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .all(
+                                                                Radius.circular(
+                                                                    10.0)),
+                                                        color: Colors.white
+                                                            .withOpacity(0.65)),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.fromLTRB(
+                                                              15.0,
+                                                              6.0,
+                                                              15.0,
+                                                              6.0),
+                                                      child: Text(CommonLanguages.convert(
+                                                          lang: settingNotifier.languageString ??
+                                                              CommonLanguages.languageStringDefault(),
+                                                          word: 'button.title.shortcuts')),
+                                                    ),
+                                                  ),
+                                                )
+                                              ],
+                                            ))
+                                          : Container()
                                     ],
                                   ),
                                   isOpenShortcutList
@@ -575,7 +591,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                         });
                                                                       } else {
                                                                         CoreNotification.show(
-                                                                            context,
+                                                                            context, settingNotifier,
                                                                             CoreNotificationStatus.error,
                                                                             CoreNotificationAction.update,
                                                                             'Subject');
@@ -878,6 +894,24 @@ class _HomeScreenState extends State<HomeScreen> {
     return localLabelList;
   }
 
+  Future<void> _pickImage(
+      ImageSource source, SettingNotifier settingNotifier) async {
+    final ImagePicker picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      settingNotifier.setAvatarImageSourceString(pickedFile.path).then(
+              (result) {
+                if (result) {
+                  CoreNotification.show(
+                      context, settingNotifier,
+                      CoreNotificationStatus.success,
+                      CoreNotificationAction.update,
+                      'Avatar');
+                }
+              });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -910,6 +944,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final settingNotifier = Provider.of<SettingNotifier>(context);
     avatarDescriptionString = settingNotifier.avatarDescriptionString ?? '';
     avatarDescriptionStringEdit = avatarDescriptionString;
+    avatarImageSourceString = settingNotifier.avatarImageSourceString ?? '';
 
     return Scaffold(
       key: _scaffoldKey,
@@ -1089,23 +1124,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white54,
-                                width: 1.0,
+                        InkWell(
+                          onTap: () async {
+                            await _pickImage(ImageSource.gallery, settingNotifier);
+                          },
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white54,
+                                  width: 1.0,
+                                ),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(65.0)),
+                                image: settingNotifier.avatarImageSourceString != null && settingNotifier.avatarImageSourceString!.isNotEmpty
+                                    ? DecorationImage(
+                                        image: FileImage(File(settingNotifier.avatarImageSourceString!)),
+                                        fit: BoxFit.cover)
+                                    : DecorationImage(
+                                        image: AssetImage(CommonStyles
+                                            .avatarImageSourceString()),
+                                        fit: BoxFit.cover),
                               ),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(50.0)),
-                              image: DecorationImage(
-                                  image: AssetImage(CommonStyles
-                                      .avatarImageSourceStringList()),
-                                  fit: BoxFit.cover),
-                            ),
-                            child: const SizedBox(
-                              width: 100.0,
-                              height: 100.0,
-                            )),
+                              child: const SizedBox(
+                                width: 125.0,
+                                height: 125.0,
+                              )),
+                        ),
                       ],
                     ),
                     const SizedBox(
@@ -1166,7 +1210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     style:
                                         const TextStyle(color: Colors.white54),
                                     onChanged: (value) {
-                                        avatarDescriptionStringEdit = value;
+                                      avatarDescriptionStringEdit = value;
                                     },
                                     controller: myController,
                                     focusNode: myFocusNode,
@@ -1224,7 +1268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           myFocusNode.unfocus();
                                         }
                                         CoreNotification.show(
-                                            context,
+                                            context, settingNotifier,
                                             CoreNotificationStatus.success,
                                             CoreNotificationAction.update,
                                             'Theme');
@@ -1258,31 +1302,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           lang: settingNotifier.languageString ??
                               CommonLanguages.languageStringDefault(),
                           word: 'button.title.setting'),
-                      style: GoogleFonts.montserrat(
-                          fontStyle: FontStyle.italic,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600)),
-                ],
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SettingScreen()),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CoreElevatedButton(
-              buttonAudio: commonAudioOnPressButton,
-              coreButtonStyle:
-                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('User manual',
                       style: GoogleFonts.montserrat(
                           fontStyle: FontStyle.italic,
                           fontSize: 18,

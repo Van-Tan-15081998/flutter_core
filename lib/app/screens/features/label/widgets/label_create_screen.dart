@@ -25,7 +25,8 @@ import 'label_list_screen.dart';
 class LabelCreateScreen extends StatefulWidget {
   final LabelModel? label;
   final ActionModeEnum actionMode;
-  const LabelCreateScreen({super.key, this.label, required this.actionMode});
+  final RedirectFromEnum? redirectFrom;
+  const LabelCreateScreen({super.key, this.label, required this.actionMode, required this.redirectFrom});
 
   @override
   State<LabelCreateScreen> createState() => _LabelCreateScreenState();
@@ -114,13 +115,13 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                               ? CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
                                       CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.create')
+                                  word: 'screen.title.create.label')
                               : CommonLanguages.convert(
                                   lang: settingNotifier.languageString ??
                                       CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.update'),
+                                  word: 'screen.title.update.label'),
                           style: CommonStyles.screenTitleTextStyle(
-                              fontSize: 22.0,
+                              fontSize: 16.0,
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context))),
                     ),
@@ -152,21 +153,32 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
               if (result) {
                 labelNotifier.onCountAll();
 
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.create, 'Label');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.created'));
 
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const LabelListScreen(
-                            labelConditionModel: null,
-                            redirectFrom: null,
-                          )),
-                  (route) => false,
-                );
+                if (widget.redirectFrom == RedirectFromEnum.noteCreate) {
+                  Navigator.pop(context, result);
+                } else {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const LabelListScreen(
+                          labelConditionModel: null,
+                          redirectFrom: null,
+                        )),
+                        (route) => false,
+                  );
+                }
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.create, 'Label');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           } else if (widget.label != null &&
@@ -180,8 +192,11 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
 
             _onUpdateLabel(context, model).then((result) {
               if (result) {
-                CoreNotification.show(context, CoreNotificationStatus.success,
-                    CoreNotificationAction.update, 'Label');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.updated'));
 
                 _onGetUpdatedLabel(context, model).then((result) {
                   if (result != null) {
@@ -196,8 +211,11 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                   }
                 });
               } else {
-                CoreNotification.show(context, CoreNotificationStatus.error,
-                    CoreNotificationAction.update, 'Label');
+                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'notification.action.error'));
               }
             });
           }
@@ -228,7 +246,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
     return WillPopScope(
       onWillPop: () async {
         onBack();
-        if (await CoreHelperWidget.confirmFunction(context: context)) {
+        if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmExitScreen: true)) {
           return true;
         }
         return false;

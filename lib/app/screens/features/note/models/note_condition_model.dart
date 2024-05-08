@@ -10,6 +10,7 @@ class NoteConditionModel {
   bool? isDeleted;
   bool? recentlyUpdated;
   bool? favourite;
+  bool? createdForDay;
 
   NoteConditionModel(
       {this.title,
@@ -22,5 +23,6 @@ class NoteConditionModel {
       this.searchText,
       this.isDeleted,
       this.recentlyUpdated,
-      this.favourite});
+      this.favourite,
+      this.createdForDay});
 }

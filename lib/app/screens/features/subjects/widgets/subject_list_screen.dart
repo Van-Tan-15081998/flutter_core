@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_core_v3/app/screens/features/subjects/widgets/subject_list_folder_mode_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -213,7 +214,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         subject, DateTime.now().millisecondsSinceEpoch);
   }
 
-  Widget _filterPopup(BuildContext context) {
+  Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
         shape:
@@ -232,8 +233,11 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                         return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Search keywords: ',
-                                  style: CommonStyles.buttonTextStyle),
+                              Text(CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'form.filter.searchKeyword').addColon(),
+                                  style: CommonStyles.labelFilterTextStyle),
                               const SizedBox(width: 10.0),
                               Expanded(
                                 child: Row(
@@ -259,8 +263,11 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('Root subjects',
-                          style: CommonStyles.buttonTextStyle),
+                      Text(CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'form.filter.rootSubject').addColon(),
+                          style: CommonStyles.labelFilterTextStyle),
                       Checkbox(
                         checkColor: Colors.white,
                         value: _filterByIsRootSubject,
@@ -284,8 +291,11 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                 return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('Subjects in the trash',
-                          style: CommonStyles.buttonTextStyle),
+                      Text(CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'form.filter.trash').addColon(),
+                          style: CommonStyles.labelFilterTextStyle),
                       Checkbox(
                         checkColor: Colors.white,
                         value: _filterByDeleted,
@@ -397,9 +407,9 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
             : _buildBody(subjectNotifier, settingNotifier),
         bottomNavigationBar: settingNotifier.isSetBackgroundImage == true
             ? null
-            : _buildBottomNavigationBar(context),
+            : _buildBottomNavigationBar(context, settingNotifier),
         floatingActionButton: settingNotifier.isSetBackgroundImage == true
-            ? _buildBottomNavigationBarActionList(context)
+            ? _buildBottomNavigationBarActionList(context, settingNotifier)
             : null,
         floatingActionButtonLocation:
             FloatingActionButtonLocation.miniCenterDocked,
@@ -407,17 +417,17 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
         data: const IconThemeData(color: Colors.white),
-        child: _buildBottomNavigationBarActionList(context),
+        child: _buildBottomNavigationBarActionList(context, settingNotifier),
       ),
     );
   }
 
-  Row _buildBottomNavigationBarActionList(BuildContext context) {
+  Row _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -558,7 +568,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
           onPressed: () async {
             await showDialog<bool>(
                 context: context,
-                builder: (BuildContext context) => _filterPopup(context));
+                builder: (BuildContext context) => _filterPopup(context, settingNotifier));
           },
           coreButtonStyle:
               ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -603,7 +613,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
         Expanded(
           child: PagedListView<int, SubjectModel>(
             padding: EdgeInsets.only(
-                top: CommonDimensions.scaffoldAppBarHeight(context) / 5),
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5, bottom: 150.0),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<SubjectModel>(
@@ -641,23 +651,27 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                             _reloadPage();
                           }
 
-                          CoreNotification.show(
-                              context,
+                          CoreNotification.showMessage(
+                              context, settingNotifier,
                               CoreNotificationStatus.success,
-                              CoreNotificationAction.delete,
-                              'Subject');
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'notification.action.deleted'));
                         } else {
-                          CoreNotification.show(
-                              context,
+                          CoreNotification.showMessage(
+                              context, settingNotifier,
                               CoreNotificationStatus.error,
-                              CoreNotificationAction.delete,
-                              'Subject');
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'notification.action.error'));
                         }
                       });
                     },
                     onDeleteForever: () async {
                       if (await CoreHelperWidget.confirmFunction(
-                          context: context)) {
+                          context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
                         _onDeleteSubjectForever(context, item).then((result) {
                           if (result) {
                             subjectNotifier.onCountAll();
@@ -666,17 +680,21 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                               _pagingController.itemList!.remove(item);
                             });
 
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.success,
-                                CoreNotificationAction.delete,
-                                'Subject');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.deleted'));
                           } else {
-                            CoreNotification.show(
-                                context,
+                            CoreNotification.showMessage(
+                                context, settingNotifier,
                                 CoreNotificationStatus.error,
-                                CoreNotificationAction.delete,
-                                'Subject');
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'notification.action.error'));
                           }
                         });
                       }
@@ -690,17 +708,21 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                             _pagingController.itemList!.remove(item);
                           });
 
-                          CoreNotification.show(
-                              context,
+                          CoreNotification.showMessage(
+                              context, settingNotifier,
                               CoreNotificationStatus.success,
-                              CoreNotificationAction.restore,
-                              'Subject');
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'notification.action.restored'));
                         } else {
-                          CoreNotification.show(
-                              context,
+                          CoreNotification.showMessage(
+                              context, settingNotifier,
                               CoreNotificationStatus.error,
-                              CoreNotificationAction.restore,
-                              'Subject');
+                              CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                  word: 'notification.action.error'));
                         }
                       });
                     },
@@ -821,6 +843,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                                 CommonLanguages.languageStringDefault(),
                             word: 'screen.title.subjects'),
                         style: CommonStyles.screenTitleTextStyle(
+                          fontSize: 20.0,
                             color: ThemeDataCenter.getScreenTitleTextColor(
                                 context)),
                       ),
@@ -887,7 +910,7 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                           await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) =>
-                                  _filterPopup(context));
+                                  _filterPopup(context, settingNotifier));
                         }),
                   )
                 : Container()
