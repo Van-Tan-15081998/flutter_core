@@ -28,6 +28,24 @@ class CommonStyles {
       'assets/images/background-image-19.jpg',
       'assets/images/background-image-20.jpg',
       'assets/images/background-image-21.jpg',
+
+      'assets/images/background-image-22.jpg',
+      'assets/images/background-image-23.jpg',
+      'assets/images/background-image-24.jpg',
+      'assets/images/background-image-25.jpg',
+      'assets/images/background-image-26.jpg',
+      'assets/images/background-image-27.jpg',
+      'assets/images/background-image-28.jpg',
+      'assets/images/background-image-29.jpg',
+      'assets/images/background-image-30.jpg',
+      'assets/images/background-image-31.jpg',
+      'assets/images/background-image-32.jpg',
+      'assets/images/background-image-33.jpg',
+      'assets/images/background-image-34.jpg',
+      'assets/images/background-image-35.jpg',
+      'assets/images/background-image-36.jpg',
+      'assets/images/background-image-37.jpg',
+      'assets/images/background-image-38.jpg',
     ];
 
     return imageSourceStringList;

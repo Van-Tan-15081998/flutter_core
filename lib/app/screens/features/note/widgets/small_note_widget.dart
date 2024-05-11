@@ -1,17 +1,23 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
+import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/dimensions/CommonDimensions.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
@@ -66,6 +72,8 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
 
+  List<String> _imageSourceStrings = [];
+
   @override
   void initState() {
     // TODO: implement initState
@@ -107,6 +115,19 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
       } else {
         // Xử lý khi Document rỗng
         print('Document rỗng.');
+      }
+    }
+
+    if (widget.note.images != null && widget.note.images!.isNotEmpty) {
+      /// Set data for input
+      List<dynamic> imageSources = jsonDecode(widget.note.images!);
+
+      if (imageSources.isNotEmpty) {
+        setState(() {
+          for (var element in imageSources) {
+            _imageSourceStrings.add(element);
+          }
+        });
       }
     }
   }
@@ -696,8 +717,10 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                   )
                 : Container(),
             Card(
+                color: Colors.white
+                    .withOpacity(settingNotifier.opacityNumber ?? 1),
                 shadowColor: const Color(0xff1f1f1f),
-                elevation: 2.0,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
                       color: ThemeDataCenter.getBorderCardColorStyle(context),
@@ -871,7 +894,7 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
         _buildLabels(),
         ScrollOnExpand(
           scrollOnExpand: true,
-          scrollOnCollapse: false,
+          scrollOnCollapse: true,
           child: ExpandablePanel(
             theme: const ExpandableThemeData(
               headerAlignment: ExpandablePanelHeaderAlignment.center,
@@ -886,8 +909,8 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                             lang: settingNotifier.languageString ??
                                 CommonLanguages.languageStringDefault(),
                             word: 'screen.title.content'),
-                        style:
-                            TextStyle(fontSize: 13.0, color: Colors.black45)),
+                        style: const TextStyle(
+                            fontSize: 13.0, color: Colors.black45)),
                   ],
                 )),
             collapsed: Column(
@@ -932,6 +955,13 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                     scrollController: _scrollController,
                     scrollable: false,
                     showCursor: false),
+                GestureDetector(
+                    onTap: () {
+                      return;
+                    },
+                    child: Container(
+                        color: Colors.transparent,
+                        child: _buildSelectedImages(context, settingNotifier)))
               ],
             ),
             builder: (_, collapsed, expanded) {
@@ -948,6 +978,144 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
         ),
       ],
     );
+  }
+
+  Widget _buildSelectedImages(
+      BuildContext context, SettingNotifier settingNotifier) {
+    if (_imageSourceStrings.isNotEmpty) {
+      return Column(
+        children: List.generate(
+          _imageSourceStrings.length,
+          (index) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return CoreBasicDialog(
+                            insetPadding: const EdgeInsets.all(5.0),
+                            backgroundColor: Colors.white.withOpacity(0.95),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            child: SizedBox(
+                              height:
+                                  CommonDimensions.maxHeightScreen(context) *
+                                      0.75,
+                              child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      5.0, 20.0, 5.0, 10.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                          .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word:
+                                                      'screen.title.viewImage'),
+                                              style: CommonStyles
+                                                  .screenTitleTextStyle(
+                                                      fontSize: 16.0,
+                                                      color: const Color(
+                                                          0xFF1f1f1f)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Expanded(
+                                        child: Container(
+                                          constraints: BoxConstraints(
+                                              maxWidth: CommonDimensions
+                                                      .maxWidthScreen(context) *
+                                                  0.9),
+                                          child: PhotoView(
+                                            maxScale: 25.0,
+                                            minScale: 0.2,
+                                            backgroundDecoration:
+                                                const BoxDecoration(
+                                                    color: Colors.transparent),
+                                            imageProvider: FileImage(File(
+                                                _imageSourceStrings[index])),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          CoreElevatedButton.icon(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
+                                            icon: const FaIcon(
+                                                FontAwesomeIcons.check,
+                                                size: 18.0),
+                                            label: Text(
+                                                CommonLanguages.convert(
+                                                    lang: settingNotifier
+                                                            .languageString ??
+                                                        CommonLanguages
+                                                            .languageStringDefault(),
+                                                    word: 'button.title.close'),
+                                                style: CommonStyles
+                                                    .labelTextStyle),
+                                            onPressed: () {
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            },
+                                            coreButtonStyle:
+                                                CoreButtonStyle.options(
+                                                    coreStyle: CoreStyle.filled,
+                                                    coreColor:
+                                                        CoreColor.success,
+                                                    coreRadius:
+                                                        CoreRadius.radius_6,
+                                                    kitBorderColorOption:
+                                                        Colors.black,
+                                                    kitForegroundColorOption:
+                                                        Colors.black,
+                                                    coreFixedSizeButton:
+                                                        CoreFixedSizeButton
+                                                            .medium_48),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          );
+                        });
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxWidth:
+                            CommonDimensions.maxWidthScreen(context) * 0.7),
+                    child: Image.file(
+                      File(_imageSourceStrings[index]),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Container();
   }
 
   SizedBox _buildHeader(BuildContext context, SettingNotifier settingNotifier) {
@@ -986,7 +1154,10 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                         : onGetTitle(settingNotifier)),
                 widget.note.deletedAt == null && widget.note.isLocked == null
                     ? Tooltip(
-                        message: 'Update',
+                        message: CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'tooltip.button.update'),
                         child: CoreElevatedButton.iconOnly(
                           buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
@@ -1002,7 +1173,10 @@ class _SmallNoteWidgetState extends State<SmallNoteWidget> {
                     : Container(),
                 widget.note.deletedAt == null && widget.note.isLocked != null
                     ? Tooltip(
-                        message: 'UnLock',
+                        message: CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'tooltip.button.unlock'),
                         child: CoreElevatedButton.iconOnly(
                           buttonAudio: commonAudioOnPressButton,
                           onPressed: () {

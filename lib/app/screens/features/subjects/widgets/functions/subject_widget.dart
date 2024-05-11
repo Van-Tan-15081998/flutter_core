@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
@@ -147,7 +148,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                   : ThemeDataCenter.getBackgroundColor(context),
               foregroundColor:
                   ThemeDataCenter.getViewSlidableActionColorStyle(context),
-              icon: Icons.remove_red_eye_rounded,
+              icon: Icons.search_rounded,
             ),
             widget.subject.deletedAt == null
                 ? SlidableAction(
@@ -320,12 +321,18 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      expandedActions = !expandedActions;
+                      expandedActions = true;
+                    });
+                  },
+                  onLongPress: () {
+                    setState(() {
+                      expandedActions = false;
                     });
                   },
                   child: Card(
+                    color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -340,7 +347,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                           // height: 150,
                           child: Container(
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              // color: Colors.white,
                               shape: BoxShape.rectangle,
                             ),
                             child: Padding(
@@ -418,7 +425,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                             child: Column(
                                               children: [
                                                 Tooltip(
-                                                  message: 'Update',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'tooltip.button.update'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -451,7 +461,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Create sub subject',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'tooltip.button.createSubSubject'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -482,7 +495,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Notes',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'screen.title.notes'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -516,7 +532,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Create note',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'screen.title.create.note'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -548,7 +567,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Parent subject',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'tooltip.button.parentSubject'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -569,7 +591,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Sub subjects',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'tooltip.button.subSubject'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -600,7 +625,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                               4.0, 0, 0, 0),
                                           child: Column(children: [
                                             Tooltip(
-                                              message: 'Restore',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'tooltip.button.restore'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:
@@ -624,7 +652,10 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                             ),
                                             const SizedBox(height: 2.0),
                                             Tooltip(
-                                              message: 'Delete forever',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'tooltip.button.deleteForever'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:

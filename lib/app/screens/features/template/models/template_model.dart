@@ -7,6 +7,14 @@ class TemplateModel {
   final String? labels; // label id list
   final int? subjectId;
   int? isFavourite;
+  int? isPinned;
+
+  final int? label01Id;
+  final int? label02Id;
+  final int? label03Id;
+  final int? label04Id;
+  final int? label05Id;
+
   final int? createdAt;
   final int? updatedAt;
   final int? deletedAt;
@@ -18,6 +26,12 @@ class TemplateModel {
       this.labels,
       this.subjectId,
       this.isFavourite,
+      this.isPinned,
+      this.label01Id,
+      this.label02Id,
+      this.label03Id,
+      this.label04Id,
+      this.label05Id,
       this.updatedAt,
       this.deletedAt,
       this.id});
@@ -29,6 +43,12 @@ class TemplateModel {
       labels: json['labels'],
       subjectId: json['subjectId'],
       isFavourite: json['isFavourite'],
+      isPinned: json['isPinned'],
+      label01Id: json['label01Id'],
+      label02Id: json['label02Id'],
+      label03Id: json['label03Id'],
+      label04Id: json['label04Id'],
+      label05Id: json['label05Id'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       deletedAt: json['deletedAt']);
@@ -40,6 +60,12 @@ class TemplateModel {
         'labels': labels,
         'subjectId': subjectId,
         'isFavourite': isFavourite,
+        'isPinned': isPinned,
+        'label01Id': label01Id,
+        'label02Id': label02Id,
+        'label03Id': label03Id,
+        'label04Id': label04Id,
+        'label05Id': label05Id,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt

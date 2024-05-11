@@ -11,18 +11,18 @@ import '../../screens/features/template/models/template_condition_model.dart';
 import '../../screens/features/template/models/template_model.dart';
 
 class DatabaseProvider {
-  static const int _version = 1;
-  static const String _dbName = "hi_notes.db";
+  static const int _version = 2;
+  static const String _dbName = "hi_notes_v26.db";
 
   static Future<Database> _getDB() async {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, images TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, avatarSourceString TEXT  NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
           "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
@@ -173,12 +173,14 @@ class DatabaseProvider {
             ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND ((createdAt >= ${noteConditionModel.createdAtStartOfDay} "
                 "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} ) OR (createdForDay >= ${noteConditionModel.createdAtStartOfDay} AND createdForDay <= ${noteConditionModel.createdAtEndOfDay}))" : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
+            ' ${noteConditionModel.labelId != null ? " AND (label01Id = ${noteConditionModel.labelId} OR label02Id = ${noteConditionModel.labelId} OR label03Id = ${noteConditionModel.labelId} OR label04Id = ${noteConditionModel.labelId} OR label05Id = ${noteConditionModel.labelId})" : ""}'
             ' ${noteConditionModel.onlyNoneSubject == true ? " AND subjectID IS NULL" : ""}'
             ' ${noteConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
             ' ${noteConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
             ' ${noteConditionModel.createdForDay == true ? " AND createdForDay IS NOT NULL AND createdForDay > $toDay" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
-        orderBy:  "isPinned DESC, ${noteConditionModel.isDeleted == true ? 'deletedAt DESC' : ''} ${noteConditionModel.createdForDay == true ? 'createdForDay ASC,' : ''} ${noteConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
+        orderBy:
+            "isPinned DESC, ${noteConditionModel.isDeleted == true ? 'deletedAt DESC,' : ''} ${noteConditionModel.createdForDay == true ? 'createdForDay ASC,' : ''} ${noteConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -554,9 +556,10 @@ class DatabaseProvider {
             ' ${templateConditionModel.isDeleted == null || templateConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
             ' ${templateConditionModel.subjectId != null ? " AND subjectID = ${templateConditionModel.subjectId}" : ""}'
             ' ${templateConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
-                ' ${templateConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
+            ' ${templateConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
             ' ${templateConditionModel.searchText != null && templateConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${templateConditionModel.searchText}%\' OR description LIKE \'%${templateConditionModel.searchText}%\')" : ""}',
-        orderBy: "${templateConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
+        orderBy:
+            "${templateConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
 
     if (maps.isEmpty) {
       return null;

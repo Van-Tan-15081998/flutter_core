@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.28+1
+version: 1.0.29+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -58,6 +58,7 @@ dependencies:
   scrollable_positioned_list: 0.3.8
   animated_text_kit: 4.2.2
   image_picker: 1.0.7
+  photo_view: 0.15.0
 
 dev_dependencies:
   flutter_test:
@@ -121,6 +122,23 @@ flutter:
     - assets/images/background-image-19.jpg
     - assets/images/background-image-20.jpg
     - assets/images/background-image-21.jpg
+    - assets/images/background-image-22.jpg
+    - assets/images/background-image-23.jpg
+    - assets/images/background-image-24.jpg
+    - assets/images/background-image-25.jpg
+    - assets/images/background-image-26.jpg
+    - assets/images/background-image-27.jpg
+    - assets/images/background-image-28.jpg
+    - assets/images/background-image-29.jpg
+    - assets/images/background-image-30.jpg
+    - assets/images/background-image-31.jpg
+    - assets/images/background-image-32.jpg
+    - assets/images/background-image-33.jpg
+    - assets/images/background-image-34.jpg
+    - assets/images/background-image-35.jpg
+    - assets/images/background-image-36.jpg
+    - assets/images/background-image-37.jpg
+    - assets/images/background-image-38.jpg
     - assets/images/flags/chinese.jpg
     - assets/images/flags/english.jpg
     - assets/images/flags/french.jpg

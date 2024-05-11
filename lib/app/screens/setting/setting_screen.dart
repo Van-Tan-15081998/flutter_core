@@ -58,6 +58,9 @@ class _SettingScreenState extends State<SettingScreen> {
   bool isSetThemeNeverDoubt = false;
   bool isSetThemeProgramCatalog = false;
 
+  bool isSettingOpacity = false;
+  double opacityNumber = 1;
+
   Widget setThemeDefault(SettingNotifier settingNotifier) {
     return Padding(
         padding: const EdgeInsets.fromLTRB(4, 5, 0, 5),
@@ -440,8 +443,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Moonlight Bytes',
-                          style: itemLabelTextStyle(context)),
+                      child:
+                          Text('Moonlight', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -628,8 +631,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Android Lollipop',
-                          style: itemLabelTextStyle(context)),
+                      child:
+                          Text('Lollipop', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -722,8 +725,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Rainbow Dash',
-                          style: itemLabelTextStyle(context)),
+                      child:
+                          Text('Rainbow', style: itemLabelTextStyle(context)),
                     ),
                   ],
                 ),
@@ -1191,7 +1194,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Grey Lavender Colors',
+                      child: Text('Grey Lavender',
                           style: itemLabelTextStyle(context)),
                     ),
                   ],
@@ -1285,7 +1288,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text('Metro UI Colors',
+                      child: Text('Metro Colors',
                           style: itemLabelTextStyle(context)),
                     ),
                   ],
@@ -1675,6 +1678,8 @@ class _SettingScreenState extends State<SettingScreen> {
     backgroundImageSourceString = settingNotifier.backgroundImageSourceString;
     languageString = settingNotifier.languageString;
 
+    opacityNumber = settingNotifier.opacityNumber ?? 1;
+
     switch (themeString) {
       case 'isSetThemeDefault':
         {
@@ -1801,7 +1806,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Card(
                     color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -1845,7 +1850,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withOpacity(
+                                  settingNotifier.opacityNumber ?? 0.85),
                             ),
                             child: Column(
                               children: [
@@ -2171,6 +2177,74 @@ class _SettingScreenState extends State<SettingScreen> {
                                   child: StatefulBuilder(
                                     builder: (BuildContext context,
                                         StateSetter setState) {
+                                      return SizedBox(
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                children: <Widget>[
+                                                  Row(
+                                                    children: [
+                                                      Flexible(
+                                                        child: Text(
+                                                            CommonLanguages.convert(
+                                                                lang: settingNotifier
+                                                                        .languageString ??
+                                                                    CommonLanguages
+                                                                        .languageStringDefault(),
+                                                                word:
+                                                                    'screen.title.settings.opacityNumber'),
+                                                            style:
+                                                                itemLabelTextStyle(
+                                                                    context)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Slider(
+                                                          value: opacityNumber,
+                                                          max: 1,
+                                                          divisions: 20,
+                                                          label: opacityNumber
+                                                              .toString(),
+                                                          onChanged:
+                                                              (double value) {
+                                                            if (!isSettingOpacity) {
+                                                              isSettingOpacity =
+                                                                  true;
+                                                              settingNotifier
+                                                                  .setOpacityNumber(
+                                                                      value)
+                                                                  .then(
+                                                                      (result) {
+                                                                if (result) {
+                                                                  isSettingOpacity =
+                                                                      false;
+                                                                }
+                                                              });
+                                                            }
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(4, 5, 0, 5),
+                                  child: StatefulBuilder(
+                                    builder: (BuildContext context,
+                                        StateSetter setState) {
                                       return SwitchListTile(
                                         dense: true,
                                         contentPadding:
@@ -2359,7 +2433,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Card(
                     color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -2403,7 +2477,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withOpacity(
+                                    settingNotifier.opacityNumber ?? 0.85),
                               ),
                               child: SizedBox(
                                 height: 450,
@@ -2530,7 +2605,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Card(
                     color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -2554,13 +2629,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(CommonLanguages.convert(
-                                        lang: settingNotifier
-                                            .languageString ??
-                                            CommonLanguages
-                                                .languageStringDefault(),
-                                        word:
-                                        'screen.title.settings.backgroundMusic'),
+                                    Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'screen.title.settings.backgroundMusic'),
                                         style: GoogleFonts.montserrat(
                                             fontStyle: FontStyle.italic,
                                             fontSize: 20,
@@ -2573,7 +2649,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withOpacity(
+                                    settingNotifier.opacityNumber ?? 0.85),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(6.0),
@@ -2777,7 +2854,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   Card(
                     color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -2821,7 +2898,8 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                           content: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withOpacity(
+                                  settingNotifier.opacityNumber ?? 0.85),
                             ),
                             child: Column(
                               children: [
@@ -2849,6 +2927,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 25.0),
                 ],
               ),
             ),

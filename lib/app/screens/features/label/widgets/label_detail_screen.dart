@@ -373,8 +373,9 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                       )
                     : Container(),
                 Card(
+                  color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
                   shadowColor: const Color(0xff1f1f1f),
-                  elevation: 2.0,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                         color: ThemeDataCenter.getBorderCardColorStyle(context),
@@ -388,7 +389,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                         // height: 150,
                         child: Container(
                           decoration: const BoxDecoration(
-                            color: Colors.white,
+                            // color: Colors.white,
                             shape: BoxShape.rectangle,
                           ),
                           child: Padding(
@@ -438,84 +439,43 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                     ),
                                   ),
                                   widget.label.deletedAt == null
-                                      ? CoreElevatedButton.iconOnly(
-                                          buttonAudio: commonAudioOnPressButton,
-                                          onPressed: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LabelCreateScreen(
-                                                          actionMode:
-                                                              ActionModeEnum
-                                                                  .update,
-                                                          label: widget.label,
-                                                          redirectFrom: null,
-                                                        )));
-                                          },
-                                          coreButtonStyle: ThemeDataCenter
-                                              .getUpdateButtonStyle(context),
-                                          icon: const Icon(
-                                              Icons.edit_note_rounded),
-                                        )
-                                      : Column(children: [
-                                          CoreElevatedButton.iconOnly(
-                                            buttonAudio:
-                                                commonAudioOnPressButton,
+                                      ? Tooltip(
+                                    message: CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages.languageStringDefault(),
+                                        word: 'tooltip.button.update'),
+                                        child: CoreElevatedButton.iconOnly(
+                                            buttonAudio: commonAudioOnPressButton,
                                             onPressed: () {
-                                              _onRestoreLabelFromTrash(context)
-                                                  .then((result) {
-                                                if (result) {
-                                                  labelNotifier.onCountAll();
-
-                                                  CoreNotification.showMessage(
-                                                      context, settingNotifier,
-                                                      CoreNotificationStatus
-                                                          .success,
-                                                      CommonLanguages.convert(
-                                                          lang: settingNotifier.languageString ??
-                                                              CommonLanguages.languageStringDefault(),
-                                                          word: 'notification.action.restored'));
-
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
                                                       builder: (context) =>
-                                                          const LabelListScreen(
-                                                        labelConditionModel:
-                                                            null,
-                                                        redirectFrom: null,
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  CoreNotification.showMessage(
-                                                      context, settingNotifier,
-                                                      CoreNotificationStatus
-                                                          .error,
-                                                      CommonLanguages.convert(
-                                                          lang: settingNotifier.languageString ??
-                                                              CommonLanguages.languageStringDefault(),
-                                                          word: 'notification.action.error'));
-                                                }
-                                              });
+                                                          LabelCreateScreen(
+                                                            actionMode:
+                                                                ActionModeEnum
+                                                                    .update,
+                                                            label: widget.label,
+                                                            redirectFrom: null,
+                                                          )));
                                             },
                                             coreButtonStyle: ThemeDataCenter
-                                                .getRestoreButtonStyle(context),
+                                                .getUpdateButtonStyle(context),
                                             icon: const Icon(
-                                                Icons
-                                                    .restore_from_trash_rounded,
-                                                size: 26.0),
+                                                Icons.edit_note_rounded),
                                           ),
-                                          const SizedBox(height: 2.0),
-                                          CoreElevatedButton.iconOnly(
-                                            buttonAudio:
-                                                commonAudioOnPressButton,
-                                            onPressed: () async {
-                                              if (await CoreHelperWidget
-                                                  .confirmFunction(
-                                                      context: context, settingNotifier: settingNotifier)) {
-                                                _onDeleteLabelForever(context)
+                                      )
+                                      : Column(children: [
+                                          Tooltip(
+                                            message: CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+        word: 'tooltip.button.restore'),
+                                            child: CoreElevatedButton.iconOnly(
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
+                                              onPressed: () {
+                                                _onRestoreLabelFromTrash(context)
                                                     .then((result) {
                                                   if (result) {
                                                     labelNotifier.onCountAll();
@@ -527,7 +487,7 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                         CommonLanguages.convert(
                                                             lang: settingNotifier.languageString ??
                                                                 CommonLanguages.languageStringDefault(),
-                                                            word: 'notification.action.deleted'));
+                                                            word: 'notification.action.restored'));
 
                                                     Navigator.push(
                                                       context,
@@ -551,14 +511,73 @@ class _LabelDetailScreenState extends State<LabelDetailScreen> {
                                                             word: 'notification.action.error'));
                                                   }
                                                 });
-                                              }
-                                            },
-                                            coreButtonStyle: ThemeDataCenter
-                                                .getDeleteForeverButtonStyle(
-                                                    context),
-                                            icon: const Icon(
-                                                Icons.delete_forever_rounded,
-                                                size: 26.0),
+                                              },
+                                              coreButtonStyle: ThemeDataCenter
+                                                  .getRestoreButtonStyle(context),
+                                              icon: const Icon(
+                                                  Icons
+                                                      .restore_from_trash_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2.0),
+                                          Tooltip(
+                                            message: CommonLanguages.convert(
+                                                lang: settingNotifier.languageString ??
+                                                    CommonLanguages.languageStringDefault(),
+                                                word: 'tooltip.button.deleteForever'),
+                                            child: CoreElevatedButton.iconOnly(
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
+                                              onPressed: () async {
+                                                if (await CoreHelperWidget
+                                                    .confirmFunction(
+                                                        context: context, settingNotifier: settingNotifier)) {
+                                                  _onDeleteLabelForever(context)
+                                                      .then((result) {
+                                                    if (result) {
+                                                      labelNotifier.onCountAll();
+
+                                                      CoreNotification.showMessage(
+                                                          context, settingNotifier,
+                                                          CoreNotificationStatus
+                                                              .success,
+                                                          CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'notification.action.deleted'));
+
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const LabelListScreen(
+                                                            labelConditionModel:
+                                                                null,
+                                                            redirectFrom: null,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      CoreNotification.showMessage(
+                                                          context, settingNotifier,
+                                                          CoreNotificationStatus
+                                                              .error,
+                                                          CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'notification.action.error'));
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                              coreButtonStyle: ThemeDataCenter
+                                                  .getDeleteForeverButtonStyle(
+                                                      context),
+                                              icon: const Icon(
+                                                  Icons.delete_forever_rounded,
+                                                  size: 26.0),
+                                            ),
                                           ),
                                         ])
                                 ]),

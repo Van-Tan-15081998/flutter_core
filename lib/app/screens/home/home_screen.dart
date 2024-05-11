@@ -117,8 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
           child: Card(
+            color: Colors.transparent,
             shadowColor: const Color(0xff1f1f1f),
-            elevation: 2.0,
+            elevation: 0,
             shape: RoundedRectangleBorder(
               side: BorderSide(
                   color:
@@ -229,8 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
                   child: Card(
+                    color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                         side: BorderSide(
                             color: ThemeDataCenter.getNoteBorderCardColorStyle(
@@ -259,6 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Icons.note_alt_outlined,
                                     size: 26.0,
                                   ),
+                                  const SizedBox(width: 5.0),
                                   Expanded(
                                     child: Text(
                                       CommonLanguages.convert(
@@ -274,7 +277,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Tooltip(
-                                    message: 'View',
+                                    message: CommonLanguages.convert(
+                                        lang:
+                                        settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'button.title.open'),
                                     child: CoreElevatedButton(
                                       buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
@@ -363,8 +371,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
                   child: Card(
+                    color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                         side: BorderSide(
                             color:
@@ -394,6 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Icons.palette_outlined,
                                     size: 26.0,
                                   ),
+                                  const SizedBox(width: 5.0),
                                   Expanded(
                                     child: Text(
                                       CommonLanguages.convert(
@@ -408,7 +418,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Tooltip(
-                                    message: 'View',
+                                    message: CommonLanguages.convert(
+                                        lang:
+                                        settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'button.title.open'),
                                     child: CoreElevatedButton(
                                       buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
@@ -618,8 +633,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
                   child: Card(
+                    color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                         side: BorderSide(
                             color: ThemeDataCenter.getLabelBorderCardColorStyle(
@@ -648,6 +664,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Icons.label_important_outline,
                                     size: 26.0,
                                   ),
+                                  const SizedBox(width: 5.0),
                                   Expanded(
                                     child: Text(
                                       CommonLanguages.convert(
@@ -662,7 +679,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Tooltip(
-                                    message: 'View',
+                                    message: CommonLanguages.convert(
+                                        lang:
+                                        settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'button.title.open'),
                                     child: CoreElevatedButton(
                                       buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {
@@ -748,8 +770,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
                   child: Card(
+                    color: Colors.transparent,
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -780,6 +803,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Icons.my_library_books_rounded,
                                     size: 26.0,
                                   ),
+                                  const SizedBox(width: 5.0),
                                   Expanded(
                                     child: Text(
                                       CommonLanguages.convert(
@@ -794,7 +818,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Tooltip(
-                                    message: 'View',
+                                    message: CommonLanguages.convert(
+                                        lang:
+                                        settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'button.title.open'),
                                     child: CoreElevatedButton(
                                       buttonAudio: commonAudioOnPressButton,
                                       onPressed: () {

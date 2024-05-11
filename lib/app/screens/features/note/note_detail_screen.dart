@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +8,17 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../core/components/containment/dialogs/CoreFullScreenDialog.dart';
 import '../../../../core/components/helper_widgets/CoreHelperWidget.dart';
 import '../../../../core/components/notifications/CoreNotification.dart';
 import '../../../library/common/converters/CommonConverters.dart';
+import '../../../library/common/dimensions/CommonDimensions.dart';
 import '../../../library/common/languages/CommonLanguages.dart';
 import '../../../library/common/styles/CommonStyles.dart';
 import '../../../library/common/utils/CommonAudioOnPressButton.dart';
@@ -65,6 +70,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+
+  List<String> _imageSourceStrings = [];
 
   _onUpdate() async {
     await Navigator.push(
@@ -141,6 +148,19 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         print('Document empty.');
       }
     }
+
+    if (widget.note.images != null && widget.note.images!.isNotEmpty) {
+      /// Set data for input
+      List<dynamic> imageSources = jsonDecode(widget.note.images!);
+
+      if (imageSources.isNotEmpty) {
+        setState(() {
+          for (var element in imageSources) {
+            _imageSourceStrings.add(element);
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -193,8 +213,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   Widget _onGetTitle(SettingNotifier settingNotifier) {
-    String defaultTitle =
-    CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.titleNotSet');
+    String defaultTitle = CommonLanguages.convert(
+        lang: settingNotifier.languageString ??
+            CommonLanguages.languageStringDefault(),
+        word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -460,324 +482,103 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       SubjectNotifier subjectNotifier) {
     return Padding(
       padding: const EdgeInsets.all(0),
-      child: Column(
-        children: <Widget>[
-          Slidable(
-            key: const ValueKey(0),
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-              children: [
-                widget.note.deletedAt == null && widget.note.isLocked == null
-                    ? SlidableAction(
-                        flex: 1,
-                        onPressed: (context) {
-                          // _onDelete();
-                          _onDeleteNote(context).then((result) {
-                            if (result) {
-                              Provider.of<NoteNotifier>(context, listen: false)
-                                  .onCountAll();
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            Slidable(
+              key: const ValueKey(0),
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  widget.note.deletedAt == null && widget.note.isLocked == null
+                      ? SlidableAction(
+                          flex: 1,
+                          onPressed: (context) {
+                            // _onDelete();
+                            _onDeleteNote(context).then((result) {
+                              if (result) {
+                                Provider.of<NoteNotifier>(context, listen: false)
+                                    .onCountAll();
 
-                              CoreNotification.showMessage(
-                                  context, settingNotifier,
-                                  CoreNotificationStatus.success,
-                                  CommonLanguages.convert(
-                                      lang: settingNotifier.languageString ??
-                                          CommonLanguages.languageStringDefault(),
-                                      word: 'notification.action.deleted'));
+                                CoreNotification.showMessage(
+                                    context,
+                                    settingNotifier,
+                                    CoreNotificationStatus.success,
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'notification.action.deleted'));
 
-                              if (widget.redirectFrom ==
-                                  RedirectFromEnum.subjectsInFolderMode) {
-                                Navigator.pop(context, result);
+                                if (widget.redirectFrom ==
+                                    RedirectFromEnum.subjectsInFolderMode) {
+                                  Navigator.pop(context, result);
+                                } else {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const NoteListScreen(
+                                              noteConditionModel: null,
+                                              isOpenSubjectsForFilter: null,
+                                              redirectFrom: null,
+                                            )),
+                                    (route) => false,
+                                  );
+                                }
                               } else {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const NoteListScreen(
-                                            noteConditionModel: null,
-                                            isOpenSubjectsForFilter: null,
-                                            redirectFrom: null,
-                                          )),
-                                  (route) => false,
-                                );
+                                CoreNotification.showMessage(
+                                    context,
+                                    settingNotifier,
+                                    CoreNotificationStatus.error,
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages
+                                                .languageStringDefault(),
+                                        word: 'notification.action.error'));
                               }
-                            } else {
-                              CoreNotification.showMessage(
-                                  context, settingNotifier,
-                                  CoreNotificationStatus.error,
-                                  CommonLanguages.convert(
-                                      lang: settingNotifier.languageString ??
-                                          CommonLanguages.languageStringDefault(),
-                                      word: 'notification.action.error'));
-                            }
-                          });
-                        },
-                        backgroundColor:
-                            settingNotifier.isSetBackgroundImage == true
-                                ? settingNotifier.isSetBackgroundImage == true
-                                    ? Colors.white.withOpacity(0.30)
-                                    : Colors.transparent
-                                : ThemeDataCenter.getBackgroundColor(context),
-                        foregroundColor:
-                            ThemeDataCenter.getDeleteSlidableActionColorStyle(
-                                context),
-                        icon: Icons.delete,
-                        label: 'Delete',
-                      )
-                    : Container()
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
-              child: ExpandableNotifier(
-                initialExpanded: true,
-                child: Column(
-                  children: [
-                    widget.note.updatedAt == null &&
-                            widget.note.deletedAt == null
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                widget.note.isLocked != null
-                                    ? Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            5.0, 0, 5.0, 0),
-                                        child: Icon(Icons.lock,
-                                            size: 22,
-                                            color: ThemeDataCenter
-                                                .getLockSlidableActionColorStyle(
-                                                    context)),
-                                      )
-                                    : Container(),
-                                Container(
-                                  padding:
-                                      settingNotifier.isSetBackgroundImage ==
-                                              true
-                                          ? const EdgeInsets.all(2.0)
-                                          : const EdgeInsets.all(0),
-                                  decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(6.0)),
-                                      color: settingNotifier
-                                                  .isSetBackgroundImage ==
-                                              true
-                                          ? Colors.white.withOpacity(0.65)
-                                          : Colors.transparent),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      widget.note.createdForDay != null
-                                          ? Tooltip(
-                                              message: 'Created for',
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Icon(
-                                                      Icons
-                                                          .directions_run_rounded,
-                                                      size: 14.0,
-                                                      color: ThemeDataCenter
-                                                          .getTopCardLabelStyle(
-                                                              context)),
-                                                  const SizedBox(width: 5.0),
-                                                  Text(
-                                                    CommonConverters
-                                                        .toTimeString(
-                                                            time: widget.note
-                                                                .createdForDay!,
-                                                            format:
-                                                                'dd/MM/yyyy'),
-                                                    style: TextStyle(
-                                                        fontSize: 13.0,
-                                                        color: ThemeDataCenter
-                                                            .getTopCardLabelStyle(
-                                                                context)),
-                                                  ),
-                                                  const SizedBox(width: 5.0),
-                                                ],
-                                              ),
-                                            )
-                                          : Container(),
-                                      Tooltip(
-                                        message: 'Created time',
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Icon(Icons.create_rounded,
-                                                size: 13.0,
-                                                color: ThemeDataCenter
-                                                    .getTopCardLabelStyle(
-                                                        context)),
-                                            const SizedBox(width: 5.0),
-                                            Text(
-                                              CommonConverters.toTimeString(
-                                                  time: widget.note.createdAt!),
-                                              style: CommonStyles
-                                                  .dateTimeTextStyle(
-                                                      color: ThemeDataCenter
-                                                          .getTopCardLabelStyle(
-                                                              context)),
-                                            ),
-                                            const SizedBox(width: 5.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                widget.note.isFavourite != null
-                                    ? const Icon(Icons.favorite,
-                                        color: Color(0xffdc3545), size: 26.0)
-                                    : Container(),
-                              ],
-                            ),
-                          )
-                        : Container(),
-                    widget.note.updatedAt != null &&
-                            widget.note.deletedAt == null
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                widget.note.isLocked != null
-                                    ? Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            5.0, 0, 5.0, 0),
-                                        child: Icon(Icons.lock,
-                                            size: 22,
-                                            color: ThemeDataCenter
-                                                .getLockSlidableActionColorStyle(
-                                                    context)),
-                                      )
-                                    : Container(),
-                                Container(
-                                  padding:
-                                      settingNotifier.isSetBackgroundImage ==
-                                              true
-                                          ? const EdgeInsets.all(2.0)
-                                          : const EdgeInsets.all(0),
-                                  decoration: BoxDecoration(
-                                      borderRadius: const BorderRadius.all(
-                                          Radius.circular(6.0)),
-                                      color: settingNotifier
-                                                  .isSetBackgroundImage ==
-                                              true
-                                          ? Colors.white.withOpacity(0.65)
-                                          : Colors.transparent),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      widget.note.createdForDay != null
-                                          ? Tooltip(
-                                              message: 'Created for',
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  Icon(
-                                                      Icons
-                                                          .directions_run_rounded,
-                                                      size: 14.0,
-                                                      color: ThemeDataCenter
-                                                          .getTopCardLabelStyle(
-                                                              context)),
-                                                  const SizedBox(width: 5.0),
-                                                  Text(
-                                                    CommonConverters
-                                                        .toTimeString(
-                                                            time: widget.note
-                                                                .createdForDay!,
-                                                            format:
-                                                                'dd/MM/yyyy'),
-                                                    style: TextStyle(
-                                                        fontSize: 13.0,
-                                                        color: ThemeDataCenter
-                                                            .getTopCardLabelStyle(
-                                                                context)),
-                                                  ),
-                                                  const SizedBox(width: 5.0),
-                                                ],
-                                              ),
-                                            )
-                                          : Container(),
-                                      Tooltip(
-                                        message: 'Updated time',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.update_rounded,
-                                                size: 13.0,
-                                                color: ThemeDataCenter
-                                                    .getTopCardLabelStyle(
-                                                        context)),
-                                            const SizedBox(width: 5.0),
-                                            Text(
-                                                CommonConverters.toTimeString(
-                                                    time:
-                                                        widget.note.updatedAt!),
-                                                style: CommonStyles
-                                                    .dateTimeTextStyle(
-                                                        color: ThemeDataCenter
-                                                            .getTopCardLabelStyle(
-                                                                context))),
-                                            const SizedBox(width: 5.0),
-                                          ],
-                                        ),
-                                      ),
-                                      Tooltip(
-                                        message: 'Created time',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.create_rounded,
-                                                size: 13.0,
-                                                color: ThemeDataCenter
-                                                    .getTopCardLabelStyle(
-                                                        context)),
-                                            const SizedBox(width: 5.0),
-                                            Text(
-                                                CommonConverters.toTimeString(
-                                                    time:
-                                                        widget.note.createdAt!),
-                                                style: CommonStyles
-                                                    .dateTimeTextStyle(
-                                                        color: ThemeDataCenter
-                                                            .getTopCardLabelStyle(
-                                                                context))),
-                                            const SizedBox(width: 5.0),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                widget.note.isFavourite != null
-                                    ? const Icon(Icons.favorite,
-                                        color: Color(0xffdc3545), size: 26.0)
-                                    : Container(),
-                              ],
-                            ),
-                          )
-                        : Container(),
-                    widget.note.deletedAt != null
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                            child: Tooltip(
-                              message: 'Deleted time',
+                            });
+                          },
+                          backgroundColor:
+                              settingNotifier.isSetBackgroundImage == true
+                                  ? settingNotifier.isSetBackgroundImage == true
+                                      ? Colors.white.withOpacity(0.30)
+                                      : Colors.transparent
+                                  : ThemeDataCenter.getBackgroundColor(context),
+                          foregroundColor:
+                              ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                                  context),
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        )
+                      : Container()
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15.0, 15.0, 15.0, 15.0),
+                child: ExpandableNotifier(
+                  initialExpanded: true,
+                  child: Column(
+                    children: [
+                      widget.note.updatedAt == null &&
+                              widget.note.deletedAt == null
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  widget.note.isLocked != null
+                                      ? Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              5.0, 0, 5.0, 0),
+                                          child: Icon(Icons.lock,
+                                              size: 22,
+                                              color: ThemeDataCenter
+                                                  .getLockSlidableActionColorStyle(
+                                                      context)),
+                                        )
+                                      : Container(),
                                   Container(
                                     padding:
                                         settingNotifier.isSetBackgroundImage ==
@@ -792,22 +593,70 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                 true
                                             ? Colors.white.withOpacity(0.65)
                                             : Colors.transparent),
-                                    child: Row(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        Icon(Icons.delete_rounded,
-                                            size: 13.0,
-                                            color: ThemeDataCenter
-                                                .getTopCardLabelStyle(context)),
-                                        const SizedBox(width: 5.0),
-                                        Text(
-                                          CommonConverters.toTimeString(
-                                              time: widget.note.deletedAt!),
-                                          style: CommonStyles.dateTimeTextStyle(
-                                            color: ThemeDataCenter
-                                                .getTopCardLabelStyle(context),
+                                        widget.note.createdForDay != null
+                                            ? Tooltip(
+                                                message: 'Created for',
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Icon(
+                                                        Icons
+                                                            .directions_run_rounded,
+                                                        size: 14.0,
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context)),
+                                                    const SizedBox(width: 5.0),
+                                                    Text(
+                                                      CommonConverters
+                                                          .toTimeString(
+                                                              time: widget.note
+                                                                  .createdForDay!,
+                                                              format:
+                                                                  'dd/MM/yyyy'),
+                                                      style: TextStyle(
+                                                          fontSize: 13.0,
+                                                          color: ThemeDataCenter
+                                                              .getTopCardLabelStyle(
+                                                                  context)),
+                                                    ),
+                                                    const SizedBox(width: 5.0),
+                                                  ],
+                                                ),
+                                              )
+                                            : Container(),
+                                        Tooltip(
+                                          message: 'Created time',
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Icon(Icons.create_rounded,
+                                                  size: 13.0,
+                                                  color: ThemeDataCenter
+                                                      .getTopCardLabelStyle(
+                                                          context)),
+                                              const SizedBox(width: 5.0),
+                                              Text(
+                                                CommonConverters.toTimeString(
+                                                    time: widget.note.createdAt!),
+                                                style: CommonStyles
+                                                    .dateTimeTextStyle(
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context)),
+                                              ),
+                                              const SizedBox(width: 5.0),
+                                            ],
                                           ),
                                         ),
-                                        const SizedBox(width: 5.0),
                                       ],
                                     ),
                                   ),
@@ -817,234 +666,354 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                       : Container(),
                                 ],
                               ),
-                            ),
-                          )
-                        : Container(),
-                    Card(
-                      shadowColor: const Color(0xff1f1f1f),
-                      elevation: 2.0,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                            color: ThemeDataCenter.getBorderCardColorStyle(
-                                context),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: <Widget>[
-                          SizedBox(
-                            // height: 150,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: widget.subject != null &&
-                                        settingNotifier
-                                            .isSetColorAccordingSubjectColor!
-                                    ? widget.subject!.color.toColor()
-                                    : ThemeDataCenter
-                                        .getNoteTopBannerCardBackgroundColor(
-                                            context),
-                                shape: BoxShape.rectangle,
+                            )
+                          : Container(),
+                      widget.note.updatedAt != null &&
+                              widget.note.deletedAt == null
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  widget.note.isLocked != null
+                                      ? Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              5.0, 0, 5.0, 0),
+                                          child: Icon(Icons.lock,
+                                              size: 22,
+                                              color: ThemeDataCenter
+                                                  .getLockSlidableActionColorStyle(
+                                                      context)),
+                                        )
+                                      : Container(),
+                                  Container(
+                                    padding:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? const EdgeInsets.all(2.0)
+                                            : const EdgeInsets.all(0),
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(6.0)),
+                                        color: settingNotifier
+                                                    .isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        widget.note.createdForDay != null
+                                            ? Tooltip(
+                                                message: 'Created for',
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Icon(
+                                                        Icons
+                                                            .directions_run_rounded,
+                                                        size: 14.0,
+                                                        color: ThemeDataCenter
+                                                            .getTopCardLabelStyle(
+                                                                context)),
+                                                    const SizedBox(width: 5.0),
+                                                    Text(
+                                                      CommonConverters
+                                                          .toTimeString(
+                                                              time: widget.note
+                                                                  .createdForDay!,
+                                                              format:
+                                                                  'dd/MM/yyyy'),
+                                                      style: TextStyle(
+                                                          fontSize: 13.0,
+                                                          color: ThemeDataCenter
+                                                              .getTopCardLabelStyle(
+                                                                  context)),
+                                                    ),
+                                                    const SizedBox(width: 5.0),
+                                                  ],
+                                                ),
+                                              )
+                                            : Container(),
+                                        Tooltip(
+                                          message: 'Updated time',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.update_rounded,
+                                                  size: 13.0,
+                                                  color: ThemeDataCenter
+                                                      .getTopCardLabelStyle(
+                                                          context)),
+                                              const SizedBox(width: 5.0),
+                                              Text(
+                                                  CommonConverters.toTimeString(
+                                                      time:
+                                                          widget.note.updatedAt!),
+                                                  style: CommonStyles
+                                                      .dateTimeTextStyle(
+                                                          color: ThemeDataCenter
+                                                              .getTopCardLabelStyle(
+                                                                  context))),
+                                              const SizedBox(width: 5.0),
+                                            ],
+                                          ),
+                                        ),
+                                        Tooltip(
+                                          message: 'Created time',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.create_rounded,
+                                                  size: 13.0,
+                                                  color: ThemeDataCenter
+                                                      .getTopCardLabelStyle(
+                                                          context)),
+                                              const SizedBox(width: 5.0),
+                                              Text(
+                                                  CommonConverters.toTimeString(
+                                                      time:
+                                                          widget.note.createdAt!),
+                                                  style: CommonStyles
+                                                      .dateTimeTextStyle(
+                                                          color: ThemeDataCenter
+                                                              .getTopCardLabelStyle(
+                                                                  context))),
+                                              const SizedBox(width: 5.0),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  widget.note.isFavourite != null
+                                      ? const Icon(Icons.favorite,
+                                          color: Color(0xffdc3545), size: 26.0)
+                                      : Container(),
+                                ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
+                            )
+                          : Container(),
+                      widget.note.deletedAt != null
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
+                              child: Tooltip(
+                                message: 'Deleted time',
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
                                   mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Expanded(
-                                        child: checkTitleEmpty()
-                                            ? flutter_quill.QuillEditor(
-                                                controller:
-                                                    _titleQuillController,
-                                                readOnly:
-                                                    true, // true for view only mode
-                                                autoFocus: false,
-                                                expands: false,
-                                                focusNode: _focusNode,
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        10.0, 10.0, 10.0, 10.0),
-                                                scrollController:
-                                                    _scrollController,
-                                                scrollable: false,
-                                                showCursor: false)
-                                            : _onGetTitle(settingNotifier)),
-                                    widget.redirectFrom !=
-                                            RedirectFromEnum
-                                                .subjectsInFolderMode
-                                        ? Container(
-                                            child: widget.note.deletedAt == null
-                                                ? Row(
-                                                    children: [
-                                                      widget.note.isLocked ==
-                                                              null
-                                                          ? Tooltip(
-                                                              message: 'Update',
-                                                              child:
-                                                                  CoreElevatedButton
-                                                                      .iconOnly(
-                                                                buttonAudio:
-                                                                    commonAudioOnPressButton,
-                                                                onPressed: () {
-                                                                  _onUpdate();
-                                                                },
-                                                                coreButtonStyle:
-                                                                    ThemeDataCenter
-                                                                        .getUpdateButtonStyle(
-                                                                            context),
-                                                                icon: const Icon(
-                                                                    Icons
-                                                                        .edit_note_rounded,
-                                                                    size: 26.0),
-                                                              ),
-                                                            )
-                                                          : Tooltip(
-                                                              message: 'UnLock',
-                                                              child:
-                                                                  CoreElevatedButton
-                                                                      .iconOnly(
-                                                                buttonAudio:
-                                                                    commonAudioOnPressButton,
-                                                                onPressed:
-                                                                    () async {
-                                                                  if (await CoreHelperWidget
-                                                                      .confirmFunction(
-                                                                          context:
-                                                                              context, settingNotifier: settingNotifier)) {
-                                                                    _onUnlockNote(
+                                    Container(
+                                      padding:
+                                          settingNotifier.isSetBackgroundImage ==
+                                                  true
+                                              ? const EdgeInsets.all(2.0)
+                                              : const EdgeInsets.all(0),
+                                      decoration: BoxDecoration(
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(6.0)),
+                                          color: settingNotifier
+                                                      .isSetBackgroundImage ==
+                                                  true
+                                              ? Colors.white.withOpacity(0.65)
+                                              : Colors.transparent),
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete_rounded,
+                                              size: 13.0,
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(context)),
+                                          const SizedBox(width: 5.0),
+                                          Text(
+                                            CommonConverters.toTimeString(
+                                                time: widget.note.deletedAt!),
+                                            style: CommonStyles.dateTimeTextStyle(
+                                              color: ThemeDataCenter
+                                                  .getTopCardLabelStyle(context),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 5.0),
+                                        ],
+                                      ),
+                                    ),
+                                    widget.note.isFavourite != null
+                                        ? const Icon(Icons.favorite,
+                                            color: Color(0xffdc3545), size: 26.0)
+                                        : Container(),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : Container(),
+                      Card(
+                        color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
+                        shadowColor: const Color(0xff1f1f1f),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                              color: ThemeDataCenter.getBorderCardColorStyle(
+                                  context),
+                              width: 1.0),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(
+                              // height: 150,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: widget.subject != null &&
+                                          settingNotifier
+                                              .isSetColorAccordingSubjectColor!
+                                      ? widget.subject!.color.toColor()
+                                      : ThemeDataCenter
+                                          .getNoteTopBannerCardBackgroundColor(
+                                              context),
+                                  shape: BoxShape.rectangle,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      Expanded(
+                                          child: checkTitleEmpty()
+                                              ? flutter_quill.QuillEditor(
+                                                  controller:
+                                                      _titleQuillController,
+                                                  readOnly:
+                                                      true, // true for view only mode
+                                                  autoFocus: false,
+                                                  expands: false,
+                                                  focusNode: _focusNode,
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          10.0, 10.0, 10.0, 10.0),
+                                                  scrollController:
+                                                      _scrollController,
+                                                  scrollable: false,
+                                                  showCursor: false)
+                                              : _onGetTitle(settingNotifier)),
+                                      widget.redirectFrom !=
+                                              RedirectFromEnum
+                                                  .subjectsInFolderMode
+                                          ? Container(
+                                              child: widget.note.deletedAt == null
+                                                  ? Row(
+                                                      children: [
+                                                        widget.note.isLocked ==
+                                                                null
+                                                            ? Tooltip(
+                                                                message: CommonLanguages.convert(
+                                                                    lang: settingNotifier.languageString ??
+                                                                        CommonLanguages.languageStringDefault(),
+                                                                    word: 'tooltip.button.update'),
+                                                                child:
+                                                                    CoreElevatedButton
+                                                                        .iconOnly(
+                                                                  buttonAudio:
+                                                                      commonAudioOnPressButton,
+                                                                  onPressed: () {
+                                                                    _onUpdate();
+                                                                  },
+                                                                  coreButtonStyle:
+                                                                      ThemeDataCenter
+                                                                          .getUpdateButtonStyle(
+                                                                              context),
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .edit_note_rounded,
+                                                                      size: 26.0),
+                                                                ),
+                                                              )
+                                                            : Tooltip(
+                                                                message: CommonLanguages.convert(
+                                                                    lang: settingNotifier.languageString ??
+                                                                        CommonLanguages.languageStringDefault(),
+                                                                    word: 'tooltip.button.unlock'),
+                                                                child:
+                                                                    CoreElevatedButton
+                                                                        .iconOnly(
+                                                                  buttonAudio:
+                                                                      commonAudioOnPressButton,
+                                                                  onPressed:
+                                                                      () async {
+                                                                    if (await CoreHelperWidget.confirmFunction(
+                                                                        context:
                                                                             context,
+                                                                        settingNotifier:
+                                                                            settingNotifier)) {
+                                                                      _onUnlockNote(
+                                                                              context,
+                                                                              widget
+                                                                                  .note)
+                                                                          .then(
+                                                                              (result) {
+                                                                        if (result) {
+                                                                          setState(
+                                                                              () {
                                                                             widget
-                                                                                .note)
-                                                                        .then(
-                                                                            (result) {
-                                                                      if (result) {
-                                                                        setState(
-                                                                            () {
-                                                                          widget
-                                                                              .note
-                                                                              .isLocked = widget.note.isLocked ==
-                                                                                  null
-                                                                              ? DateTime.now().millisecondsSinceEpoch
-                                                                              : null;
-                                                                        });
+                                                                                .note
+                                                                                .isLocked = widget.note.isLocked ==
+                                                                                    null
+                                                                                ? DateTime.now().millisecondsSinceEpoch
+                                                                                : null;
+                                                                          });
 
-                                                                        CoreNotification.showMessage(
-                                                                            context, settingNotifier,
-                                                                            CoreNotificationStatus.success,
-                                                                            CommonLanguages.convert(
-                                                                                lang: settingNotifier.languageString ??
-                                                                                    CommonLanguages.languageStringDefault(),
-                                                                                word: 'notification.action.unlocked'));
-                                                                      } else {
-                                                                        CoreNotification.showMessage(
-                                                                            context, settingNotifier,
-                                                                            CoreNotificationStatus.error,
-                                                                            CommonLanguages.convert(
-                                                                                lang: settingNotifier.languageString ??
-                                                                                    CommonLanguages.languageStringDefault(),
-                                                                                word: 'notification.action.error'));
-                                                                      }
-                                                                    });
-                                                                  }
-                                                                },
-                                                                coreButtonStyle:
-                                                                    ThemeDataCenter
-                                                                        .getUpdateButtonStyle(
-                                                                            context),
-                                                                icon: const Icon(
-                                                                    Icons
-                                                                        .lock_open_rounded,
-                                                                    size: 26.0),
-                                                              ),
-                                                            )
-                                                    ],
-                                                  )
-                                                : Column(
-                                                    children: [
-                                                      Tooltip(
-                                                        message: 'Restore',
-                                                        child:
-                                                            CoreElevatedButton
-                                                                .iconOnly(
-                                                          buttonAudio:
-                                                              commonAudioOnPressButton,
-                                                          onPressed: () {
-                                                            _onRestoreNoteFromTrash(
-                                                                    context)
-                                                                .then((result) {
-                                                              if (result) {
-                                                                Provider.of<NoteNotifier>(
-                                                                        context,
-                                                                        listen:
-                                                                            false)
-                                                                    .onCountAll();
-
-                                                                Navigator
-                                                                    .pushAndRemoveUntil(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              const NoteListScreen(
-                                                                                noteConditionModel: null,
-                                                                                isOpenSubjectsForFilter: null,
-                                                                                redirectFrom: null,
-                                                                              )),
-                                                                  (route) =>
-                                                                      false,
-                                                                );
-
-                                                                CoreNotification.showMessage(
-                                                                    context, settingNotifier,
-                                                                    CoreNotificationStatus
-                                                                        .success,
-                                                                    CommonLanguages.convert(
-                                                                        lang: settingNotifier.languageString ??
-                                                                            CommonLanguages.languageStringDefault(),
-                                                                        word: 'notification.action.restored'));
-                                                              } else {
-                                                                CoreNotification.showMessage(
-                                                                    context, settingNotifier,
-                                                                    CoreNotificationStatus
-                                                                        .error,
-                                                                    CommonLanguages.convert(
-                                                                        lang: settingNotifier.languageString ??
-                                                                            CommonLanguages.languageStringDefault(),
-                                                                        word: 'notification.action.error'));
-                                                              }
-                                                            });
-                                                          },
-                                                          coreButtonStyle:
-                                                              ThemeDataCenter
-                                                                  .getRestoreButtonStyle(
-                                                                      context),
-                                                          icon: const Icon(
-                                                              Icons
-                                                                  .restore_from_trash_rounded,
-                                                              size: 26.0),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 2.0),
-                                                      Tooltip(
-                                                        message:
-                                                            'Delete forever',
-                                                        child:
-                                                            CoreElevatedButton
-                                                                .iconOnly(
-                                                          buttonAudio:
-                                                              commonAudioOnPressButton,
-                                                          onPressed: () async {
-                                                            if (await CoreHelperWidget
-                                                                .confirmFunction(
-                                                                    context:
-                                                                        context, settingNotifier: settingNotifier)) {
-                                                              _onDeleteNoteForever(
+                                                                          CoreNotification.showMessage(
+                                                                              context,
+                                                                              settingNotifier,
+                                                                              CoreNotificationStatus
+                                                                                  .success,
+                                                                              CommonLanguages.convert(
+                                                                                  lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                                  word: 'notification.action.unlocked'));
+                                                                        } else {
+                                                                          CoreNotification.showMessage(
+                                                                              context,
+                                                                              settingNotifier,
+                                                                              CoreNotificationStatus
+                                                                                  .error,
+                                                                              CommonLanguages.convert(
+                                                                                  lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                                  word: 'notification.action.error'));
+                                                                        }
+                                                                      });
+                                                                    }
+                                                                  },
+                                                                  coreButtonStyle:
+                                                                      ThemeDataCenter
+                                                                          .getUpdateButtonStyle(
+                                                                              context),
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .lock_open_rounded,
+                                                                      size: 26.0),
+                                                                ),
+                                                              )
+                                                      ],
+                                                    )
+                                                  : Column(
+                                                      children: [
+                                                        Tooltip(
+                                                          message: CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'tooltip.button.restore'),
+                                                          child:
+                                                              CoreElevatedButton
+                                                                  .iconOnly(
+                                                            buttonAudio:
+                                                                commonAudioOnPressButton,
+                                                            onPressed: () {
+                                                              _onRestoreNoteFromTrash(
                                                                       context)
-                                                                  .then(
-                                                                      (result) {
+                                                                  .then((result) {
                                                                 if (result) {
                                                                   Provider.of<NoteNotifier>(
                                                                           context,
@@ -1056,157 +1025,385 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                       .pushAndRemoveUntil(
                                                                     context,
                                                                     MaterialPageRoute(
-                                                                        builder: (context) =>
-                                                                            const NoteListScreen(
-                                                                              noteConditionModel: null,
-                                                                              isOpenSubjectsForFilter: null,
-                                                                              redirectFrom: null,
-                                                                            )),
+                                                                        builder:
+                                                                            (context) =>
+                                                                                const NoteListScreen(
+                                                                                  noteConditionModel: null,
+                                                                                  isOpenSubjectsForFilter: null,
+                                                                                  redirectFrom: null,
+                                                                                )),
                                                                     (route) =>
                                                                         false,
                                                                   );
 
                                                                   CoreNotification.showMessage(
-                                                                      context, settingNotifier,
+                                                                      context,
+                                                                      settingNotifier,
                                                                       CoreNotificationStatus
                                                                           .success,
                                                                       CommonLanguages.convert(
                                                                           lang: settingNotifier.languageString ??
-                                                                              CommonLanguages.languageStringDefault(),
-                                                                          word: 'notification.action.deleted'));
+                                                                              CommonLanguages
+                                                                                  .languageStringDefault(),
+                                                                          word:
+                                                                              'notification.action.restored'));
                                                                 } else {
                                                                   CoreNotification.showMessage(
-                                                                      context, settingNotifier,
+                                                                      context,
+                                                                      settingNotifier,
                                                                       CoreNotificationStatus
                                                                           .error,
                                                                       CommonLanguages.convert(
                                                                           lang: settingNotifier.languageString ??
-                                                                              CommonLanguages.languageStringDefault(),
-                                                                          word: 'notification.action.error'));
+                                                                              CommonLanguages
+                                                                                  .languageStringDefault(),
+                                                                          word:
+                                                                              'notification.action.error'));
                                                                 }
                                                               });
-                                                            }
-                                                          },
-                                                          coreButtonStyle:
-                                                              ThemeDataCenter
-                                                                  .getDeleteForeverButtonStyle(
-                                                                      context),
-                                                          icon: const Icon(
-                                                              Icons
-                                                                  .delete_forever_rounded,
-                                                              size: 26.0),
+                                                            },
+                                                            coreButtonStyle:
+                                                                ThemeDataCenter
+                                                                    .getRestoreButtonStyle(
+                                                                        context),
+                                                            icon: const Icon(
+                                                                Icons
+                                                                    .restore_from_trash_rounded,
+                                                                size: 26.0),
+                                                          ),
                                                         ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                          )
-                                        : Container(),
-                                  ],
+                                                        const SizedBox(
+                                                            height: 2.0),
+                                                        Tooltip(
+                                                          message:
+                                                          CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'tooltip.button.deleteForever'),
+                                                          child:
+                                                              CoreElevatedButton
+                                                                  .iconOnly(
+                                                            buttonAudio:
+                                                                commonAudioOnPressButton,
+                                                            onPressed: () async {
+                                                              if (await CoreHelperWidget
+                                                                  .confirmFunction(
+                                                                      context:
+                                                                          context,
+                                                                      settingNotifier:
+                                                                          settingNotifier)) {
+                                                                _onDeleteNoteForever(
+                                                                        context)
+                                                                    .then(
+                                                                        (result) {
+                                                                  if (result) {
+                                                                    Provider.of<NoteNotifier>(
+                                                                            context,
+                                                                            listen:
+                                                                                false)
+                                                                        .onCountAll();
+
+                                                                    Navigator
+                                                                        .pushAndRemoveUntil(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              const NoteListScreen(
+                                                                                noteConditionModel: null,
+                                                                                isOpenSubjectsForFilter: null,
+                                                                                redirectFrom: null,
+                                                                              )),
+                                                                      (route) =>
+                                                                          false,
+                                                                    );
+
+                                                                    CoreNotification.showMessage(
+                                                                        context,
+                                                                        settingNotifier,
+                                                                        CoreNotificationStatus
+                                                                            .success,
+                                                                        CommonLanguages.convert(
+                                                                            lang: settingNotifier.languageString ??
+                                                                                CommonLanguages.languageStringDefault(),
+                                                                            word: 'notification.action.deleted'));
+                                                                  } else {
+                                                                    CoreNotification.showMessage(
+                                                                        context,
+                                                                        settingNotifier,
+                                                                        CoreNotificationStatus
+                                                                            .error,
+                                                                        CommonLanguages.convert(
+                                                                            lang: settingNotifier.languageString ??
+                                                                                CommonLanguages.languageStringDefault(),
+                                                                            word: 'notification.action.error'));
+                                                                  }
+                                                                });
+                                                              }
+                                                            },
+                                                            coreButtonStyle:
+                                                                ThemeDataCenter
+                                                                    .getDeleteForeverButtonStyle(
+                                                                        context),
+                                                            icon: const Icon(
+                                                                Icons
+                                                                    .delete_forever_rounded,
+                                                                size: 26.0),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                            )
+                                          : Container(),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          _buildSubject(),
-                          _buildLabels(),
-                          ScrollOnExpand(
-                            scrollOnExpand: true,
-                            scrollOnCollapse: false,
-                            child: ExpandablePanel(
-                              theme: const ExpandableThemeData(
-                                headerAlignment:
-                                    ExpandablePanelHeaderAlignment.center,
-                                tapBodyToCollapse: true,
-                              ),
-                              header: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "[${widget.note.id!}] ",
-                                      style: const TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.black45),
-                                    ),
-                                    const Text(
-                                      "Content",
-                                      style: TextStyle(
-                                          fontSize: 13.0,
-                                          color: Colors.black45),
-                                    ),
-                                  ],
+                            _buildSubject(),
+                            _buildLabels(),
+                            ScrollOnExpand(
+                              scrollOnExpand: true,
+                              scrollOnCollapse: false,
+                              child: ExpandablePanel(
+                                theme: const ExpandableThemeData(
+                                  headerAlignment:
+                                      ExpandablePanelHeaderAlignment.center,
+                                  tapBodyToCollapse: true,
                                 ),
-                              ),
-                              collapsed: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    height: 35,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.rectangle,
-                                        boxShadow: [],
+                                header: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        CommonLanguages.convert(
+                                            lang:
+                                                settingNotifier.languageString ??
+                                                    CommonLanguages
+                                                        .languageStringDefault(),
+                                            word: 'screen.title.content'),
+                                        style: const TextStyle(
+                                            fontSize: 13.0,
+                                            color: Colors.black45),
                                       ),
-                                      child: flutter_quill.QuillEditor(
-                                          controller:
-                                              _subDescriptionQuillController,
-                                          readOnly:
-                                              true, // true for view only mode
-                                          autoFocus: false,
-                                          expands: false,
-                                          focusNode: _focusNode,
-                                          padding: const EdgeInsets.all(4.0),
-                                          scrollController: _scrollController,
-                                          scrollable: false,
-                                          showCursor: false),
+                                    ],
+                                  ),
+                                ),
+                                collapsed: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 35,
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          shape: BoxShape.rectangle,
+                                          boxShadow: [],
+                                        ),
+                                        child: flutter_quill.QuillEditor(
+                                            controller:
+                                                _subDescriptionQuillController,
+                                            readOnly:
+                                                true, // true for view only mode
+                                            autoFocus: false,
+                                            expands: false,
+                                            focusNode: _focusNode,
+                                            padding: const EdgeInsets.all(4.0),
+                                            scrollController: _scrollController,
+                                            scrollable: false,
+                                            showCursor: false),
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    '...',
-                                    style: GoogleFonts.montserrat(
-                                        fontStyle: FontStyle.italic,
-                                        fontSize: 14),
-                                  ),
-                                ],
+                                    Text(
+                                      '...',
+                                      style: GoogleFonts.montserrat(
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 14),
+                                    ),
+                                  ],
+                                ),
+                                expanded: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    flutter_quill.QuillEditor(
+                                        controller: _descriptionQuillController,
+                                        readOnly: true, // true for view only mode
+                                        autoFocus: false,
+                                        expands: false,
+                                        focusNode: _focusNode,
+                                        padding: const EdgeInsets.all(4.0),
+                                        scrollController: _scrollController,
+                                        scrollable: false,
+                                        showCursor: false),
+                                    GestureDetector(
+                                        onTap: () {
+                                        },
+                                        child: Container(
+                                            color: Colors.transparent,
+                                            child: _buildSelectedImages(context, settingNotifier)))
+                                  ],
+                                ),
+                                builder: (_, collapsed, expanded) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 10, right: 10, bottom: 10),
+                                    child: Expandable(
+                                      collapsed: collapsed,
+                                      expanded: expanded,
+                                      theme: const ExpandableThemeData(
+                                          crossFadePoint: 0),
+                                    ),
+                                  );
+                                },
                               ),
-                              expanded: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  flutter_quill.QuillEditor(
-                                      controller: _descriptionQuillController,
-                                      readOnly: true, // true for view only mode
-                                      autoFocus: false,
-                                      expands: false,
-                                      focusNode: _focusNode,
-                                      padding: const EdgeInsets.all(4.0),
-                                      scrollController: _scrollController,
-                                      scrollable: false,
-                                      showCursor: false),
-                                ],
-                              ),
-                              builder: (_, collapsed, expanded) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 10, right: 10, bottom: 10),
-                                  child: Expandable(
-                                    collapsed: collapsed,
-                                    expanded: expanded,
-                                    theme: const ExpandableThemeData(
-                                        crossFadePoint: 0),
-                                  ),
-                                );
-                              },
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildSelectedImages(
+      BuildContext context, SettingNotifier settingNotifier) {
+    if (_imageSourceStrings.isNotEmpty) {
+      return Column(
+        children: List.generate(
+          _imageSourceStrings.length,
+              (index) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return CoreBasicDialog(
+                            insetPadding: const EdgeInsets.all(5.0),
+                            backgroundColor: Colors.white.withOpacity(0.95),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            child: SizedBox(
+                              height:
+                              CommonDimensions.maxHeightScreen(context) *
+                                  0.75,
+                              child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      5.0, 20.0, 5.0, 10.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                      .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word:
+                                                  'screen.title.viewImage'),
+                                              style: CommonStyles
+                                                  .screenTitleTextStyle(
+                                                  fontSize: 16.0,
+                                                  color: const Color(
+                                                      0xFF1f1f1f)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Expanded(
+                                        child: Container(
+                                          constraints: BoxConstraints(
+                                              maxWidth: CommonDimensions
+                                                  .maxWidthScreen(context) *
+                                                  0.9),
+                                          child: PhotoView(
+                                            maxScale: 25.0,
+                                            minScale: 0.2,
+                                            backgroundDecoration:
+                                            const BoxDecoration(
+                                                color: Colors.transparent),
+                                            imageProvider: FileImage(File(
+                                                _imageSourceStrings[index])),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          CoreElevatedButton.icon(
+                                            buttonAudio:
+                                            commonAudioOnPressButton,
+                                            icon: const FaIcon(
+                                                FontAwesomeIcons.check,
+                                                size: 18.0),
+                                            label: Text(
+                                                CommonLanguages.convert(
+                                                    lang: settingNotifier
+                                                        .languageString ??
+                                                        CommonLanguages
+                                                            .languageStringDefault(),
+                                                    word: 'button.title.close'),
+                                                style: CommonStyles
+                                                    .labelTextStyle),
+                                            onPressed: () {
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            },
+                                            coreButtonStyle:
+                                            CoreButtonStyle.options(
+                                                coreStyle: CoreStyle.filled,
+                                                coreColor:
+                                                CoreColor.success,
+                                                coreRadius:
+                                                CoreRadius.radius_6,
+                                                kitBorderColorOption:
+                                                Colors.black,
+                                                kitForegroundColorOption:
+                                                Colors.black,
+                                                coreFixedSizeButton:
+                                                CoreFixedSizeButton
+                                                    .medium_48),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          );
+                        });
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxWidth:
+                        CommonDimensions.maxWidthScreen(context) * 0.7),
+                    child: Image.file(
+                      File(_imageSourceStrings[index]),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Container();
   }
 }

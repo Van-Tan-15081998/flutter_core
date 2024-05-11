@@ -86,6 +86,14 @@ class SettingSharedPreferences {
     await prefs.setString('themeString', themeStr);
   }
 
+  Future<void> setOpacityNumber(double opacityNum) async {
+    final SharedPreferences prefs = await _prefs;
+
+    final double? opacityNumber = prefs.getDouble('opacityNumber');
+
+    await prefs.setDouble('opacityNumber', opacityNum);
+  }
+
   Future<void> setAvatarDescriptionString(String avatarDescriptionStr) async {
     final SharedPreferences prefs = await _prefs;
 
@@ -195,6 +203,14 @@ GETTER
     final String? themeString = prefs.getString('themeString');
 
     return themeString;
+  }
+
+  Future<double?> getOpacityNumber() async {
+    final SharedPreferences prefs = await _prefs;
+
+    final double? opacityNumber = prefs.getDouble('opacityNumber');
+
+    return opacityNumber;
   }
 
   Future<String?> getAvatarDescriptionString() async {

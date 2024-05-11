@@ -199,7 +199,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                 width:
                     screenWidth, // Đặt chiều rộng của container bằng chiều ngang của màn hình
                 decoration: BoxDecoration(
-                  color: const Color(0xFF404040),
+                  color: const Color(0xFF404040).withOpacity(0.99),
                   borderRadius: BorderRadius.circular(8.0), // Bo góc
                 ),
                 child: Column(
@@ -333,8 +333,10 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
               )
             : Container(),
       ),
+      // floatingActionButtonLocation:
+      //     FloatingActionButtonLocation.startDocked,
       floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterDocked,
+      FloatingActionButtonLocation.miniCenterFloat,
     );
   }
 

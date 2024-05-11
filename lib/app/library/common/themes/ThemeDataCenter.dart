@@ -49,7 +49,8 @@ class ThemeDataCenter {
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
       return const Color(0xffffc425);
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
-      return const Color(0xffffbbee);
+      // return const Color(0xffffbbee);
+      return const Color(0xffffffd8);
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
       return const Color(0xffeeeeee);
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
@@ -63,41 +64,61 @@ class ThemeDataCenter {
 
     if (settingNotifier.themeString == 'isSetThemeDefault' ||
         settingNotifier.themeString == null) {
-      return Colors.lightGreen;
+      return Colors.lightGreen.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
-      return Colors.white;
+      return Colors.white.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
-      return const Color(0xff2ab7ca);
+      return const Color(0xff2ab7ca).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
-      return const Color(0xff6497b1);
+      return const Color(0xff6497b1).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
-      return const Color(0xfff6cd61);
+      return const Color(0xfff6cd61).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
-      return const Color(0xff63ace5);
+      return const Color(0xff63ace5).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
-      return const Color(0xff65c3ba);
+      return const Color(0xff65c3ba).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
-      return const Color(0xff7bc043);
+      return const Color(0xff7bc043).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
-      return const Color(0xfffff5ee);
+      // return const Color(0xfffff5ee);
+      return const Color(0xffFFFFD1).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
-      return const Color(0xff4d648d);
+      return const Color(0xff4d648d).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
-      return const Color(0xff96ceb4);
+      return const Color(0xff96ceb4).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
-      return const Color(0xff4b3832);
+      return const Color(0xff4b3832).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
-      return const Color(0xffe5e6eb);
+      return const Color(0xffe5e6eb).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
-      return const Color(0xff00b159);
+      return const Color(0xff00b159).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
-      return const Color(0xffff77aa);
+      return const Color(0xffff77aa).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
-      return const Color(0xffcccccc);
+      return const Color(0xffcccccc).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
-      return const Color(0xff4f372d);
+      // return const Color(0xff4f372d);
+      return const Color(0xffFDCF76).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     }
-    return const Color(0xff1f1f1f);
+    return const Color(0xff1f1f1f).withOpacity(
+        settingNotifier.opacityNumber ?? 1);
   }
 
   static Color getBottomBannerCardBackgroundColor(BuildContext context) {
@@ -105,41 +126,61 @@ class ThemeDataCenter {
 
     if (settingNotifier.themeString == 'isSetThemeDefault' ||
         settingNotifier.themeString == null) {
-      return Colors.white10;
+      return Colors.white10.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
-      return Colors.white;
+      return Colors.white.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
-      return const Color(0xff3da4ab);
+      // return const Color(0xff3da4ab);
+      return const Color(0xffFFFFCF).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
-      return const Color(0xffe0f3f2);
+      return const Color(0xffe0f3f2).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
-      return const Color(0xffffcc5c);
+      return const Color(0xffffcc5c).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
-      return const Color(0xffbe9b7b);
+      return const Color(0xffbe9b7b).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
-      return const Color(0xffd2d4dc);
+      return const Color(0xffd2d4dc).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
-      return const Color(0xfff4f4f8);
+      return const Color(0xfff4f4f8).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
-      return const Color(0xffff99cc);
+      // return const Color(0xffff99cc);
+      return const Color(0xffE0FEFE).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
-      return const Color(0xffdddddd);
+      return const Color(0xffdddddd).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
-      return const Color(0xffedc951);
+      return const Color(0xffFCF0CF).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     }
-    return const Color(0xff1f1f1f);
+    return const Color(0xff1f1f1f).withOpacity(
+        settingNotifier.opacityNumber ?? 1);
   }
 
   static Color getTableCalendarBackgroundColor(BuildContext context) {
@@ -174,7 +215,8 @@ class ThemeDataCenter {
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
       return const Color(0xffffc425);
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
-      return const Color(0xffffbbee);
+      // return const Color(0xffffbbee);
+      return const Color(0xffffffd8);
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
       return const Color(0xffeeeeee);
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
@@ -236,41 +278,60 @@ class ThemeDataCenter {
 
     if (settingNotifier.themeString == 'isSetThemeDefault' ||
         settingNotifier.themeString == null) {
-      return Colors.lightGreen;
+      return Colors.lightGreen.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlackAndWhite') {
-      return Colors.white10;
+      return Colors.white10.withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeachTowels') {
-      return const Color(0xff2ab7ca);
+      return const Color(0xff2ab7ca).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeautifulBlues') {
-      return const Color(0xff6497b1);
+      return const Color(0xff6497b1).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMoonlightBytes') {
-      return const Color(0xfff6cd61);
+      return const Color(0xfff6cd61).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNumber3') {
-      return const Color(0xff63ace5);
+      return const Color(0xff63ace5).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeAndroidLollipop') {
-      return const Color(0xff65c3ba);
+      return const Color(0xff65c3ba).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeRainbowDash') {
-      return const Color(0xff7bc043);
+      return const Color(0xff7bc043).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeShadesOfWhite') {
-      return const Color(0xfffff5ee);
+      // return const Color(0xfffff5ee);
+      return const Color(0xffFFFFD1).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBlueberryBasket') {
-      return const Color(0xff4d648d);
+      return const Color(0xff4d648d).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeBeach') {
-      return const Color(0xff96ceb4);
+      return const Color(0xff96ceb4).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeCappuccino') {
-      return const Color(0xffbe9b7b);
+      return const Color(0xffbe9b7b).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeGreyLavenderColors') {
-      return const Color(0xffe5e6eb);
+      return const Color(0xffe5e6eb).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeMetroUIColors') {
-      return const Color(0xff00b159);
+      return const Color(0xff00b159).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemePinks') {
-      return const Color(0xffff77aa);
+      return const Color(0xffff77aa).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeNeverDoubt') {
-      return const Color(0xffcccccc);
+      return const Color(0xffcccccc).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     } else if (settingNotifier.themeString == 'isSetThemeProgramCatalog') {
-      return const Color(0xffedc951);
+      return const Color(0xffedc951).withOpacity(
+          settingNotifier.opacityNumber ?? 1);
     }
-    return const Color(0xff1f1f1f);
+    return const Color(0xff1f1f1f).withOpacity(
+        settingNotifier.opacityNumber ?? 1);
   }
 
   static Color getNoteBorderCardColorStyle(BuildContext context) {

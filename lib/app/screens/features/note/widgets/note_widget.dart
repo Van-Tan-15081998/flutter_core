@@ -1,17 +1,23 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter_core_v3/app/library/common/dimensions/CommonDimensions.dart';
 import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as flutter_quill;
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
+import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
 import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
@@ -24,6 +30,8 @@ import '../../subjects/models/subject_model.dart';
 import '../../subjects/widgets/subject_list_screen.dart';
 import '../models/note_model.dart';
 import '../note_detail_screen.dart';
+
+typedef OnFilterByLabelCallback = void Function(int? labelId);
 
 class NoteWidget extends StatefulWidget {
   final int? index;
@@ -38,6 +46,7 @@ class NoteWidget extends StatefulWidget {
   final VoidCallback? onPin;
   final VoidCallback? onUnlock;
   final VoidCallback? onFilterBySubject;
+  final OnFilterByLabelCallback? onFilterByLabel;
   const NoteWidget({
     Key? key,
     required this.index,
@@ -52,6 +61,7 @@ class NoteWidget extends StatefulWidget {
     required this.onPin,
     required this.onUnlock,
     required this.onFilterBySubject,
+    required this.onFilterByLabel,
   }) : super(key: key);
 
   @override
@@ -72,6 +82,8 @@ class _NoteWidgetState extends State<NoteWidget> {
 
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+
+  List<String> _imageSourceStrings = [];
 
   @override
   void initState() {
@@ -114,6 +126,19 @@ class _NoteWidgetState extends State<NoteWidget> {
       } else {
         // Xử lý khi Document rỗng
         print('Document rỗng.');
+      }
+    }
+
+    if (widget.note.images != null && widget.note.images!.isNotEmpty) {
+      /// Set data for input
+      List<dynamic> imageSources = jsonDecode(widget.note.images!);
+
+      if (imageSources.isNotEmpty) {
+        setState(() {
+          for (var element in imageSources) {
+            _imageSourceStrings.add(element);
+          }
+        });
       }
     }
   }
@@ -168,11 +193,14 @@ class _NoteWidgetState extends State<NoteWidget> {
   }
 
   Widget onGetTitle(SettingNotifier settingNotifier) {
-    String defaultTitle =
-        CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.titleNotSet');
+    String defaultTitle = CommonLanguages.convert(
+        lang: settingNotifier.languageString ??
+            CommonLanguages.languageStringDefault(),
+        word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      child: Text(defaultTitle, style: const TextStyle(fontSize: 16.0, color: Color(0xFF1f1f1f))),
+      child: Text(defaultTitle,
+          style: const TextStyle(fontSize: 16.0, color: Color(0xFF1f1f1f))),
     );
   }
 
@@ -191,31 +219,43 @@ class _NoteWidgetState extends State<NoteWidget> {
         labelWidgets.add(
           Padding(
             padding: const EdgeInsets.all(2.0),
-            child: DottedBorder(
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(12),
-                color: element.color.toColor(),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                  child: Container(
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.label_important_rounded,
-                              color: element.color.toColor(),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12.0),
+              onTap: () {
+                if (widget.onFilterByLabel != null) {
+                  widget.onFilterByLabel!(element.id);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(12),
+                    color: element.color.toColor(),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      child: Container(
+                          color: Colors.white,
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.label_important_rounded,
+                                  color: element.color.toColor(),
+                                ),
+                                Flexible(
+                                  child: Text(element.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                              ],
                             ),
-                            Flexible(
-                              child: Text(element.title,
-                                  maxLines: 1, overflow: TextOverflow.ellipsis),
-                            ),
-                          ],
-                        ),
-                      )),
-                )),
+                          )),
+                    )),
+              ),
+            ),
           ),
         );
       }
@@ -874,8 +914,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                     )
                   : Container(),
               Card(
+                  color: Colors.white
+                      .withOpacity(settingNotifier.opacityNumber ?? 1),
                   shadowColor: const Color(0xff1f1f1f),
-                  elevation: 2.0,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                         color: ThemeDataCenter.getBorderCardColorStyle(context),
@@ -1007,7 +1049,8 @@ class _NoteWidgetState extends State<NoteWidget> {
                           )
                         : Container(),
                     const SizedBox(width: 5.0),
-                    widget.note.isLocked == null && widget.note.deletedAt == null
+                    widget.note.isLocked == null &&
+                            widget.note.deletedAt == null
                         ? InkWell(
                             onLongPress: () {
                               if (widget.onDelete != null) {
@@ -1058,7 +1101,7 @@ class _NoteWidgetState extends State<NoteWidget> {
         _buildLabels(),
         ScrollOnExpand(
           scrollOnExpand: true,
-          scrollOnCollapse: false,
+          scrollOnCollapse: true,
           child: ExpandablePanel(
             theme: const ExpandableThemeData(
               headerAlignment: ExpandablePanelHeaderAlignment.center,
@@ -1068,12 +1111,13 @@ class _NoteWidgetState extends State<NoteWidget> {
                 padding: const EdgeInsets.all(6.0),
                 child: Row(
                   children: [
-                    Text(CommonLanguages.convert(
-                        lang: settingNotifier.languageString ??
-                            CommonLanguages.languageStringDefault(),
-                        word: 'screen.title.content'),
-                        style:
-                            const TextStyle(fontSize: 13.0, color: Colors.black45)),
+                    Text(
+                        CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'screen.title.content'),
+                        style: const TextStyle(
+                            fontSize: 13.0, color: Colors.black45)),
                   ],
                 )),
             collapsed: Column(
@@ -1084,7 +1128,6 @@ class _NoteWidgetState extends State<NoteWidget> {
                   child: Container(
                     decoration: const BoxDecoration(
                       shape: BoxShape.rectangle,
-                      boxShadow: [],
                     ),
                     child: flutter_quill.QuillEditor(
                         controller: _subDescriptionQuillController,
@@ -1118,6 +1161,12 @@ class _NoteWidgetState extends State<NoteWidget> {
                     scrollController: _scrollController,
                     scrollable: false,
                     showCursor: false),
+                GestureDetector(
+                    onTap: () {
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                        child: _buildSelectedImages(context, settingNotifier)))
               ],
             ),
             builder: (_, collapsed, expanded) {
@@ -1134,6 +1183,144 @@ class _NoteWidgetState extends State<NoteWidget> {
         ),
       ],
     );
+  }
+
+  Widget _buildSelectedImages(
+      BuildContext context, SettingNotifier settingNotifier) {
+    if (_imageSourceStrings.isNotEmpty) {
+      return Column(
+        children: List.generate(
+          _imageSourceStrings.length,
+          (index) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return CoreBasicDialog(
+                            insetPadding: const EdgeInsets.all(5.0),
+                            backgroundColor: Colors.white.withOpacity(0.95),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                            child: SizedBox(
+                              height:
+                                  CommonDimensions.maxHeightScreen(context) *
+                                      0.75,
+                              child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      5.0, 20.0, 5.0, 10.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                          .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word:
+                                                      'screen.title.viewImage'),
+                                              style: CommonStyles
+                                                  .screenTitleTextStyle(
+                                                      fontSize: 16.0,
+                                                      color: const Color(
+                                                          0xFF1f1f1f)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Expanded(
+                                        child: Container(
+                                          constraints: BoxConstraints(
+                                              maxWidth: CommonDimensions
+                                                      .maxWidthScreen(context) *
+                                                  0.9),
+                                          child: PhotoView(
+                                            maxScale: 25.0,
+                                            minScale: 0.2,
+                                            backgroundDecoration:
+                                                const BoxDecoration(
+                                                    color: Colors.transparent),
+                                            imageProvider: FileImage(File(
+                                                _imageSourceStrings[index])),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10.0),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          CoreElevatedButton.icon(
+                                            buttonAudio:
+                                                commonAudioOnPressButton,
+                                            icon: const FaIcon(
+                                                FontAwesomeIcons.check,
+                                                size: 18.0),
+                                            label: Text(
+                                                CommonLanguages.convert(
+                                                    lang: settingNotifier
+                                                            .languageString ??
+                                                        CommonLanguages
+                                                            .languageStringDefault(),
+                                                    word: 'button.title.close'),
+                                                style: CommonStyles
+                                                    .labelTextStyle),
+                                            onPressed: () {
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.pop(context, true);
+                                              }
+                                            },
+                                            coreButtonStyle:
+                                                CoreButtonStyle.options(
+                                                    coreStyle: CoreStyle.filled,
+                                                    coreColor:
+                                                        CoreColor.success,
+                                                    coreRadius:
+                                                        CoreRadius.radius_6,
+                                                    kitBorderColorOption:
+                                                        Colors.black,
+                                                    kitForegroundColorOption:
+                                                        Colors.black,
+                                                    coreFixedSizeButton:
+                                                        CoreFixedSizeButton
+                                                            .medium_48),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          );
+                        });
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                        maxWidth:
+                            CommonDimensions.maxWidthScreen(context) * 0.7),
+                    child: Image.file(
+                      File(_imageSourceStrings[index]),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    return Container();
   }
 
   SizedBox _buildHeader(BuildContext context, SettingNotifier settingNotifier) {
@@ -1171,7 +1358,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                         : onGetTitle(settingNotifier)),
                 widget.note.deletedAt == null && widget.note.isLocked == null
                     ? Tooltip(
-                        message: 'Update',
+                        message: CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'tooltip.button.update'),
                         child: CoreElevatedButton.iconOnly(
                           buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
@@ -1187,7 +1377,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                     : Container(),
                 widget.note.deletedAt == null && widget.note.isLocked != null
                     ? Tooltip(
-                        message: 'UnLock',
+                        message: CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'tooltip.button.unlock'),
                         child: CoreElevatedButton.iconOnly(
                           buttonAudio: commonAudioOnPressButton,
                           onPressed: () {
@@ -1204,7 +1397,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                 widget.note.deletedAt != null
                     ? Column(children: [
                         Tooltip(
-                          message: 'Restore',
+                          message: CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'tooltip.button.restore'),
                           child: CoreElevatedButton.iconOnly(
                             buttonAudio: commonAudioOnPressButton,
                             onPressed: () {
@@ -1220,7 +1416,10 @@ class _NoteWidgetState extends State<NoteWidget> {
                         ),
                         const SizedBox(height: 2.0),
                         Tooltip(
-                          message: 'Delete forever',
+                          message: CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'tooltip.button.deleteForever'),
                           child: CoreElevatedButton.iconOnly(
                             buttonAudio: commonAudioOnPressButton,
                             onPressed: () {

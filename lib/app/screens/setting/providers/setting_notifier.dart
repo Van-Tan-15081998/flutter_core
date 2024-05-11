@@ -41,6 +41,9 @@ class SettingNotifier with ChangeNotifier {
   String? get playingBackgroundMusicSourceString =>
       _playingBackgroundMusicSourceString;
 
+  double? _opacityNumber;
+  double? get opacityNumber => _opacityNumber;
+
   SettingNotifier() {
     init();
   }
@@ -64,6 +67,8 @@ class SettingNotifier with ChangeNotifier {
     _isExpandedNoteContent = await getIsExpandedNoteContent();
 
     _isExpandedTemplateContent = await getIsExpandedTemplateContent();
+
+    _opacityNumber = await getOpacityNumber();
 
     notifyListeners();
   }
@@ -173,6 +178,23 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
+  Future<double?> getOpacityNumber() async {
+    double? result;
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    result = await settingSharedPreferences.getOpacityNumber();
+
+    if (result == null) {
+      // Set false
+      await settingSharedPreferences.setOpacityNumber(1);
+
+      // Get again
+      result = await getOpacityNumber();
+    }
+
+    return result;
+  }
+
   Future<String?> getThemeString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
@@ -208,28 +230,25 @@ class SettingNotifier with ChangeNotifier {
     return result;
   }
 
-
   Future<String?> getAvatarImageSourceString() async {
     String? result;
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     result = await settingSharedPreferences.getAvatarImageSourceString();
 
     if (result == null) {
       // Set default
-      await settingSharedPreferences.setAvatarImageSourceString(
-          '');
+      await settingSharedPreferences.setAvatarImageSourceString('');
 
       // Get again
       result = await getAvatarImageSourceString();
     }
 
-    if (result != null && result.isNotEmpty ) {
+    if (result != null && result.isNotEmpty) {
       bool isExist = await File(result).exists();
 
-      if  (!isExist) {
-        await settingSharedPreferences.setAvatarImageSourceString(
-            '');
+      if (!isExist) {
+        await settingSharedPreferences.setAvatarImageSourceString('');
 
         result = await getAvatarImageSourceString();
       }
@@ -265,7 +284,8 @@ class SettingNotifier with ChangeNotifier {
 
     if (result == null) {
       // Set default
-      await settingSharedPreferences.setPlayingBackgroundMusicSourceString("ALL");
+      await settingSharedPreferences
+          .setPlayingBackgroundMusicSourceString("ALL");
 
       // Get again
       result = await getPlayingBackgroundMusicSourceString();
@@ -449,12 +469,13 @@ class SettingNotifier with ChangeNotifier {
     return false;
   }
 
-  Future<bool> setAvatarImageSourceString(String avatarImageSourceString) async {
+  Future<bool> setAvatarImageSourceString(
+      String avatarImageSourceString) async {
     String? result;
 
     // Set
     SettingSharedPreferences settingSharedPreferences =
-    SettingSharedPreferences();
+        SettingSharedPreferences();
     await settingSharedPreferences
         .setAvatarImageSourceString(avatarImageSourceString);
 
@@ -524,6 +545,25 @@ class SettingNotifier with ChangeNotifier {
 
     if (result != null) {
       _languageString = result;
+      notifyListeners();
+
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> setOpacityNumber(double opacityNum) async {
+    double? result;
+
+    // Set
+    SettingSharedPreferences settingSharedPreferences =
+        SettingSharedPreferences();
+    await settingSharedPreferences.setOpacityNumber(opacityNum);
+
+    result = await settingSharedPreferences.getOpacityNumber();
+
+    if (result != null) {
+      _opacityNumber = result;
       notifyListeners();
 
       return true;

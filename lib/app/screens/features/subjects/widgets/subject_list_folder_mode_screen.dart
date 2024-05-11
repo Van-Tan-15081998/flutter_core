@@ -599,33 +599,39 @@ class _SubjectListFolderModeScreenState
                 ),
               ),
             ),
-            IconButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6.0),
+            Tooltip(
+              message:  CommonLanguages.convert(
+                  lang: settingNotifier.languageString ??
+                      CommonLanguages.languageStringDefault(),
+                  word: 'tooltip.button.createSubject'),
+              child: IconButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
                   ),
+                  backgroundColor: MaterialStateProperty.all<Color?>(
+                      Colors.blueGrey.withOpacity(0.65)),
                 ),
-                backgroundColor: MaterialStateProperty.all<Color?>(
-                    Colors.blueGrey.withOpacity(0.65)),
-              ),
-              onPressed: () async {
-                bool? isCreated = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SubjectCreateScreen(
-                            parentSubject: currentParentSubject,
-                            actionMode: ActionModeEnum.create,
-                            redirectFrom: RedirectFromEnum.subjectsInFolderMode,
-                            breadcrumb: null,
-                          )),
-                );
+                onPressed: () async {
+                  bool? isCreated = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SubjectCreateScreen(
+                              parentSubject: currentParentSubject,
+                              actionMode: ActionModeEnum.create,
+                              redirectFrom: RedirectFromEnum.subjectsInFolderMode,
+                              breadcrumb: null,
+                            )),
+                  );
 
-                if (isCreated == true) {
-                  _reloadPage();
-                }
-              },
-              icon: const Icon(Icons.create_new_folder_rounded),
+                  if (isCreated == true) {
+                    _reloadPage();
+                  }
+                },
+                icon: const Icon(Icons.create_new_folder_rounded),
+              ),
             ),
           ],
         ),
@@ -849,14 +855,36 @@ class _SubjectListFolderModeScreenState
   /*
   Get note's labels
    */
-  List<LabelModel>? _getNoteLabels(String jsonLabelIds) {
+  List<int> _getNoteLabelIds(NoteModel note) {
+    List<int> noteLabelIds = [];
+    if (note.label01Id != null) {
+      noteLabelIds.add(note.label01Id!);
+    }
+    if (note.label02Id != null) {
+      noteLabelIds.add(note.label02Id!);
+    }
+    if (note.label03Id != null) {
+      noteLabelIds.add(note.label03Id!);
+    }
+    if (note.label04Id != null) {
+      noteLabelIds.add(note.label04Id!);
+    }
+    if (note.label05Id != null) {
+      noteLabelIds.add(note.label05Id!);
+    }
+
+    return noteLabelIds;
+  }
+  List<LabelModel>? _getNoteLabels(NoteModel note) {
     List<LabelModel>? noteLabels = [];
-    List<dynamic> labelIds = jsonDecode(jsonLabelIds);
+    List<dynamic> labelIds = _getNoteLabelIds(note);
 
     if (_labelList != null && _labelList!.isNotEmpty) {
-      noteLabels =
-          _labelList!.where((model) => labelIds.contains(model.id)).toList();
+      noteLabels = _labelList!
+          .where((model) => labelIds.contains(model.id))
+          .toList();
     }
+
 
     return noteLabels;
   }
@@ -888,7 +916,7 @@ class _SubjectListFolderModeScreenState
           index: index + 1,
           note: item,
           isLastItem: null,
-          labels: _getNoteLabels(item.labels!),
+          labels: _getNoteLabels(item),
           subject: _getNoteSubject(item.subjectId),
           onView: () {
             Navigator.push(
@@ -896,7 +924,7 @@ class _SubjectListFolderModeScreenState
                 MaterialPageRoute(
                     builder: (context) => NoteDetailScreen(
                           note: item,
-                          labels: _getNoteLabels(item.labels!),
+                          labels: _getNoteLabels(item),
                           subject: _getNoteSubject(item.subjectId),
                           redirectFrom: RedirectFromEnum.subjectsInFolderMode,
                         )));

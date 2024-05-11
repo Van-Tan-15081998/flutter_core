@@ -11,6 +11,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../../core/common/pagination/models/CorePaginationModel.dart';
+import '../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../core/components/form/CoreTextFormField.dart';
@@ -67,6 +68,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
   bool _filterByDeleted = false;
   bool _filterByDate = false;
   bool _filterBySubject = false;
+  bool _filterByLabel = false;
   bool _filterByRecentlyUpdated = false;
   bool _filterByFavourite = false;
   bool _filterByCreatedForDay = false;
@@ -75,6 +77,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
   List<SubjectModel>? _subjectList = [];
 
   SubjectModel? filteredSubject;
+  LabelModel? filteredLabel;
 
   /*
    Parameters For Pagination
@@ -277,13 +280,34 @@ class _NoteListScreenState extends State<NoteListScreen> {
   /*
   Get note's labels
    */
-  List<LabelModel>? _getNoteLabels(String jsonLabelIds) {
+  List<int> _getNoteLabelIds(NoteModel note) {
+    List<int> noteLabelIds = [];
+    if (note.label01Id != null) {
+      noteLabelIds.add(note.label01Id!);
+    }
+    if (note.label02Id != null) {
+      noteLabelIds.add(note.label02Id!);
+    }
+    if (note.label03Id != null) {
+      noteLabelIds.add(note.label03Id!);
+    }
+    if (note.label04Id != null) {
+      noteLabelIds.add(note.label04Id!);
+    }
+    if (note.label05Id != null) {
+      noteLabelIds.add(note.label05Id!);
+    }
+
+    return noteLabelIds;
+  }
+  List<LabelModel>? _getNoteLabels(NoteModel note) {
     List<LabelModel>? noteLabels = [];
-    List<dynamic> labelIds = jsonDecode(jsonLabelIds);
+    List<dynamic> labelIds = _getNoteLabelIds(note);
 
     if (_labelList != null && _labelList!.isNotEmpty) {
-      noteLabels =
-          _labelList!.where((model) => labelIds.contains(model.id)).toList();
+      noteLabels = _labelList!
+              .where((model) => labelIds.contains(model.id))
+              .toList();
     }
 
     return noteLabels;
@@ -317,6 +341,8 @@ class _NoteListScreenState extends State<NoteListScreen> {
 
       _filterBySubject = false;
       filteredSubject = null;
+      _filterByLabel = false;
+      filteredLabel = null;
       _selectedDay = null;
       _rangeStart = null;
       _rangeEnd = null;
@@ -327,6 +353,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
       _noteConditionModel.isDeleted = null;
       _noteConditionModel.recentlyUpdated = null;
       _noteConditionModel.subjectId = null;
+      _noteConditionModel.labelId = null;
       _noteConditionModel.favourite = null;
       _noteConditionModel.createdForDay = null;
 
@@ -345,7 +372,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
         _noteConditionModel.isDeleted == true ||
         _noteConditionModel.recentlyUpdated == true ||
         _noteConditionModel.subjectId != null ||
-        _noteConditionModel.favourite == true || _noteConditionModel.createdForDay == true) {
+        _noteConditionModel.favourite == true ||
+        _noteConditionModel.createdForDay == true ||
+        _noteConditionModel.labelId != null) {
       return true;
     }
     return false;
@@ -422,6 +451,16 @@ class _NoteListScreenState extends State<NoteListScreen> {
       });
     }
   }
+  void _getFilteredLabel() async {
+    LabelModel? localFilteredLabel =
+    await LabelDatabaseManager.getById(_noteConditionModel.labelId!);
+
+    if (localFilteredLabel != null) {
+      setState(() {
+        filteredLabel = localFilteredLabel;
+      });
+    }
+  }
 
   Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
@@ -493,6 +532,65 @@ class _NoteListScreenState extends State<NoteListScreen> {
                           )
                         ],
                       )
+                    : Container(),
+                filteredLabel != null
+                    ? Row(
+                  children: [
+                    Text(CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'form.filter.label').addColon(), style: CommonStyles.labelFilterTextStyle),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  2.0, 2.0, 2.0, 2.0),
+                              child: DottedBorder(
+                                borderType: BorderType.RRect,
+                                radius: const Radius.circular(12),
+                                color: filteredLabel!.color.toColor(),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
+                                  child: Container(
+                                    color: Colors.white,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.label_important_rounded,
+                                            color: filteredLabel!.color
+                                                .toColor(),
+                                          ),
+                                          const SizedBox(width: 6.0),
+                                          Flexible(
+                                            child: Text(
+                                              filteredLabel!.title,
+                                              style: const TextStyle(
+                                                  fontSize: 16.0,
+                                                  fontWeight:
+                                                  FontWeight.w400),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )
                     : Container(),
                 _noteConditionModel.createdAtStartOfDay != null &&
                         _noteConditionModel.createdAtEndOfDay != null
@@ -685,8 +783,16 @@ class _NoteListScreenState extends State<NoteListScreen> {
                 ),
                 const SizedBox(height: 20.0),
                 const SizedBox(height: 20.0),
-                CoreElevatedButton.iconOnly(
+                CoreElevatedButton.icon(
                   buttonAudio: commonAudioOnPressButton,
+                  icon: const FaIcon(FontAwesomeIcons.check,
+                      size: 18.0),
+                  label: Text(
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'button.title.accept'),
+                      style: CommonStyles.labelTextStyle),
                   onPressed: () {
                     setState(() {
                       /// Reload Data
@@ -696,9 +802,14 @@ class _NoteListScreenState extends State<NoteListScreen> {
                       Navigator.of(context).pop();
                     });
                   },
-                  coreButtonStyle:
-                      ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-                  icon: const Icon(Icons.check_rounded, size: 25.0),
+                  coreButtonStyle: CoreButtonStyle.options(
+                      coreStyle: CoreStyle.filled,
+                      coreColor: CoreColor.success,
+                      coreRadius: CoreRadius.radius_6,
+                      kitBorderColorOption: Colors.black,
+                      kitForegroundColorOption: Colors.black,
+                      coreFixedSizeButton:
+                      CoreFixedSizeButton.medium_48),
                 ),
               ],
             ),
@@ -807,7 +918,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                     padding: const EdgeInsets.fromLTRB(
                                         10.0, 4.0, 10.0, 4.0),
                                     child: Text(
-                                      'All',
+                                      CommonLanguages.convert(
+                                          lang: settingNotifier
+                                              .languageString ??
+                                              CommonLanguages
+                                                  .languageStringDefault(),
+                                          word:
+                                          'button.title.all'),
                                       style: TextStyle(
                                           color: ((filteredSubject == null &&
                                               widget.noteConditionModel
@@ -913,7 +1030,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                           ),
                         ),
                       ),
-                      _buildSubjectListPopup(context)
+                      _buildSubjectListPopup(context, settingNotifier)
                     ],
                   ),
                 ),
@@ -1080,7 +1197,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                       key: ValueKey<int>(item.id!),
                       index: index + 1,
                       note: item,
-                      labels: _getNoteLabels(item.labels!),
+                      labels: _getNoteLabels(item),
                       subject: _getNoteSubject(item.subjectId),
                       onUpdate: () {
                         _onUpdateNote(context, item);
@@ -1254,6 +1371,21 @@ class _NoteListScreenState extends State<NoteListScreen> {
                           _reloadPage();
                         }
                       },
+                      onFilterByLabel: (int? labelId) {
+                        if (labelId != null) {
+                          setState(() {
+                            _filterByLabel = true;
+                            _noteConditionModel.labelId = labelId;
+                          });
+
+                          /*
+                              Get label
+                               */
+                          _getFilteredLabel();
+
+                          _reloadPage();
+                        }
+                      },
                     ),
                     firstPageErrorIndicatorBuilder: (context) => Center(
                       child: Text(
@@ -1312,128 +1444,137 @@ class _NoteListScreenState extends State<NoteListScreen> {
     );
   }
 
-  Widget _buildSubjectListPopup(BuildContext context) {
+  Widget _buildSubjectListPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Padding(
                     padding: const EdgeInsets.fromLTRB(4.0, 0, 2.0, 0),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: ThemeDataCenter.getFilteringTextColorStyle(context),
-                            width: 1.0,
+                    child: Tooltip(
+                      message: CommonLanguages.convert(
+                          lang: settingNotifier
+                              .languageString ??
+                              CommonLanguages
+                                  .languageStringDefault(),
+                          word:
+                          'button.title.selectSubject'),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: ThemeDataCenter.getFilteringTextColorStyle(context),
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Icon(
-                            Icons.list_rounded,
-                            size: 22,
-                            color:
-                            ThemeDataCenter.getFilteringTextColorStyle(context),
+                          child: Padding(
+                            padding: const EdgeInsets.all(6.0),
+                            child: Icon(
+                              Icons.list_rounded,
+                              size: 22,
+                              color:
+                              ThemeDataCenter.getFilteringTextColorStyle(context),
+                            ),
                           ),
                         ),
-                      ),
-                      onTap: () async {
-                        await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) => CoreBasicDialog(
-                              backgroundColor: Colors.white.withOpacity(0.8),
-                              shape:
-                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                              child: SizedBox(
-                                height: CommonDimensions.maxHeightScreen(context)/2,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24.0),
-                                  child: ListView.builder(
-                                    itemCount: _subjectList!.length,
-                                    itemBuilder: (context, index) {
-                                      return  Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(10.0),
-                                          onTap: () {
-                                            filteredSubject = null;
-                                            _noteConditionModel.subjectId =
-                                                _subjectList![index].id;
+                        onTap: () async {
+                          await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) => CoreBasicDialog(
+                                backgroundColor: Colors.white.withOpacity(0.8),
+                                shape:
+                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                                child: SizedBox(
+                                  height: CommonDimensions.maxHeightScreen(context)/2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: ListView.builder(
+                                      itemCount: _subjectList!.length,
+                                      itemBuilder: (context, index) {
+                                        return  Padding(
+                                          padding: const EdgeInsets.all(2.0),
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(10.0),
+                                            onTap: () {
+                                              filteredSubject = null;
+                                              _noteConditionModel.subjectId =
+                                                  _subjectList![index].id;
 
-                                            /*
-                                      Get subject
-                                       */
-                                            _getFilteredSubject();
+                                              /*
+                                        Get subject
+                                         */
+                                              _getFilteredSubject();
 
-                                            if (Navigator.canPop(context)) {
-                                              Navigator.pop(context);
-                                            }
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.pop(context);
+                                              }
 
-                                            _reloadPage();
-                                          },
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              Flexible(
-                                                child: Container(
-                                                  decoration: const BoxDecoration(
-                                                    shape: BoxShape.rectangle,
-                                                  ),
-                                                  child: Padding(
-                                                      padding: const EdgeInsets.all(4.0),
-                                                      child: SingleChildScrollView(
-                                                        scrollDirection: Axis.horizontal,
-                                                        child: Row(mainAxisSize: MainAxisSize.max, children: [
-                                                          Padding(
-                                                            padding: const EdgeInsets.all(2.0),
-                                                            child: DottedBorder(
-                                                                borderType: BorderType.RRect,
-                                                                radius: const Radius.circular(12),
-                                                                color: _subjectList![index].color.toColor(),
-                                                                child: ClipRRect(
-                                                                  borderRadius: const BorderRadius.all(
-                                                                      Radius.circular(12)),
-                                                                  child: Container(
-                                                                      color: Colors.white,
-                                                                      child: Padding(
-                                                                        padding: const EdgeInsets.all(6.0),
-                                                                        child: Row(
-                                                                          mainAxisSize: MainAxisSize.min,
-                                                                          children: [
-                                                                            Icon(
-                                                                              Icons.palette_rounded,
-                                                                              color: _subjectList![index].color
-                                                                                  .toColor(),
-                                                                            ),
-                                                                            const SizedBox(width: 6.0),
-                                                                            Flexible(
-                                                                              child: Text(
-                                                                                  _subjectList![index].title,
-                                                                                  maxLines: 1,
-                                                                                  overflow:
-                                                                                  TextOverflow.ellipsis),
-                                                                            ),
-                                                                          ],
+                                              _reloadPage();
+                                            },
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                Flexible(
+                                                  child: Container(
+                                                    decoration: const BoxDecoration(
+                                                      shape: BoxShape.rectangle,
+                                                    ),
+                                                    child: Padding(
+                                                        padding: const EdgeInsets.all(4.0),
+                                                        child: SingleChildScrollView(
+                                                          scrollDirection: Axis.horizontal,
+                                                          child: Row(mainAxisSize: MainAxisSize.max, children: [
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(2.0),
+                                                              child: DottedBorder(
+                                                                  borderType: BorderType.RRect,
+                                                                  radius: const Radius.circular(12),
+                                                                  color: _subjectList![index].color.toColor(),
+                                                                  child: ClipRRect(
+                                                                    borderRadius: const BorderRadius.all(
+                                                                        Radius.circular(12)),
+                                                                    child: Container(
+                                                                        color: Colors.white,
+                                                                        child: Padding(
+                                                                          padding: const EdgeInsets.all(6.0),
+                                                                          child: Row(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            children: [
+                                                                              Icon(
+                                                                                Icons.palette_rounded,
+                                                                                color: _subjectList![index].color
+                                                                                    .toColor(),
+                                                                              ),
+                                                                              const SizedBox(width: 6.0),
+                                                                              Flexible(
+                                                                                child: Text(
+                                                                                    _subjectList![index].title,
+                                                                                    maxLines: 1,
+                                                                                    overflow:
+                                                                                    TextOverflow.ellipsis),
+                                                                              ),
+                                                                            ],
+                                                                          ),
                                                                         ),
-                                                                      ),
+                                                                    ),
                                                                   ),
-                                                                ),
+                                                              ),
                                                             ),
+                                                          ],
                                                           ),
-                                                        ],
                                                         ),
-                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  )
+                                        );
+                                      },
+                                    )
+                                  ),
                                 ),
-                              ),
-                            ),);
-                      },
+                              ),);
+                        },
+                      ),
                     ),
                   );
   }
@@ -1517,176 +1658,212 @@ class _NoteListScreenState extends State<NoteListScreen> {
       mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          CoreElevatedButton(
-            buttonAudio: commonAudioOnPressButton,
-            onPressed: () {
-              _resetConditions();
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.refresh_rounded,
-              size: 25.0,
+          Tooltip(
+            message: CommonLanguages.convert(
+                lang: settingNotifier
+                    .languageString ??
+                    CommonLanguages
+                        .languageStringDefault(),
+                word:
+                'tooltip.button.reload'),
+            child: CoreElevatedButton(
+              buttonAudio: commonAudioOnPressButton,
+              onPressed: () {
+                _resetConditions();
+              },
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              child: const Icon(
+                Icons.refresh_rounded,
+                size: 25.0,
+              ),
             ),
           ),
           const SizedBox(width: 5),
-          CoreElevatedButton(
-            buttonAudio: commonAudioOnPressButton,
-            onPressed: () async {
-              await showDialog<bool>(
-                context: context,
-                builder: (BuildContext context) => Form(
-                  child: CoreBasicDialog(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Form(
-                            key: _formKey,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                CoreTextFormField(
-                                  style: TextStyle(
-                                    color: ThemeDataCenter
-                                        .getAloneTextColorStyle(context),
+          Tooltip(
+            message: CommonLanguages.convert(
+                lang: settingNotifier
+                    .languageString ??
+                    CommonLanguages
+                        .languageStringDefault(),
+                word:
+                'tooltip.button.search'),
+            child: CoreElevatedButton(
+              buttonAudio: commonAudioOnPressButton,
+              onPressed: () async {
+                await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) => Form(
+                    child: CoreBasicDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  CoreTextFormField(
+                                    style: TextStyle(
+                                      color: ThemeDataCenter
+                                          .getAloneTextColorStyle(context),
+                                    ),
+                                    onChanged: (String value) {
+                                      if (value.isNotEmpty) {
+                                        setState(() {
+                                          _searchText = value.trim();
+                                        });
+                                      }
+                                    },
+                                    controller: _searchController,
+                                    focusNode: _searchFocusNode,
+                                    validateString:
+                                        'Please enter search string!',
+                                    maxLength: 60,
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: ThemeDataCenter
+                                          .getFormFieldLabelColorStyle(
+                                              context),
+                                    ),
+                                    label: 'Search',
+                                    labelColor: ThemeDataCenter
+                                        .getFormFieldLabelColorStyle(context),
+                                    placeholder: 'Search on notes',
+                                    helper: '',
                                   ),
-                                  onChanged: (String value) {
-                                    if (value.isNotEmpty) {
-                                      setState(() {
-                                        _searchText = value.trim();
-                                      });
-                                    }
-                                  },
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  validateString:
-                                      'Please enter search string!',
-                                  maxLength: 60,
-                                  icon: Icon(
-                                    Icons.edit,
-                                    color: ThemeDataCenter
-                                        .getFormFieldLabelColorStyle(
-                                            context),
-                                  ),
-                                  label: 'Search',
-                                  labelColor: ThemeDataCenter
-                                      .getFormFieldLabelColorStyle(context),
-                                  placeholder: 'Search on notes',
-                                  helper: '',
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceAround,
-                            children: [
-                              CoreElevatedButton.iconOnly(
+                            const SizedBox(height: 20.0),
+                            Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceAround,
+                              children: [
+                                CoreElevatedButton.iconOnly(
+                                    buttonAudio: commonAudioOnPressButton,
+                                    icon: const Icon(Icons.close_rounded),
+                                    onPressed: () {
+                                      if (_searchController.text.isNotEmpty) {
+                                        setState(() {
+                                          _searchController.text = "";
+                                          _searchText = "";
+                                          _noteConditionModel.searchText =
+                                              _searchText;
+                                        });
+                                        // Reload Page
+                                        _reloadPage();
+                                      }
+                                    },
+                                    coreButtonStyle: ThemeDataCenter
+                                        .getCoreScreenButtonStyle(context: context)),
+                                CoreElevatedButton.iconOnly(
                                   buttonAudio: commonAudioOnPressButton,
-                                  icon: const Icon(Icons.close_rounded),
+                                  icon: const Icon(Icons.search_rounded),
                                   onPressed: () {
-                                    if (_searchController.text.isNotEmpty) {
+                                    if (_formKey.currentState!.validate()) {
                                       setState(() {
-                                        _searchController.text = "";
-                                        _searchText = "";
-                                        _noteConditionModel.searchText =
-                                            _searchText;
+                                        // Set Condition
+                                        if (_searchController
+                                            .text.isNotEmpty) {
+                                          _noteConditionModel.searchText =
+                                              _searchText;
+
+                                          // Reload Data
+                                          _reloadPage();
+
+                                          // Close Dialog
+                                          Navigator.of(context).pop();
+                                        }
                                       });
-                                      // Reload Page
-                                      _reloadPage();
                                     }
                                   },
                                   coreButtonStyle: ThemeDataCenter
-                                      .getCoreScreenButtonStyle(context: context)),
-                              CoreElevatedButton.iconOnly(
-                                buttonAudio: commonAudioOnPressButton,
-                                icon: const Icon(Icons.search_rounded),
-                                onPressed: () {
-                                  if (_formKey.currentState!.validate()) {
-                                    setState(() {
-                                      // Set Condition
-                                      if (_searchController
-                                          .text.isNotEmpty) {
-                                        _noteConditionModel.searchText =
-                                            _searchText;
-
-                                        // Reload Data
-                                        _reloadPage();
-
-                                        // Close Dialog
-                                        Navigator.of(context).pop();
-                                      }
-                                    });
-                                  }
-                                },
-                                coreButtonStyle: ThemeDataCenter
-                                    .getCoreScreenButtonStyle(context: context),
-                              ),
-                            ],
-                          )
-                        ],
+                                      .getCoreScreenButtonStyle(context: context),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.search,
-              size: 25.0,
+                );
+              },
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              child: const Icon(
+                Icons.search,
+                size: 25.0,
+              ),
             ),
           ),
           const SizedBox(width: 5),
-          CoreElevatedButton(
-            buttonAudio: commonAudioOnPressButton,
-            onPressed: () async {
-              await showDialog<bool>(
-                  context: context,
-                  builder: (BuildContext context) => _filterPopup(context, settingNotifier));
-            },
-            coreButtonStyle:
-                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-            child: const Icon(
-              Icons.filter_list_alt,
-              size: 25.0,
+          Tooltip(
+            message: CommonLanguages.convert(
+                lang: settingNotifier
+                    .languageString ??
+                    CommonLanguages
+                        .languageStringDefault(),
+                word:
+                'tooltip.button.filter'),
+            child: CoreElevatedButton(
+              buttonAudio: commonAudioOnPressButton,
+              onPressed: () async {
+                await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext context) => _filterPopup(context, settingNotifier));
+              },
+              coreButtonStyle:
+                  ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              child: const Icon(
+                Icons.filter_list_alt,
+                size: 25.0,
+              ),
             ),
           ),
           const SizedBox(width: 5),
           _selectedDay == null
-              ? CoreElevatedButton(
+              ? Tooltip(
+            message: CommonLanguages.convert(
+                lang: settingNotifier
+                    .languageString ??
+                    CommonLanguages
+                        .languageStringDefault(),
+                word:
+                'tooltip.button.createNote'),
+                child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NoteCreateScreen(
-                            note: null,
-                            copyNote: null,
-                            subject: filteredSubject,
-                            actionMode: ActionModeEnum.create,
-                          redirectFrom: RedirectFromEnum.notes,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NoteCreateScreen(
+                              note: null,
+                              copyNote: null,
+                              subject: filteredSubject,
+                              actionMode: ActionModeEnum.create,
+                            redirectFrom: RedirectFromEnum.notes,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  coreButtonStyle:
-                      ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-                  child: const Icon(
-                    Icons.add,
-                    size: 25.0,
+                      );
+                    },
+                    coreButtonStyle:
+                        ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+                    child: const Icon(
+                      Icons.add,
+                      size: 25.0,
+                    ),
                   ),
-                )
+              )
               : PopupMenuButton<ActionCreateNoteEnum>(
                   icon: ElevatedButton(
                     onPressed: null,
@@ -1825,7 +2002,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
               ),
             ),
             Tooltip(
-              message: 'Created time',
+              message: CommonLanguages.convert(
+                  lang: settingNotifier
+                      .languageString ??
+                      CommonLanguages
+                          .languageStringDefault(),
+                  word:
+                  'tooltip.button.calendar'),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
                 child: InkWell(
@@ -1877,7 +2060,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
               ),
             ),
             Tooltip(
-              message: 'Subjects',
+              message: CommonLanguages.convert(
+                  lang: settingNotifier
+                      .languageString ??
+                      CommonLanguages
+                          .languageStringDefault(),
+                  word:
+                  'tooltip.button.subjectsHome'),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
                 child: InkWell(
@@ -1927,7 +2116,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
             ),
             _isFiltering()
                 ? Tooltip(
-                    message: 'Filtering...',
+                    message: CommonLanguages.convert(
+                        lang: settingNotifier
+                            .languageString ??
+                            CommonLanguages
+                                .languageStringDefault(),
+                        word:
+                        'tooltip.button.filter'),
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(6.0, 0, 0, 0),
                       child: Padding(

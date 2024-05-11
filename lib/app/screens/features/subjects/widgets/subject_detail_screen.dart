@@ -399,8 +399,9 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                         )
                       : Container(),
                   Card(
+                    color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
                     shadowColor: const Color(0xff1f1f1f),
-                    elevation: 2.0,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                       side: BorderSide(
                           color:
@@ -472,7 +473,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                       ? Column(
                                           children: [
                                             Tooltip(
-                                              message: 'Update',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'tooltip.button.update'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:
@@ -504,7 +508,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               ),
                                             ),
                                             Tooltip(
-                                              message: 'Create sub subject',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'tooltip.button.createSubSubject'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:
@@ -535,7 +542,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               ),
                                             ),
                                             Tooltip(
-                                              message: 'Notes',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'screen.title.notes'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:
@@ -568,7 +578,10 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                               ),
                                             ),
                                             Tooltip(
-                                              message: 'Create note',
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier.languageString ??
+                                                      CommonLanguages.languageStringDefault(),
+                                                  word: 'screen.title.create.note'),
                                               child:
                                                   CoreElevatedButton.iconOnly(
                                                 buttonAudio:
@@ -672,69 +685,20 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                           ],
                                         )
                                       : Column(children: [
-                                          CoreElevatedButton.iconOnly(
-                                            buttonAudio:
-                                                commonAudioOnPressButton,
-                                            onPressed: () {
-                                              _onRestoreSubjectFromTrash(
-                                                      context)
-                                                  .then((result) {
-                                                if (result) {
-                                                  subjectNotifier.onCountAll();
-
-                                                  CoreNotification.showMessage(
-                                                      context, settingNotifier,
-                                                      CoreNotificationStatus
-                                                          .success,
-                                                      CommonLanguages.convert(
-                                                          lang: settingNotifier.languageString ??
-                                                              CommonLanguages.languageStringDefault(),
-                                                          word: 'notification.action.restored'));
-
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const SubjectListScreen(
-                                                        subjectConditionModel:
-                                                            null,
-                                                        redirectFrom: null,
-                                                        breadcrumb: null,
-                                                      ),
-                                                    ),
-                                                  );
-                                                } else {
-                                                  CoreNotification.showMessage(
-                                                      context, settingNotifier,
-                                                      CoreNotificationStatus
-                                                          .error,
-                                                      CommonLanguages.convert(
-                                                          lang: settingNotifier.languageString ??
-                                                              CommonLanguages.languageStringDefault(),
-                                                          word: 'notification.action.error'));
-                                                }
-                                              });
-                                            },
-                                            coreButtonStyle: ThemeDataCenter
-                                                .getRestoreButtonStyle(context),
-                                            icon: const Icon(
-                                                Icons
-                                                    .restore_from_trash_rounded,
-                                                size: 26.0),
-                                          ),
-                                          const SizedBox(height: 2.0),
-                                          CoreElevatedButton.iconOnly(
-                                            buttonAudio:
-                                                commonAudioOnPressButton,
-                                            onPressed: () async {
-                                              if (await CoreHelperWidget
-                                                  .confirmFunction(
-                                                      context: context, settingNotifier: settingNotifier)) {
-                                                _onDeleteSubjectForever(context)
+                                          Tooltip(
+                                            message: CommonLanguages.convert(
+                                                lang: settingNotifier.languageString ??
+                                                    CommonLanguages.languageStringDefault(),
+                                                word: 'tooltip.button.restore'),
+                                            child: CoreElevatedButton.iconOnly(
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
+                                              onPressed: () {
+                                                _onRestoreSubjectFromTrash(
+                                                        context)
                                                     .then((result) {
                                                   if (result) {
-                                                    subjectNotifier
-                                                        .onCountAll();
+                                                    subjectNotifier.onCountAll();
 
                                                     CoreNotification.showMessage(
                                                         context, settingNotifier,
@@ -743,7 +707,7 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                         CommonLanguages.convert(
                                                             lang: settingNotifier.languageString ??
                                                                 CommonLanguages.languageStringDefault(),
-                                                            word: 'notification.action.deleted'));
+                                                            word: 'notification.action.restored'));
 
                                                     Navigator.push(
                                                       context,
@@ -768,14 +732,75 @@ class _SubjectDetailScreenState extends State<SubjectDetailScreen> {
                                                             word: 'notification.action.error'));
                                                   }
                                                 });
-                                              }
-                                            },
-                                            coreButtonStyle: ThemeDataCenter
-                                                .getDeleteForeverButtonStyle(
-                                                    context),
-                                            icon: const Icon(
-                                                Icons.delete_forever_rounded,
-                                                size: 26.0),
+                                              },
+                                              coreButtonStyle: ThemeDataCenter
+                                                  .getRestoreButtonStyle(context),
+                                              icon: const Icon(
+                                                  Icons
+                                                      .restore_from_trash_rounded,
+                                                  size: 26.0),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2.0),
+                                          Tooltip(
+                                            message: CommonLanguages.convert(
+                                                lang: settingNotifier.languageString ??
+                                                    CommonLanguages.languageStringDefault(),
+                                                word: 'tooltip.button.deleteForever'),
+                                            child: CoreElevatedButton.iconOnly(
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
+                                              onPressed: () async {
+                                                if (await CoreHelperWidget
+                                                    .confirmFunction(
+                                                        context: context, settingNotifier: settingNotifier)) {
+                                                  _onDeleteSubjectForever(context)
+                                                      .then((result) {
+                                                    if (result) {
+                                                      subjectNotifier
+                                                          .onCountAll();
+
+                                                      CoreNotification.showMessage(
+                                                          context, settingNotifier,
+                                                          CoreNotificationStatus
+                                                              .success,
+                                                          CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'notification.action.deleted'));
+
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              const SubjectListScreen(
+                                                            subjectConditionModel:
+                                                                null,
+                                                            redirectFrom: null,
+                                                            breadcrumb: null,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      CoreNotification.showMessage(
+                                                          context, settingNotifier,
+                                                          CoreNotificationStatus
+                                                              .error,
+                                                          CommonLanguages.convert(
+                                                              lang: settingNotifier.languageString ??
+                                                                  CommonLanguages.languageStringDefault(),
+                                                              word: 'notification.action.error'));
+                                                    }
+                                                  });
+                                                }
+                                              },
+                                              coreButtonStyle: ThemeDataCenter
+                                                  .getDeleteForeverButtonStyle(
+                                                      context),
+                                              icon: const Icon(
+                                                  Icons.delete_forever_rounded,
+                                                  size: 26.0),
+                                            ),
                                           ),
                                         ])
                                 ],

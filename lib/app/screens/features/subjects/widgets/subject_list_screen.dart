@@ -8,6 +8,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
+import '../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../core/components/containment/dialogs/CoreBasicDialog.dart';
 import '../../../../../core/components/form/CoreTextFormField.dart';
@@ -314,20 +315,34 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
                     ]);
               }),
               const SizedBox(height: 20.0),
-              CoreElevatedButton.iconOnly(
-                  buttonAudio: commonAudioOnPressButton,
-                  icon: const FaIcon(FontAwesomeIcons.check, size: 25.0),
-                  onPressed: () {
-                    setState(() {
-                      /// Reload Data
-                      _reloadPage();
+              CoreElevatedButton.icon(
+                buttonAudio: commonAudioOnPressButton,
+                icon: const FaIcon(FontAwesomeIcons.check,
+                    size: 18.0),
+                label: Text(
+                    CommonLanguages.convert(
+                        lang: settingNotifier.languageString ??
+                            CommonLanguages.languageStringDefault(),
+                        word: 'button.title.accept'),
+                    style: CommonStyles.labelTextStyle),
+                onPressed: () {
+                  setState(() {
+                    /// Reload Data
+                    _reloadPage();
 
-                      /// Close Dialog
-                      Navigator.of(context).pop();
-                    });
-                  },
-                  coreButtonStyle: ThemeDataCenter.getCoreScreenButtonStyle(
-                      context: context)),
+                    /// Close Dialog
+                    Navigator.of(context).pop();
+                  });
+                },
+                coreButtonStyle: CoreButtonStyle.options(
+                    coreStyle: CoreStyle.filled,
+                    coreColor: CoreColor.success,
+                    coreRadius: CoreRadius.radius_6,
+                    kitBorderColorOption: Colors.black,
+                    kitForegroundColorOption: Colors.black,
+                    coreFixedSizeButton:
+                    CoreFixedSizeButton.medium_48),
+              ),
             ],
           ),
         ),
@@ -432,171 +447,207 @@ class _SubjectListScreenState extends State<SubjectListScreen> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        CoreElevatedButton(
-          buttonAudio: commonAudioOnPressButton,
-          onPressed: () {
-            _resetConditions();
-            _reloadPage();
-          },
-          coreButtonStyle:
-              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-          child: const Icon(
-            Icons.refresh_rounded,
-            size: 25.0,
+        Tooltip(
+          message: CommonLanguages.convert(
+              lang: settingNotifier
+                  .languageString ??
+                  CommonLanguages
+                      .languageStringDefault(),
+              word:
+              'tooltip.button.reload'),
+          child: CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
+            onPressed: () {
+              _resetConditions();
+              _reloadPage();
+            },
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+            child: const Icon(
+              Icons.refresh_rounded,
+              size: 25.0,
+            ),
           ),
         ),
         const SizedBox(width: 5),
-        CoreElevatedButton(
-          buttonAudio: commonAudioOnPressButton,
-          onPressed: () async {
-            await showDialog<bool>(
-                context: context,
-                builder: (BuildContext context) => Form(
-                      child: CoreBasicDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Form(
-                                key: _formKey,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+        Tooltip(
+          message: CommonLanguages.convert(
+              lang: settingNotifier
+                  .languageString ??
+                  CommonLanguages
+                      .languageStringDefault(),
+              word:
+              'tooltip.button.search'),
+          child: CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
+            onPressed: () async {
+              await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) => Form(
+                        child: CoreBasicDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      CoreTextFormField(
+                                        style: TextStyle(
+                                            color: ThemeDataCenter
+                                                .getAloneTextColorStyle(context)),
+                                        onChanged: (String value) {
+                                          if (value.isNotEmpty) {
+                                            setState(() {
+                                              _searchText = value.trim();
+                                            });
+                                          }
+                                        },
+                                        controller: _searchController,
+                                        focusNode: _searchFocusNode,
+                                        validateString:
+                                            'Please enter search string!',
+                                        maxLength: 60,
+                                        icon: Icon(Icons.edit,
+                                            color: ThemeDataCenter
+                                                .getFormFieldLabelColorStyle(
+                                                    context)),
+                                        label: 'Search',
+                                        labelColor: ThemeDataCenter
+                                            .getFormFieldLabelColorStyle(context),
+                                        placeholder: 'Search on subjects',
+                                        helper: '',
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20.0),
+                                Row(
                                   mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
                                   children: [
-                                    CoreTextFormField(
-                                      style: TextStyle(
-                                          color: ThemeDataCenter
-                                              .getAloneTextColorStyle(context)),
-                                      onChanged: (String value) {
-                                        if (value.isNotEmpty) {
+                                    CoreElevatedButton.iconOnly(
+                                      buttonAudio: commonAudioOnPressButton,
+                                      icon: const Icon(Icons.close_rounded),
+                                      onPressed: () {
+                                        if (_searchController.text.isNotEmpty) {
                                           setState(() {
-                                            _searchText = value.trim();
+                                            _searchController.text = "";
+                                            _searchText = "";
+                                            _subjectConditionModel.searchText =
+                                                _searchText;
+                                          });
+                                          // Reload Page
+                                          _reloadPage();
+                                        }
+                                      },
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(
+                                              context: context),
+                                    ),
+                                    CoreElevatedButton.iconOnly(
+                                      buttonAudio: commonAudioOnPressButton,
+                                      icon: const Icon(Icons.search_rounded),
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          setState(() {
+                                            if (_searchController
+                                                .text.isNotEmpty) {
+                                              // Set Condition
+                                              _subjectConditionModel.searchText =
+                                                  _searchText;
+
+                                              // Reload Data
+                                              _reloadPage();
+
+                                              // Close Dialog
+                                              Navigator.of(context).pop();
+                                            }
                                           });
                                         }
                                       },
-                                      controller: _searchController,
-                                      focusNode: _searchFocusNode,
-                                      validateString:
-                                          'Please enter search string!',
-                                      maxLength: 60,
-                                      icon: Icon(Icons.edit,
-                                          color: ThemeDataCenter
-                                              .getFormFieldLabelColorStyle(
-                                                  context)),
-                                      label: 'Search',
-                                      labelColor: ThemeDataCenter
-                                          .getFormFieldLabelColorStyle(context),
-                                      placeholder: 'Search on subjects',
-                                      helper: '',
+                                      coreButtonStyle: ThemeDataCenter
+                                          .getCoreScreenButtonStyle(
+                                              context: context),
                                     ),
                                   ],
-                                ),
-                              ),
-                              const SizedBox(height: 20.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  CoreElevatedButton.iconOnly(
-                                    buttonAudio: commonAudioOnPressButton,
-                                    icon: const Icon(Icons.close_rounded),
-                                    onPressed: () {
-                                      if (_searchController.text.isNotEmpty) {
-                                        setState(() {
-                                          _searchController.text = "";
-                                          _searchText = "";
-                                          _subjectConditionModel.searchText =
-                                              _searchText;
-                                        });
-                                        // Reload Page
-                                        _reloadPage();
-                                      }
-                                    },
-                                    coreButtonStyle: ThemeDataCenter
-                                        .getCoreScreenButtonStyle(
-                                            context: context),
-                                  ),
-                                  CoreElevatedButton.iconOnly(
-                                    buttonAudio: commonAudioOnPressButton,
-                                    icon: const Icon(Icons.search_rounded),
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        setState(() {
-                                          if (_searchController
-                                              .text.isNotEmpty) {
-                                            // Set Condition
-                                            _subjectConditionModel.searchText =
-                                                _searchText;
-
-                                            // Reload Data
-                                            _reloadPage();
-
-                                            // Close Dialog
-                                            Navigator.of(context).pop();
-                                          }
-                                        });
-                                      }
-                                    },
-                                    coreButtonStyle: ThemeDataCenter
-                                        .getCoreScreenButtonStyle(
-                                            context: context),
-                                  ),
-                                ],
-                              )
-                            ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ));
-          },
-          coreButtonStyle:
-              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-          child: const Icon(
-            Icons.search,
-            size: 25.0,
+                      ));
+            },
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+            child: const Icon(
+              Icons.search,
+              size: 25.0,
+            ),
           ),
         ),
         const SizedBox(width: 5.0),
-        CoreElevatedButton(
-          buttonAudio: commonAudioOnPressButton,
-          onPressed: () async {
-            await showDialog<bool>(
-                context: context,
-                builder: (BuildContext context) => _filterPopup(context, settingNotifier));
-          },
-          coreButtonStyle:
-              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-          child: const Icon(
-            Icons.filter_list_alt,
-            size: 25.0,
+        Tooltip(
+          message: CommonLanguages.convert(
+              lang: settingNotifier
+                  .languageString ??
+                  CommonLanguages
+                      .languageStringDefault(),
+              word:
+              'tooltip.button.filter'),
+          child: CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
+            onPressed: () async {
+              await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) => _filterPopup(context, settingNotifier));
+            },
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+            child: const Icon(
+              Icons.filter_list_alt,
+              size: 25.0,
+            ),
           ),
         ),
         const SizedBox(width: 5.0),
-        CoreElevatedButton(
-          buttonAudio: commonAudioOnPressButton,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const SubjectCreateScreen(
-                        parentSubject: null,
-                        actionMode: ActionModeEnum.create,
-                        redirectFrom: RedirectFromEnum.subjects,
-                        breadcrumb: null,
-                      )),
-            );
-          },
-          coreButtonStyle:
-              ThemeDataCenter.getCoreScreenButtonStyle(context: context),
-          child: const Icon(
-            Icons.add,
-            size: 25.0,
+        Tooltip(
+          message: CommonLanguages.convert(
+              lang: settingNotifier
+                  .languageString ??
+                  CommonLanguages
+                      .languageStringDefault(),
+              word:
+              'tooltip.button.createSubject'),
+          child: CoreElevatedButton(
+            buttonAudio: commonAudioOnPressButton,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SubjectCreateScreen(
+                          parentSubject: null,
+                          actionMode: ActionModeEnum.create,
+                          redirectFrom: RedirectFromEnum.subjects,
+                          breadcrumb: null,
+                        )),
+              );
+            },
+            coreButtonStyle:
+                ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+            child: const Icon(
+              Icons.add,
+              size: 25.0,
+            ),
           ),
         ),
       ],

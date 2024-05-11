@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
 import '../../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
@@ -77,7 +78,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                 : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
-            icon: Icons.remove_red_eye_rounded,
+            icon: Icons.search_rounded,
           ),
           widget.label.deletedAt == null
               ? SlidableAction(
@@ -232,8 +233,9 @@ class _LabelWidgetState extends State<LabelWidget> {
                   )
                 : Container(),
             Card(
-              shadowColor: Colors.black,
-              elevation: 2.0,
+              color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 0,
               shape: RoundedRectangleBorder(
                 side: BorderSide(
                     color: ThemeDataCenter.getBorderCardColorStyle(context),
@@ -247,7 +249,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                     // height: 150,
                     child: Container(
                       decoration: const BoxDecoration(
-                        color: Colors.white,
+                        // color: Colors.white,
                         shape: BoxShape.rectangle,
                       ),
                       child: Padding(
@@ -292,7 +294,10 @@ class _LabelWidgetState extends State<LabelWidget> {
                               ),
                               widget.label.deletedAt == null
                                   ? Tooltip(
-                                      message: 'Update',
+                                      message: CommonLanguages.convert(
+                                          lang: settingNotifier.languageString ??
+                                              CommonLanguages.languageStringDefault(),
+                                          word: 'tooltip.button.update'),
                                       child: CoreElevatedButton.iconOnly(
                                         buttonAudio: commonAudioOnPressButton,
                                         onPressed: () {
@@ -316,7 +321,10 @@ class _LabelWidgetState extends State<LabelWidget> {
                                     )
                                   : Column(children: [
                                       Tooltip(
-                                        message: 'Restore',
+                                        message: CommonLanguages.convert(
+                                            lang: settingNotifier.languageString ??
+                                                CommonLanguages.languageStringDefault(),
+                                            word: 'tooltip.button.restore'),
                                         child: CoreElevatedButton.iconOnly(
                                           buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
@@ -334,7 +342,10 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       ),
                                       const SizedBox(height: 2.0),
                                       Tooltip(
-                                        message: 'Delete forever',
+                                        message: CommonLanguages.convert(
+                                            lang: settingNotifier.languageString ??
+                                                CommonLanguages.languageStringDefault(),
+                                            word: 'tooltip.button.deleteForever'),
                                         child: CoreElevatedButton.iconOnly(
                                           buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {

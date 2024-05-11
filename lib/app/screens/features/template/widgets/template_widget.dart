@@ -11,6 +11,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import '../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../../library/common/converters/CommonConverters.dart';
+import '../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../library/common/styles/CommonStyles.dart';
 import '../../../../library/common/themes/ThemeDataCenter.dart';
 import '../../../../library/common/utils/CommonAudioOnPressButton.dart';
@@ -156,9 +157,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     }
   }
 
-  Widget onGetTitle() {
+  Widget onGetTitle(SettingNotifier settingNotifier) {
     String defaultTitle =
-        'You wrote at ${CommonConverters.toTimeString(time: widget.template.createdAt!)}';
+    CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'screen.title.titleNotSet');
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Text(defaultTitle),
@@ -332,7 +333,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                 : ThemeDataCenter.getBackgroundColor(context),
             foregroundColor:
                 ThemeDataCenter.getViewSlidableActionColorStyle(context),
-            icon: Icons.remove_red_eye_rounded,
+            icon: Icons.search_rounded,
           ),
           widget.template.deletedAt == null
               ? SlidableAction(
@@ -551,8 +552,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                       )
                     : Container(),
                 Card(
+                  color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
                   shadowColor: const Color(0xff1f1f1f),
-                  elevation: 2.0,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                         color: ThemeDataCenter.getBorderCardColorStyle(context),
@@ -611,12 +613,18 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                           scrollable: false,
                                                           showCursor: false),
                                                 )
-                                              : onGetTitle()),
+                                              : onGetTitle(settingNotifier)),
                                       widget.template.deletedAt == null
                                           ? Column(
                                               children: [
                                                 Tooltip(
-                                                  message: 'Update',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'tooltip.button.update'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -637,7 +645,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Create note',
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.create.note'),
                                                   child: CoreElevatedButton
                                                       .iconOnly(
                                                     buttonAudio:
@@ -662,7 +676,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                             )
                                           : Column(children: [
                                               Tooltip(
-                                                message: 'Restore',
+                                                message: CommonLanguages.convert(
+                                                    lang: settingNotifier
+                                                            .languageString ??
+                                                        CommonLanguages
+                                                            .languageStringDefault(),
+                                                    word:
+                                                        'tooltip.button.restore'),
                                                 child:
                                                     CoreElevatedButton.iconOnly(
                                                   buttonAudio:
@@ -687,7 +707,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                               ),
                                               const SizedBox(height: 2.0),
                                               Tooltip(
-                                                message: 'Delete forever',
+                                                message: CommonLanguages.convert(
+                                                    lang: settingNotifier
+                                                            .languageString ??
+                                                        CommonLanguages
+                                                            .languageStringDefault(),
+                                                    word:
+                                                        'tooltip.button.deleteForever'),
                                                 child:
                                                     CoreElevatedButton.iconOnly(
                                                   buttonAudio:
@@ -730,12 +756,14 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                       padding: const EdgeInsets.all(6.0),
                                       child: Row(
                                         children: [
-                                          Text("[id:${widget.template.id!}] ",
+                                          Text(
+                                              CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                          .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word: 'screen.title.content'),
                                               style: const TextStyle(
-                                                  fontSize: 13.0,
-                                                  color: Colors.black45)),
-                                          const Text("Content",
-                                              style: TextStyle(
                                                   fontSize: 13.0,
                                                   color: Colors.black45)),
                                         ],
