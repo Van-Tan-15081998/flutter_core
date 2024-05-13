@@ -27,6 +27,7 @@ import '../../../setting/providers/setting_notifier.dart';
 import '../../label/models/label_model.dart';
 import '../../subjects/models/subject_condition_model.dart';
 import '../../subjects/models/subject_model.dart';
+import '../../subjects/widgets/subject_list_folder_mode_screen.dart';
 import '../../subjects/widgets/subject_list_screen.dart';
 import '../models/note_model.dart';
 import '../note_detail_screen.dart';
@@ -293,17 +294,27 @@ class _NoteWidgetState extends State<NoteWidget> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12.0),
                   onLongPress: () {
-                    SubjectConditionModel subjectConditionModel =
-                        SubjectConditionModel();
-                    subjectConditionModel.id = widget.subject!.id;
+                    // SubjectConditionModel subjectConditionModel =
+                    //     SubjectConditionModel();
+                    // subjectConditionModel.id = widget.subject!.id;
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //       builder: (context) => SubjectListScreen(
+                    //             subjectConditionModel: subjectConditionModel,
+                    //             redirectFrom: RedirectFromEnum.notes,
+                    //             breadcrumb: null,
+                    //           )),
+                    // );
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SubjectListScreen(
-                                subjectConditionModel: subjectConditionModel,
-                                redirectFrom: RedirectFromEnum.notes,
-                                breadcrumb: null,
-                              )),
+                        builder: (context) => SubjectListFolderModeScreen(
+                          subjectConditionModel: null,
+                          redirectFrom: RedirectFromEnum.notes,
+                          breadcrumb: [widget.subject!],
+                        ),
+                      ),
                     );
                   },
                   onTap: () {
@@ -459,6 +470,7 @@ class _NoteWidgetState extends State<NoteWidget> {
         child: ExpandableNotifier(
           initialExpanded: settingNotifier.isExpandedNoteContent ?? false,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               widget.note.updatedAt == null && widget.note.deletedAt == null
                   ? Padding(
@@ -1100,12 +1112,12 @@ class _NoteWidgetState extends State<NoteWidget> {
         _buildSubject(),
         _buildLabels(),
         ScrollOnExpand(
-          scrollOnExpand: true,
-          scrollOnCollapse: true,
+          scrollOnExpand: false,
+          scrollOnCollapse: false,
           child: ExpandablePanel(
             theme: const ExpandableThemeData(
               headerAlignment: ExpandablePanelHeaderAlignment.center,
-              tapBodyToCollapse: true,
+              tapBodyToCollapse: false,
             ),
             header: Padding(
                 padding: const EdgeInsets.all(6.0),
@@ -1149,6 +1161,7 @@ class _NoteWidgetState extends State<NoteWidget> {
               ],
             ),
             expanded: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 flutter_quill.QuillEditor(
@@ -1161,12 +1174,7 @@ class _NoteWidgetState extends State<NoteWidget> {
                     scrollController: _scrollController,
                     scrollable: false,
                     showCursor: false),
-                GestureDetector(
-                    onTap: () {
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                        child: _buildSelectedImages(context, settingNotifier)))
+                _buildSelectedImages(context, settingNotifier)
               ],
             ),
             builder: (_, collapsed, expanded) {
@@ -1188,137 +1196,362 @@ class _NoteWidgetState extends State<NoteWidget> {
   Widget _buildSelectedImages(
       BuildContext context, SettingNotifier settingNotifier) {
     if (_imageSourceStrings.isNotEmpty) {
-      return Column(
-        children: List.generate(
-          _imageSourceStrings.length,
-          (index) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    await showDialog<bool>(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (BuildContext context) {
-                          return CoreBasicDialog(
-                            insetPadding: const EdgeInsets.all(5.0),
-                            backgroundColor: Colors.white.withOpacity(0.95),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            child: SizedBox(
-                              height:
-                                  CommonDimensions.maxHeightScreen(context) *
-                                      0.75,
-                              child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      5.0, 20.0, 5.0, 10.0),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              CommonLanguages.convert(
-                                                  lang: settingNotifier
-                                                          .languageString ??
-                                                      CommonLanguages
-                                                          .languageStringDefault(),
-                                                  word:
-                                                      'screen.title.viewImage'),
-                                              style: CommonStyles
-                                                  .screenTitleTextStyle(
-                                                      fontSize: 16.0,
-                                                      color: const Color(
-                                                          0xFF1f1f1f)),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10.0),
-                                      Expanded(
-                                        child: Container(
-                                          constraints: BoxConstraints(
-                                              maxWidth: CommonDimensions
-                                                      .maxWidthScreen(context) *
-                                                  0.9),
-                                          child: PhotoView(
-                                            maxScale: 25.0,
-                                            minScale: 0.2,
-                                            backgroundDecoration:
-                                                const BoxDecoration(
-                                                    color: Colors.transparent),
-                                            imageProvider: FileImage(File(
-                                                _imageSourceStrings[index])),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10.0),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          CoreElevatedButton.icon(
-                                            buttonAudio:
-                                                commonAudioOnPressButton,
-                                            icon: const FaIcon(
-                                                FontAwesomeIcons.check,
-                                                size: 18.0),
-                                            label: Text(
+      if (_imageSourceStrings.length == 1) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _imageSourceStrings.length,
+            (index) => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                  child: GestureDetector(
+                    onTap: () async {
+                      await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (BuildContext context) {
+                            return CoreBasicDialog(
+                              insetPadding: const EdgeInsets.all(5.0),
+                              backgroundColor: Colors.white.withOpacity(0.95),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: SizedBox(
+                                height:
+                                    CommonDimensions.maxHeightScreen(context) *
+                                        0.75,
+                                child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        5.0, 20.0, 5.0, 10.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
                                                 CommonLanguages.convert(
                                                     lang: settingNotifier
                                                             .languageString ??
                                                         CommonLanguages
                                                             .languageStringDefault(),
-                                                    word: 'button.title.close'),
+                                                    word:
+                                                        'screen.title.viewImage'),
                                                 style: CommonStyles
-                                                    .labelTextStyle),
-                                            onPressed: () {
-                                              if (Navigator.canPop(context)) {
-                                                Navigator.pop(context, true);
-                                              }
-                                            },
-                                            coreButtonStyle:
-                                                CoreButtonStyle.options(
-                                                    coreStyle: CoreStyle.filled,
-                                                    coreColor:
-                                                        CoreColor.success,
-                                                    coreRadius:
-                                                        CoreRadius.radius_6,
-                                                    kitBorderColorOption:
-                                                        Colors.black,
-                                                    kitForegroundColorOption:
-                                                        Colors.black,
-                                                    coreFixedSizeButton:
-                                                        CoreFixedSizeButton
-                                                            .medium_48),
+                                                    .screenTitleTextStyle(
+                                                        fontSize: 16.0,
+                                                        color: const Color(
+                                                            0xFF1f1f1f)),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Expanded(
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                                maxWidth: CommonDimensions
+                                                        .maxWidthScreen(
+                                                            context) *
+                                                    0.9),
+                                            child: PhotoView(
+                                              maxScale: 25.0,
+                                              minScale: 0.1,
+                                              backgroundDecoration:
+                                                  const BoxDecoration(
+                                                      color:
+                                                          Colors.transparent),
+                                              imageProvider: FileImage(File(
+                                                  _imageSourceStrings[index])),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            CoreElevatedButton.icon(
+                                              playSound: false,
+                                              buttonAudio:
+                                                  commonAudioOnPressButton,
+                                              icon: const FaIcon(
+                                                  FontAwesomeIcons.xmark,
+                                                  size: 18.0),
+                                              label: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'button.title.close'),
+                                                  style: CommonStyles
+                                                      .labelTextStyle),
+                                              onPressed: () {
+                                                if (Navigator.canPop(context)) {
+                                                  Navigator.pop(context, true);
+                                                }
+                                              },
+                                              coreButtonStyle:
+                                                  CoreButtonStyle.options(
+                                                      coreStyle:
+                                                          CoreStyle.filled,
+                                                      coreColor:
+                                                          CoreColor.success,
+                                                      coreRadius:
+                                                          CoreRadius.radius_6,
+                                                      kitBorderColorOption:
+                                                          Colors.black,
+                                                      kitForegroundColorOption:
+                                                          Colors.black,
+                                                      coreFixedSizeButton:
+                                                          CoreFixedSizeButton
+                                                              .medium_48),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            );
+                          });
+                    },
+                    child: Material(
+                      elevation: 3,
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5.0),
+                        child: Container(
+                          constraints: BoxConstraints(
+                              maxWidth:
+                                  CommonDimensions.maxWidthScreen(context) *
+                                      0.7,
+                              maxHeight: CommonDimensions
+                                  .maxHeightScreen(
+                                  context) *
+                                  0.35),
+                          child: Image.file(
+                            File(_imageSourceStrings[index]),
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        int viewingIndex = 0;
+        String? viewingImageSourceString;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(
+              _imageSourceStrings.length,
+              (index) => Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    viewingIndex = index;
+                    viewingImageSourceString = _imageSourceStrings[index];
+                    await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return CoreBasicDialog(
+                              insetPadding: const EdgeInsets.all(5.0),
+                              backgroundColor: Colors.white.withOpacity(0.95),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: StatefulBuilder(builder:
+                                  (BuildContext context, StateSetter setState) {
+                                return SizedBox(
+                                  height: CommonDimensions.maxHeightScreen(
+                                          context) *
+                                      0.75,
+                                  child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          5.0, 20.0, 5.0, 10.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.viewImage'),
+                                                  style: CommonStyles
+                                                      .screenTitleTextStyle(
+                                                          fontSize: 16.0,
+                                                          color: const Color(
+                                                              0xFF1f1f1f)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Expanded(
+                                            child: Container(
+                                              constraints: BoxConstraints(
+                                                  maxWidth: CommonDimensions
+                                                          .maxWidthScreen(
+                                                              context) *
+                                                      0.9),
+                                              child: PhotoView(
+                                                maxScale: 25.0,
+                                                minScale: 0.1,
+                                                backgroundDecoration:
+                                                    const BoxDecoration(
+                                                        color:
+                                                            Colors.transparent),
+                                                imageProvider: FileImage(File(
+                                                    viewingImageSourceString ??
+                                                        _imageSourceStrings[
+                                                            index])),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4.0, 0, 4.0, 0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                CoreElevatedButton.iconOnly(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
+                                                  onPressed: () {
+                                                    if (viewingIndex > 0) {
+                                                      setState(() {
+                                                        viewingIndex--;
+                                                        viewingImageSourceString =
+                                                            _imageSourceStrings[
+                                                                viewingIndex];
+                                                      });
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                      ThemeDataCenter
+                                                          .getUpdateButtonStyle(
+                                                              context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .arrow_back_ios_rounded,
+                                                      size: 26.0),
+                                                ),
+                                                CoreElevatedButton.icon(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
+                                                  icon: const FaIcon(
+                                                      FontAwesomeIcons.xmark,
+                                                      size: 18.0),
+                                                  label: Text(
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier
+                                                                  .languageString ??
+                                                              CommonLanguages
+                                                                  .languageStringDefault(),
+                                                          word:
+                                                              'button.title.close'),
+                                                      style: CommonStyles
+                                                          .labelTextStyle),
+                                                  onPressed: () {
+                                                    if (Navigator.canPop(
+                                                        context)) {
+                                                      Navigator.pop(
+                                                          context, true);
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                      CoreButtonStyle.options(
+                                                          coreStyle:
+                                                              CoreStyle.filled,
+                                                          coreColor:
+                                                              CoreColor.success,
+                                                          coreRadius: CoreRadius
+                                                              .radius_6,
+                                                          kitBorderColorOption:
+                                                              Colors.black,
+                                                          kitForegroundColorOption:
+                                                              Colors.black,
+                                                          coreFixedSizeButton:
+                                                              CoreFixedSizeButton
+                                                                  .medium_48),
+                                                ),
+                                                CoreElevatedButton.iconOnly(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                      commonAudioOnPressButton,
+                                                  onPressed: () {
+                                                    if (viewingIndex <
+                                                        _imageSourceStrings
+                                                                .length -
+                                                            1) {
+                                                      setState(() {
+                                                        viewingIndex++;
+                                                        viewingImageSourceString =
+                                                            _imageSourceStrings[
+                                                                viewingIndex];
+                                                      });
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                      ThemeDataCenter
+                                                          .getUpdateButtonStyle(
+                                                              context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .arrow_forward_ios_rounded,
+                                                      size: 26.0),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
-                                      ),
-                                    ],
-                                  )),
-                            ),
-                          );
+                                      )),
+                                );
+                              }));
                         });
                   },
-                  child: Container(
-                    constraints: BoxConstraints(
-                        maxWidth:
-                            CommonDimensions.maxWidthScreen(context) * 0.7),
-                    child: Image.file(
-                      File(_imageSourceStrings[index]),
-                      fit: BoxFit.contain,
+                  child: Material(
+                    elevation: 3,
+                    borderRadius: BorderRadius.circular(5.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                        child: Image.file(
+                          File(_imageSourceStrings[index]),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
     return Container();
   }
@@ -1330,7 +1563,9 @@ class _NoteWidgetState extends State<NoteWidget> {
         decoration: BoxDecoration(
           color: widget.subject != null &&
                   settingNotifier.isSetColorAccordingSubjectColor!
-              ? widget.subject!.color.toColor()
+              ? widget.subject!.color
+                  .toColor()
+                  .withOpacity(settingNotifier.opacityNumber ?? 1)
               : ThemeDataCenter.getNoteTopBannerCardBackgroundColor(context),
           shape: BoxShape.rectangle,
         ),

@@ -589,7 +589,6 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
       optionActionContent: Container(),
       onGoHome: () {},
       onSubmit: () async {
-
         String? avatarPath;
         if (_formKey.currentState!.validate()) {
           if (widget.subject == null &&
@@ -863,7 +862,7 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                               settingNotifier.languageString ??
                                                   CommonLanguages
                                                       .languageStringDefault(),
-                                          word: 'form.field.title.title')
+                                          word: 'form.field.title.subjectName')
                                       .addColon()
                                       .toString(),
                                   style: GoogleFonts.montserrat(
@@ -897,17 +896,21 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                             },
                             controller: myController,
                             focusNode: myFocusNode,
-                            validateString: 'Please enter your title',
+                            validateString: CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word:
+                                    'notification.action.requiredSubjectName'),
                             maxLength: 60,
                             icon: Icon(Icons.edit,
                                 color:
                                     ThemeDataCenter.getFormFieldLabelColorStyle(
                                         context)),
-                            label: 'Title',
+                            label: '',
                             labelColor:
                                 ThemeDataCenter.getFormFieldLabelColorStyle(
                                     context),
-                            placeholder: 'Enter you title',
+                            placeholder: '',
                             helper: '',
                           ),
                         ),
@@ -1101,7 +1104,14 @@ class _SubjectCreateScreenState extends State<SubjectCreateScreen> {
                                               const Color(0xff1f1f1f),
                                           coreFixedSizeButton:
                                               CoreFixedSizeButton.medium_40),
-                                      child: Text('Color palette',
+                                      child: Text(
+                                          CommonLanguages.convert(
+                                              lang: settingNotifier
+                                                      .languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                              word:
+                                                  'button.title.colorPalette'),
                                           style: CommonStyles.buttonTextStyle),
                                     ),
                                   ],

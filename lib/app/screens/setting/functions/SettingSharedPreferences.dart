@@ -107,7 +107,7 @@ class SettingSharedPreferences {
     final SharedPreferences prefs = await _prefs;
 
     final String? avatarImageSourceString =
-    prefs.getString('avatarImageSourceString');
+        prefs.getString('avatarImageSourceString');
 
     await prefs.setString('avatarImageSourceString', avatarImageSourceStr);
   }
@@ -226,7 +226,7 @@ GETTER
     final SharedPreferences prefs = await _prefs;
 
     final String? avatarImageSourceString =
-    prefs.getString('avatarImageSourceString');
+        prefs.getString('avatarImageSourceString');
 
     return avatarImageSourceString;
   }

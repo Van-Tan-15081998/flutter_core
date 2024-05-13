@@ -108,32 +108,33 @@ class _SubjectWidgetFolderItemState extends State<SubjectWidgetFolderItem> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Stack(
-                    children: [
-                      Icon(Icons.folder_rounded,
-                          size: 85, color: widget.subject.color.toColor()),
-                      widget.subject.avatarSourceString != null ?
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white54,
-                                width: 1.0,
-                              ),
-                              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-                              image: DecorationImage(
-                                  image: FileImage(File(widget.subject.avatarSourceString!)), fit: BoxFit.cover),
-                            ),
-                            child: const SizedBox(
-                              width: 70.0,
-                              height: 50.0,
-                            )),
-                      ) :Container()
-                    ]
-                  ),
+                  Stack(children: [
+                    Icon(Icons.folder_rounded,
+                        size: 85, color: widget.subject.color.toColor()),
+                    widget.subject.avatarSourceString != null
+                        ? Positioned(
+                            bottom: 0,
+                            left: 0,
+                            child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white54,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(5.0)),
+                                  image: DecorationImage(
+                                      image: FileImage(File(
+                                          widget.subject.avatarSourceString!)),
+                                      fit: BoxFit.cover),
+                                ),
+                                child: const SizedBox(
+                                  width: 70.0,
+                                  height: 50.0,
+                                )),
+                          )
+                        : Container()
+                  ]),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0, 2.0, 2.0, 0),
                     child: PopupMenuButton<ActionSubjectFolderItemEnum>(

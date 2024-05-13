@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
@@ -380,6 +381,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
     return false;
   }
 
+  _deleteImage(String filePath) {
+    File file = File(filePath);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+  }
+
   /*
   Reload Page
    */
@@ -465,324 +473,351 @@ class _NoteListScreenState extends State<NoteListScreen> {
   Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
+        insetPadding: const EdgeInsets.all(5.0),
+        backgroundColor: Colors.white.withOpacity(0.95),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SingleChildScrollView(
+        child: SizedBox(
+          height: CommonDimensions.maxHeightScreen(context) * 0.75,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                filteredSubject != null
-                    ? Row(
-                        children: [
-                          Text(CommonLanguages.convert(
-                              lang: settingNotifier.languageString ??
-                                  CommonLanguages.languageStringDefault(),
-                              word: 'form.filter.subject').addColon(), style: CommonStyles.labelFilterTextStyle),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        2.0, 2.0, 2.0, 2.0),
-                                    child: DottedBorder(
-                                      borderType: BorderType.RRect,
-                                      radius: const Radius.circular(12),
-                                      color: filteredSubject!.color.toColor(),
-                                      child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(
-                                          Radius.circular(12),
-                                        ),
-                                        child: Container(
-                                          color: Colors.white,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(6.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  Icons.palette_rounded,
-                                                  color: filteredSubject!.color
-                                                      .toColor(),
-                                                ),
-                                                const SizedBox(width: 6.0),
-                                                Flexible(
-                                                  child: Text(
-                                                    filteredSubject!.title,
-                                                    style: const TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.w400),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      )
-                    : Container(),
-                filteredLabel != null
-                    ? Row(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(CommonLanguages.convert(
-                        lang: settingNotifier.languageString ??
-                            CommonLanguages.languageStringDefault(),
-                        word: 'form.filter.label').addColon(), style: CommonStyles.labelFilterTextStyle),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Flexible(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                  2.0, 2.0, 2.0, 2.0),
-                              child: DottedBorder(
-                                borderType: BorderType.RRect,
-                                radius: const Radius.circular(12),
-                                color: filteredLabel!.color.toColor(),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(12),
-                                  ),
-                                  child: Container(
-                                    color: Colors.white,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(6.0),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.label_important_rounded,
-                                            color: filteredLabel!.color
-                                                .toColor(),
-                                          ),
-                                          const SizedBox(width: 6.0),
-                                          Flexible(
-                                            child: Text(
-                                              filteredLabel!.title,
-                                              style: const TextStyle(
-                                                  fontSize: 16.0,
-                                                  fontWeight:
-                                                  FontWeight.w400),
+                    Flexible(
+                      child: Text(
+                        CommonLanguages.convert(
+                            lang: settingNotifier.languageString ??
+                                CommonLanguages.languageStringDefault(),
+                            word: 'form.filter.filter'),
+                        style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 16.0, color: const Color(0xFF1f1f1f)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        filteredSubject != null
+                            ? Row(
+                                children: [
+                                  Text(CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                          CommonLanguages.languageStringDefault(),
+                                      word: 'form.filter.subject').addColon(), style: CommonStyles.labelFilterTextStyle),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                2.0, 2.0, 2.0, 2.0),
+                                            child: DottedBorder(
+                                              borderType: BorderType.RRect,
+                                              radius: const Radius.circular(12),
+                                              color: filteredSubject!.color.toColor(),
+                                              child: ClipRRect(
+                                                borderRadius: const BorderRadius.all(
+                                                  Radius.circular(12),
+                                                ),
+                                                child: Container(
+                                                  color: Colors.white,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(6.0),
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.palette_rounded,
+                                                          color: filteredSubject!.color
+                                                              .toColor(),
+                                                        ),
+                                                        const SizedBox(width: 6.0),
+                                                        Flexible(
+                                                          child: Text(
+                                                            filteredSubject!.title,
+                                                            style: const TextStyle(
+                                                                fontSize: 16.0,
+                                                                fontWeight:
+                                                                    FontWeight.w400),
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                          )
-                                        ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Container(),
+                        filteredLabel != null
+                            ? Row(
+                          children: [
+                            Text(CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'form.filter.label').addColon(), style: CommonStyles.labelFilterTextStyle),
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Flexible(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          2.0, 2.0, 2.0, 2.0),
+                                      child: DottedBorder(
+                                        borderType: BorderType.RRect,
+                                        radius: const Radius.circular(12),
+                                        color: filteredLabel!.color.toColor(),
+                                        child: ClipRRect(
+                                          borderRadius: const BorderRadius.all(
+                                            Radius.circular(12),
+                                          ),
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(6.0),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.label_important_rounded,
+                                                    color: filteredLabel!.color
+                                                        .toColor(),
+                                                  ),
+                                                  const SizedBox(width: 6.0),
+                                                  Flexible(
+                                                    child: Text(
+                                                      filteredLabel!.title,
+                                                      style: const TextStyle(
+                                                          fontSize: 16.0,
+                                                          fontWeight:
+                                                          FontWeight.w400),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                )
-                    : Container(),
-                _noteConditionModel.createdAtStartOfDay != null &&
-                        _noteConditionModel.createdAtEndOfDay != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: StatefulBuilder(builder:
-                            (BuildContext context, StateSetter setState) {
-                          return Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(CommonLanguages.convert(
-                          lang: settingNotifier.languageString ??
-                          CommonLanguages.languageStringDefault(),
-                              word: 'form.filter.creationTime').addColon(),
-                                      style: CommonStyles.labelFilterTextStyle),
+                            )
+                          ],
+                        )
+                            : Container(),
+                        _noteConditionModel.createdAtStartOfDay != null &&
+                                _noteConditionModel.createdAtEndOfDay != null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: StatefulBuilder(builder:
+                                    (BuildContext context, StateSetter setState) {
+                                  return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(CommonLanguages.convert(
+                                  lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                                      word: 'form.filter.creationTime').addColon(),
+                                              style: CommonStyles.labelFilterTextStyle),
+                                        ),
+                                        _noteConditionModel.createdAtStartOfDay != null &&
+                                                _noteConditionModel.createdAtEndOfDay !=
+                                                    null
+                                            ? Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                    Text(
+                                                        'From: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtStartOfDay!))}',
+                                                        style:
+                                                            CommonStyles.labelFilterTextStyle),
+                                                    Text(
+                                                        'To: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtEndOfDay!))}',
+                                                        style: CommonStyles.labelFilterTextStyle)
+                                                  ])
+                                            : Container(),
+                                      ]);
+                                }),
+                              )
+                            : Container(),
+                        _noteConditionModel.searchText != null
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: StatefulBuilder(
+                                  builder: (BuildContext context, StateSetter setState) {
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(CommonLanguages.convert(
+                                            lang: settingNotifier.languageString ??
+                                                CommonLanguages.languageStringDefault(),
+                                            word: 'form.filter.searchKeyword').addColon(),
+                                            style: CommonStyles.labelFilterTextStyle),
+                                        const SizedBox(width: 10.0),
+                                        Expanded(
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  '"${_noteConditionModel.searchText!}"',
+                                                  style: const TextStyle(
+                                                      color: Color(0xFF1f1f1f),
+                                                      fontSize: 16.0),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
-                                _noteConditionModel.createdAtStartOfDay != null &&
-                                        _noteConditionModel.createdAtEndOfDay !=
-                                            null
-                                    ? Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                            Text(
-                                                'From: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtStartOfDay!))}',
-                                                style:
-                                                    CommonStyles.labelFilterTextStyle),
-                                            Text(
-                                                'To: ${DateFormat('dd/MM/yyyy').format(DateTime.fromMillisecondsSinceEpoch(_noteConditionModel.createdAtEndOfDay!))}',
-                                                style: CommonStyles.labelFilterTextStyle)
-                                          ])
-                                    : Container(),
-                              ]);
-                        }),
-                      )
-                    : Container(),
-                _noteConditionModel.searchText != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: StatefulBuilder(
+                              )
+                            : Container(),
+                        const SizedBox(height: 20.0),
+                        StatefulBuilder(
                           builder: (BuildContext context, StateSetter setState) {
                             return Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
+                              children: <Widget>[
                                 Text(CommonLanguages.convert(
                                     lang: settingNotifier.languageString ??
                                         CommonLanguages.languageStringDefault(),
-                                    word: 'form.filter.searchKeyword').addColon(),
+                                    word: 'form.filter.trash').addColon(),
                                     style: CommonStyles.labelFilterTextStyle),
-                                const SizedBox(width: 10.0),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          '"${_noteConditionModel.searchText!}"',
-                                          style: const TextStyle(
-                                              color: Color(0xFF1f1f1f),
-                                              fontSize: 16.0),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                Checkbox(
+                                  checkColor: Colors.white,
+                                  value: _filterByDeleted,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _filterByDeleted = value!;
+                                      if (_filterByDeleted) {
+                                        _noteConditionModel.isDeleted = _filterByDeleted;
+                                      } else {
+                                        _noteConditionModel.isDeleted = null;
+                                      }
+                                    });
+                                  },
                                 ),
                               ],
                             );
                           },
                         ),
-                      )
-                    : Container(),
-                const SizedBox(height: 20.0),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.trash').addColon(),
-                            style: CommonStyles.labelFilterTextStyle),
-                        Checkbox(
-                          checkColor: Colors.white,
-                          value: _filterByDeleted,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _filterByDeleted = value!;
-                              if (_filterByDeleted) {
-                                _noteConditionModel.isDeleted = _filterByDeleted;
-                              } else {
-                                _noteConditionModel.isDeleted = null;
-                              }
-                            });
+                        const SizedBox(height: 20.0),
+                        StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.favourite').addColon(),
+                                    style: CommonStyles.labelFilterTextStyle),
+                                Checkbox(
+                                  checkColor: Colors.white,
+                                  value: _filterByFavourite,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _filterByFavourite = value!;
+                                      if (_filterByFavourite) {
+                                        _noteConditionModel.favourite =
+                                            _filterByFavourite;
+                                      } else {
+                                        _noteConditionModel.favourite = null;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
                           },
                         ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.favourite').addColon(),
-                            style: CommonStyles.labelFilterTextStyle),
-                        Checkbox(
-                          checkColor: Colors.white,
-                          value: _filterByFavourite,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _filterByFavourite = value!;
-                              if (_filterByFavourite) {
-                                _noteConditionModel.favourite =
-                                    _filterByFavourite;
-                              } else {
-                                _noteConditionModel.favourite = null;
-                              }
-                            });
+                        const SizedBox(height: 20.0),
+                        StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.recentlyUpdated').addColon(),
+                                    style: CommonStyles.labelFilterTextStyle),
+                                Checkbox(
+                                  checkColor: Colors.white,
+                                  value: _filterByRecentlyUpdated,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _filterByRecentlyUpdated = value!;
+                                      if (_filterByRecentlyUpdated) {
+                                        _noteConditionModel.recentlyUpdated =
+                                            _filterByRecentlyUpdated;
+                                      } else {
+                                        _noteConditionModel.recentlyUpdated = null;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
                           },
                         ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.recentlyUpdated').addColon(),
-                            style: CommonStyles.labelFilterTextStyle),
-                        Checkbox(
-                          checkColor: Colors.white,
-                          value: _filterByRecentlyUpdated,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _filterByRecentlyUpdated = value!;
-                              if (_filterByRecentlyUpdated) {
-                                _noteConditionModel.recentlyUpdated =
-                                    _filterByRecentlyUpdated;
-                              } else {
-                                _noteConditionModel.recentlyUpdated = null;
-                              }
-                            });
+                        const SizedBox(height: 20.0),
+                        StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.dueDate').addColon(),
+                                    style: CommonStyles.labelFilterTextStyle),
+                                Checkbox(
+                                  checkColor: Colors.white,
+                                  value: _filterByCreatedForDay,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _filterByCreatedForDay = value!;
+                                      if (_filterByCreatedForDay) {
+                                        _noteConditionModel.createdForDay = _filterByCreatedForDay;
+                                      } else {
+                                        _noteConditionModel.createdForDay = null;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            );
                           },
                         ),
+                        const SizedBox(height: 20.0),
                       ],
-                    );
-                  },
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 20.0),
-                StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.dueDate').addColon(),
-                            style: CommonStyles.labelFilterTextStyle),
-                        Checkbox(
-                          checkColor: Colors.white,
-                          value: _filterByCreatedForDay,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              _filterByCreatedForDay = value!;
-                              if (_filterByCreatedForDay) {
-                                _noteConditionModel.createdForDay = _filterByCreatedForDay;
-                              } else {
-                                _noteConditionModel.createdForDay = null;
-                              }
-                            });
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                const SizedBox(height: 20.0),
                 CoreElevatedButton.icon(
                   buttonAudio: commonAudioOnPressButton,
                   icon: const FaIcon(FontAwesomeIcons.check,
@@ -1231,8 +1266,41 @@ class _NoteListScreenState extends State<NoteListScreen> {
                       },
                       onDeleteForever: () async {
                         if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
+
+                          // Delete images
+                          List<String> imageSourceStrings = [];
+                          if (item.images != null && item.images!.isNotEmpty) {
+                            List<dynamic> jsonDecodeImageSourceStrings = jsonDecode(item.images!);
+
+                            if (jsonDecodeImageSourceStrings.isNotEmpty) {
+                              for (var element in jsonDecodeImageSourceStrings) {
+                                imageSourceStrings.add(element);
+                              }
+                            }
+                          }
+
                           _onDeleteNoteForever(context, item).then((result) {
                             if (result) {
+
+                              // Delete images
+                              try {
+                              if (imageSourceStrings.isNotEmpty) {
+                                for (var element in imageSourceStrings) {
+                                  _deleteImage(element);
+                                }
+                              }
+                              } catch (e) {
+                                CoreNotification.showMessage(
+                                  context,
+                                  settingNotifier,
+                                  CoreNotificationStatus.error,
+                                    CommonLanguages.convert(
+                                      lang: settingNotifier.languageString ??
+                                      CommonLanguages.languageStringDefault(),
+                                      word: 'notification.action.error'));
+                                return;
+                              }
+
                               noteNotifier.onCountAll();
 
                               setState(() {
@@ -1479,96 +1547,149 @@ class _NoteListScreenState extends State<NoteListScreen> {
                           await showDialog<bool>(
                               context: context,
                               builder: (BuildContext context) => CoreBasicDialog(
-                                backgroundColor: Colors.white.withOpacity(0.8),
+                                insetPadding: const EdgeInsets.all(5.0),
+                                backgroundColor: Colors.white.withOpacity(0.95),
                                 shape:
                                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                                 child: SizedBox(
-                                  height: CommonDimensions.maxHeightScreen(context)/2,
+                                  height: CommonDimensions.maxHeightScreen(context)*0.75,
                                   child: Padding(
-                                    padding: const EdgeInsets.all(24.0),
-                                    child: ListView.builder(
-                                      itemCount: _subjectList!.length,
-                                      itemBuilder: (context, index) {
-                                        return  Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(10.0),
-                                            onTap: () {
-                                              filteredSubject = null;
-                                              _noteConditionModel.subjectId =
-                                                  _subjectList![index].id;
+                                      padding: const EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 10.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                CommonLanguages.convert(
+                                                    lang: settingNotifier.languageString ??
+                                                        CommonLanguages.languageStringDefault(),
+                                                    word: 'button.title.selectSubject'),
+                                                style: CommonStyles.screenTitleTextStyle(
+                                                    fontSize: 16.0, color: const Color(0xFF1f1f1f)),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Expanded(
+                                          child: ListView.builder(
+                                            itemCount: _subjectList!.length,
+                                            itemBuilder: (context, index) {
+                                              return  Padding(
+                                                padding: const EdgeInsets.all(2.0),
+                                                child: InkWell(
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                  onTap: () {
+                                                    filteredSubject = null;
+                                                    _noteConditionModel.subjectId =
+                                                        _subjectList![index].id;
 
-                                              /*
-                                        Get subject
-                                         */
-                                              _getFilteredSubject();
+                                                    /*
+                                              Get subject
+                                               */
+                                                    _getFilteredSubject();
 
-                                              if (Navigator.canPop(context)) {
-                                                Navigator.pop(context);
-                                              }
+                                                    if (Navigator.canPop(context)) {
+                                                      Navigator.pop(context);
+                                                    }
 
-                                              _reloadPage();
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              children: [
-                                                Flexible(
-                                                  child: Container(
-                                                    decoration: const BoxDecoration(
-                                                      shape: BoxShape.rectangle,
-                                                    ),
-                                                    child: Padding(
-                                                        padding: const EdgeInsets.all(4.0),
-                                                        child: SingleChildScrollView(
-                                                          scrollDirection: Axis.horizontal,
-                                                          child: Row(mainAxisSize: MainAxisSize.max, children: [
-                                                            Padding(
-                                                              padding: const EdgeInsets.all(2.0),
-                                                              child: DottedBorder(
-                                                                  borderType: BorderType.RRect,
-                                                                  radius: const Radius.circular(12),
-                                                                  color: _subjectList![index].color.toColor(),
-                                                                  child: ClipRRect(
-                                                                    borderRadius: const BorderRadius.all(
-                                                                        Radius.circular(12)),
-                                                                    child: Container(
-                                                                        color: Colors.white,
-                                                                        child: Padding(
-                                                                          padding: const EdgeInsets.all(6.0),
-                                                                          child: Row(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            children: [
-                                                                              Icon(
-                                                                                Icons.palette_rounded,
-                                                                                color: _subjectList![index].color
-                                                                                    .toColor(),
+                                                    _reloadPage();
+                                                  },
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.max,
+                                                    children: [
+                                                      Flexible(
+                                                        child: Container(
+                                                          decoration: const BoxDecoration(
+                                                            shape: BoxShape.rectangle,
+                                                          ),
+                                                          child: Padding(
+                                                              padding: const EdgeInsets.all(4.0),
+                                                              child: SingleChildScrollView(
+                                                                scrollDirection: Axis.horizontal,
+                                                                child: Row(mainAxisSize: MainAxisSize.max, children: [
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.all(2.0),
+                                                                    child: DottedBorder(
+                                                                        borderType: BorderType.RRect,
+                                                                        radius: const Radius.circular(12),
+                                                                        color: _subjectList![index].color.toColor(),
+                                                                        child: ClipRRect(
+                                                                          borderRadius: const BorderRadius.all(
+                                                                              Radius.circular(12)),
+                                                                          child: Container(
+                                                                              color: Colors.white,
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets.all(6.0),
+                                                                                child: Row(
+                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                  children: [
+                                                                                    Icon(
+                                                                                      Icons.palette_rounded,
+                                                                                      color: _subjectList![index].color
+                                                                                          .toColor(),
+                                                                                    ),
+                                                                                    const SizedBox(width: 6.0),
+                                                                                    Flexible(
+                                                                                      child: Text(
+                                                                                          _subjectList![index].title,
+                                                                                          maxLines: 1,
+                                                                                          overflow:
+                                                                                          TextOverflow.ellipsis),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
                                                                               ),
-                                                                              const SizedBox(width: 6.0),
-                                                                              Flexible(
-                                                                                child: Text(
-                                                                                    _subjectList![index].title,
-                                                                                    maxLines: 1,
-                                                                                    overflow:
-                                                                                    TextOverflow.ellipsis),
-                                                                              ),
-                                                                            ],
                                                                           ),
                                                                         ),
                                                                     ),
                                                                   ),
+                                                                ],
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ],
                                                           ),
                                                         ),
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              );
+                                            },
                                           ),
-                                        );
-                                      },
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            CoreElevatedButton.icon(
+                                              buttonAudio: commonAudioOnPressButton,
+                                              icon:
+                                              const FaIcon(FontAwesomeIcons.check, size: 18.0),
+                                              label: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier.languageString ??
+                                                          CommonLanguages.languageStringDefault(),
+                                                      word: 'button.title.close'),
+                                                  style: CommonStyles.labelTextStyle),
+                                              onPressed: () {
+                                                if (Navigator.canPop(context)) {
+                                                  Navigator.pop(context, true);
+                                                }
+                                              },
+                                              coreButtonStyle: CoreButtonStyle.options(
+                                                  coreStyle: CoreStyle.filled,
+                                                  coreColor: CoreColor.success,
+                                                  coreRadius: CoreRadius.radius_6,
+                                                  kitBorderColorOption: Colors.black,
+                                                  kitForegroundColorOption: Colors.black,
+                                                  coreFixedSizeButton:
+                                                  CoreFixedSizeButton.medium_48),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     )
                                   ),
                                 ),
@@ -1695,15 +1816,33 @@ class _NoteListScreenState extends State<NoteListScreen> {
                   context: context,
                   builder: (BuildContext context) => Form(
                     child: CoreBasicDialog(
+                      insetPadding: const EdgeInsets.all(5.0),
+                      backgroundColor: Colors.white.withOpacity(0.95),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(24.0),
+                        padding: const EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 10.0),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages.languageStringDefault(),
+                                        word: 'tooltip.button.search'),
+                                    style: CommonStyles.screenTitleTextStyle(
+                                        fontSize: 16.0, color: const Color(0xFF1f1f1f)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10.0),
                             Form(
                               key: _formKey,
                               child: Column(
@@ -1711,9 +1850,8 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
                                   CoreTextFormField(
-                                    style: TextStyle(
-                                      color: ThemeDataCenter
-                                          .getAloneTextColorStyle(context),
+                                    style: const TextStyle(
+                                      color: Color(0xFF1f1f1f),
                                     ),
                                     onChanged: (String value) {
                                       if (value.isNotEmpty) {
@@ -1725,7 +1863,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                     controller: _searchController,
                                     focusNode: _searchFocusNode,
                                     validateString:
-                                        'Please enter search string!',
+                                    CommonLanguages.convert(
+                                        lang: settingNotifier.languageString ??
+                                            CommonLanguages.languageStringDefault(),
+                                        word: 'notification.action.requiredSearchKeyWord'),
                                     maxLength: 60,
                                     icon: Icon(
                                       Icons.edit,
@@ -1733,10 +1874,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
                                           .getFormFieldLabelColorStyle(
                                               context),
                                     ),
-                                    label: 'Search',
+                                    label: '',
                                     labelColor: ThemeDataCenter
                                         .getFormFieldLabelColorStyle(context),
-                                    placeholder: 'Search on notes',
+                                    placeholder: '',
                                     helper: '',
                                   ),
                                 ],

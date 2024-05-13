@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
@@ -278,8 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   Tooltip(
                                     message: CommonLanguages.convert(
-                                        lang:
-                                        settingNotifier.languageString ??
+                                        lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
                                         word: 'button.title.open'),
@@ -419,8 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   Tooltip(
                                     message: CommonLanguages.convert(
-                                        lang:
-                                        settingNotifier.languageString ??
+                                        lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
                                         word: 'button.title.open'),
@@ -528,16 +527,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         color: Colors.white
                                                             .withOpacity(0.65)),
                                                     child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.fromLTRB(
-                                                              15.0,
-                                                              6.0,
-                                                              15.0,
-                                                              6.0),
+                                                      padding: const EdgeInsets
+                                                              .fromLTRB(
+                                                          15.0, 6.0, 15.0, 6.0),
                                                       child: Text(CommonLanguages.convert(
-                                                          lang: settingNotifier.languageString ??
-                                                              CommonLanguages.languageStringDefault(),
-                                                          word: 'button.title.shortcuts')),
+                                                          lang: settingNotifier
+                                                                  .languageString ??
+                                                              CommonLanguages
+                                                                  .languageStringDefault(),
+                                                          word:
+                                                              'button.title.shortcuts')),
                                                     ),
                                                   ),
                                                 )
@@ -606,7 +605,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                         });
                                                                       } else {
                                                                         CoreNotification.show(
-                                                                            context, settingNotifier,
+                                                                            context,
+                                                                            settingNotifier,
                                                                             CoreNotificationStatus.error,
                                                                             CoreNotificationAction.update,
                                                                             'Subject');
@@ -680,8 +680,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   Tooltip(
                                     message: CommonLanguages.convert(
-                                        lang:
-                                        settingNotifier.languageString ??
+                                        lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
                                         word: 'button.title.open'),
@@ -819,8 +818,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   Tooltip(
                                     message: CommonLanguages.convert(
-                                        lang:
-                                        settingNotifier.languageString ??
+                                        lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
                                         word: 'button.title.open'),
@@ -923,21 +921,47 @@ class _HomeScreenState extends State<HomeScreen> {
     return localLabelList;
   }
 
+  Future<String?> _saveImage(String? imagePath) async {
+    if (imagePath != null && imagePath.isNotEmpty) {
+      final imageFile = File(imagePath);
+      final appDirectory = await getApplicationDocumentsDirectory();
+
+      String fileName = imageFile.path.split('/').last;
+      String fileExtension = fileName.split('.').last;
+
+      final savedImageFile = await imageFile.copy(
+          '${appDirectory.path}/image_${DateTime.now().millisecondsSinceEpoch}.$fileExtension');
+
+      if (savedImageFile.path.isNotEmpty) {
+        return savedImageFile.path;
+      }
+    }
+    return null;
+  }
+
   Future<void> _pickImage(
       ImageSource source, SettingNotifier settingNotifier) async {
     final ImagePicker picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
+
+    String? savedImageSourceString;
     if (pickedFile != null) {
-      settingNotifier.setAvatarImageSourceString(pickedFile.path).then(
-              (result) {
-                if (result) {
-                  CoreNotification.show(
-                      context, settingNotifier,
-                      CoreNotificationStatus.success,
-                      CoreNotificationAction.update,
-                      'Avatar');
-                }
-              });
+      savedImageSourceString = await _saveImage(pickedFile.path);
+    }
+
+    if (savedImageSourceString != null) {
+      settingNotifier
+          .setAvatarImageSourceString(savedImageSourceString)
+          .then((result) {
+        if (result) {
+          CoreNotification.show(
+              context,
+              settingNotifier,
+              CoreNotificationStatus.success,
+              CoreNotificationAction.update,
+              'Avatar');
+        }
+      });
     }
   }
 
@@ -1073,18 +1097,35 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       title: Row(
         children: [
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(5.0),
-              decoration: CommonStyles.titleScreenDecorationStyle(
-                  settingNotifier.isSetBackgroundImage),
-              child: Text(widget.title,
-                  style: CommonStyles.screenTitleTextStyle(
-                      fontSize: 30.0,
-                      fontWeight: FontWeight.bold,
-                      color: ThemeDataCenter.getScreenTitleTextColor(context))),
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.all(5.0),
+                    decoration: CommonStyles.titleScreenDecorationStyle(
+                        settingNotifier.isSetBackgroundImage),
+                    child: Text(widget.title,
+                        style: CommonStyles.screenTitleTextStyle(
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.bold,
+                            color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                  ),
+                ),
+              ],
             ),
           ),
+          DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(CommonStyles
+                        .avatarImageSourceString()),
+                    fit: BoxFit.contain),
+              ),
+              child: const SizedBox(
+                width: 65.0,
+                height: 65.0,
+              ))
         ],
       ),
     );
@@ -1155,7 +1196,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         InkWell(
                           onTap: () async {
-                            await _pickImage(ImageSource.gallery, settingNotifier);
+                            await _pickImage(
+                                ImageSource.gallery, settingNotifier);
                           },
                           child: DecoratedBox(
                               decoration: BoxDecoration(
@@ -1165,14 +1207,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 borderRadius: const BorderRadius.all(
                                     Radius.circular(65.0)),
-                                image: settingNotifier.avatarImageSourceString != null && settingNotifier.avatarImageSourceString!.isNotEmpty
+                                image: settingNotifier
+                                                .avatarImageSourceString !=
+                                            null &&
+                                        settingNotifier
+                                            .avatarImageSourceString!.isNotEmpty
                                     ? DecorationImage(
-                                        image: FileImage(File(settingNotifier.avatarImageSourceString!)),
+                                        image: FileImage(File(settingNotifier
+                                            .avatarImageSourceString!)),
                                         fit: BoxFit.cover)
                                     : DecorationImage(
                                         image: AssetImage(CommonStyles
                                             .avatarImageSourceString()),
-                                        fit: BoxFit.cover),
+                                        fit: BoxFit.contain),
                               ),
                               child: const SizedBox(
                                 width: 125.0,
@@ -1297,7 +1344,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           myFocusNode.unfocus();
                                         }
                                         CoreNotification.show(
-                                            context, settingNotifier,
+                                            context,
+                                            settingNotifier,
                                             CoreNotificationStatus.success,
                                             CoreNotificationAction.update,
                                             'Theme');

@@ -28,6 +28,7 @@ import '../label/models/label_model.dart';
 import '../subjects/models/subject_condition_model.dart';
 import '../subjects/models/subject_model.dart';
 import '../subjects/providers/subject_notifier.dart';
+import '../subjects/widgets/subject_list_folder_mode_screen.dart';
 import '../subjects/widgets/subject_list_screen.dart';
 import 'databases/note_db_manager.dart';
 import 'models/note_model.dart';
@@ -299,19 +300,29 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
               Flexible(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12.0),
-                  onTap: () {
-                    SubjectConditionModel subjectConditionModel =
-                        SubjectConditionModel();
-                    subjectConditionModel.id = widget.subject!.id;
-                    Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SubjectListScreen(
-                                  subjectConditionModel: subjectConditionModel,
-                                  redirectFrom: null,
-                                  breadcrumb: null,
-                                )),
-                        (route) => false);
+                  onLongPress: () {
+                    // SubjectConditionModel subjectConditionModel =
+                    //     SubjectConditionModel();
+                    // subjectConditionModel.id = widget.subject!.id;
+                    // Navigator.pushAndRemoveUntil(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => SubjectListScreen(
+                    //               subjectConditionModel: subjectConditionModel,
+                    //               redirectFrom: null,
+                    //               breadcrumb: null,
+                    //             )),
+                    //     (route) => false);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SubjectListFolderModeScreen(
+                          subjectConditionModel: null,
+                          redirectFrom: RedirectFromEnum.notes,
+                          breadcrumb: [widget.subject!],
+                        ),
+                      ),
+                    );
                   },
                   child: Container(
                     decoration: const BoxDecoration(
@@ -497,7 +508,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                             // _onDelete();
                             _onDeleteNote(context).then((result) {
                               if (result) {
-                                Provider.of<NoteNotifier>(context, listen: false)
+                                Provider.of<NoteNotifier>(context,
+                                        listen: false)
                                     .onCountAll();
 
                                 CoreNotification.showMessage(
@@ -594,14 +606,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                             ? Colors.white.withOpacity(0.65)
                                             : Colors.transparent),
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
                                       children: [
                                         widget.note.createdForDay != null
                                             ? Tooltip(
                                                 message: 'Created for',
                                                 child: Row(
-                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.end,
                                                   children: [
@@ -646,7 +661,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                               const SizedBox(width: 5.0),
                                               Text(
                                                 CommonConverters.toTimeString(
-                                                    time: widget.note.createdAt!),
+                                                    time:
+                                                        widget.note.createdAt!),
                                                 style: CommonStyles
                                                     .dateTimeTextStyle(
                                                         color: ThemeDataCenter
@@ -702,14 +718,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                             ? Colors.white.withOpacity(0.65)
                                             : Colors.transparent),
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
                                       children: [
                                         widget.note.createdForDay != null
                                             ? Tooltip(
                                                 message: 'Created for',
                                                 child: Row(
-                                                  mainAxisSize: MainAxisSize.max,
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.end,
                                                   children: [
@@ -751,8 +770,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                               const SizedBox(width: 5.0),
                                               Text(
                                                   CommonConverters.toTimeString(
-                                                      time:
-                                                          widget.note.updatedAt!),
+                                                      time: widget
+                                                          .note.updatedAt!),
                                                   style: CommonStyles
                                                       .dateTimeTextStyle(
                                                           color: ThemeDataCenter
@@ -774,8 +793,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                               const SizedBox(width: 5.0),
                                               Text(
                                                   CommonConverters.toTimeString(
-                                                      time:
-                                                          widget.note.createdAt!),
+                                                      time: widget
+                                                          .note.createdAt!),
                                                   style: CommonStyles
                                                       .dateTimeTextStyle(
                                                           color: ThemeDataCenter
@@ -806,11 +825,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Container(
-                                      padding:
-                                          settingNotifier.isSetBackgroundImage ==
-                                                  true
-                                              ? const EdgeInsets.all(2.0)
-                                              : const EdgeInsets.all(0),
+                                      padding: settingNotifier
+                                                  .isSetBackgroundImage ==
+                                              true
+                                          ? const EdgeInsets.all(2.0)
+                                          : const EdgeInsets.all(0),
                                       decoration: BoxDecoration(
                                           borderRadius: const BorderRadius.all(
                                               Radius.circular(6.0)),
@@ -824,14 +843,17 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                           Icon(Icons.delete_rounded,
                                               size: 13.0,
                                               color: ThemeDataCenter
-                                                  .getTopCardLabelStyle(context)),
+                                                  .getTopCardLabelStyle(
+                                                      context)),
                                           const SizedBox(width: 5.0),
                                           Text(
                                             CommonConverters.toTimeString(
                                                 time: widget.note.deletedAt!),
-                                            style: CommonStyles.dateTimeTextStyle(
+                                            style:
+                                                CommonStyles.dateTimeTextStyle(
                                               color: ThemeDataCenter
-                                                  .getTopCardLabelStyle(context),
+                                                  .getTopCardLabelStyle(
+                                                      context),
                                             ),
                                           ),
                                           const SizedBox(width: 5.0),
@@ -840,7 +862,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                     ),
                                     widget.note.isFavourite != null
                                         ? const Icon(Icons.favorite,
-                                            color: Color(0xffdc3545), size: 26.0)
+                                            color: Color(0xffdc3545),
+                                            size: 26.0)
                                         : Container(),
                                   ],
                                 ),
@@ -848,7 +871,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                             )
                           : Container(),
                       Card(
-                        color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
+                        color: Colors.white
+                            .withOpacity(settingNotifier.opacityNumber ?? 1),
                         shadowColor: const Color(0xff1f1f1f),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -893,7 +917,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                   focusNode: _focusNode,
                                                   padding:
                                                       const EdgeInsets.fromLTRB(
-                                                          10.0, 10.0, 10.0, 10.0),
+                                                          10.0,
+                                                          10.0,
+                                                          10.0,
+                                                          10.0),
                                                   scrollController:
                                                       _scrollController,
                                                   scrollable: false,
@@ -903,255 +930,228 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                               RedirectFromEnum
                                                   .subjectsInFolderMode
                                           ? Container(
-                                              child: widget.note.deletedAt == null
-                                                  ? Row(
-                                                      children: [
-                                                        widget.note.isLocked ==
-                                                                null
-                                                            ? Tooltip(
-                                                                message: CommonLanguages.convert(
-                                                                    lang: settingNotifier.languageString ??
-                                                                        CommonLanguages.languageStringDefault(),
-                                                                    word: 'tooltip.button.update'),
-                                                                child:
-                                                                    CoreElevatedButton
+                                              child:
+                                                  widget.note.deletedAt == null
+                                                      ? Row(
+                                                          children: [
+                                                            widget.note.isLocked ==
+                                                                    null
+                                                                ? Tooltip(
+                                                                    message: CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages
+                                                                                .languageStringDefault(),
+                                                                        word:
+                                                                            'tooltip.button.update'),
+                                                                    child: CoreElevatedButton
                                                                         .iconOnly(
-                                                                  buttonAudio:
-                                                                      commonAudioOnPressButton,
-                                                                  onPressed: () {
-                                                                    _onUpdate();
-                                                                  },
-                                                                  coreButtonStyle:
-                                                                      ThemeDataCenter
-                                                                          .getUpdateButtonStyle(
+                                                                      buttonAudio:
+                                                                          commonAudioOnPressButton,
+                                                                      onPressed:
+                                                                          () {
+                                                                        _onUpdate();
+                                                                      },
+                                                                      coreButtonStyle:
+                                                                          ThemeDataCenter.getUpdateButtonStyle(
                                                                               context),
-                                                                  icon: const Icon(
-                                                                      Icons
-                                                                          .edit_note_rounded,
-                                                                      size: 26.0),
-                                                                ),
-                                                              )
-                                                            : Tooltip(
-                                                                message: CommonLanguages.convert(
-                                                                    lang: settingNotifier.languageString ??
-                                                                        CommonLanguages.languageStringDefault(),
-                                                                    word: 'tooltip.button.unlock'),
-                                                                child:
-                                                                    CoreElevatedButton
+                                                                      icon: const Icon(
+                                                                          Icons
+                                                                              .edit_note_rounded,
+                                                                          size:
+                                                                              26.0),
+                                                                    ),
+                                                                  )
+                                                                : Tooltip(
+                                                                    message: CommonLanguages.convert(
+                                                                        lang: settingNotifier.languageString ??
+                                                                            CommonLanguages
+                                                                                .languageStringDefault(),
+                                                                        word:
+                                                                            'tooltip.button.unlock'),
+                                                                    child: CoreElevatedButton
                                                                         .iconOnly(
-                                                                  buttonAudio:
-                                                                      commonAudioOnPressButton,
-                                                                  onPressed:
-                                                                      () async {
-                                                                    if (await CoreHelperWidget.confirmFunction(
-                                                                        context:
-                                                                            context,
-                                                                        settingNotifier:
-                                                                            settingNotifier)) {
-                                                                      _onUnlockNote(
-                                                                              context,
-                                                                              widget
-                                                                                  .note)
-                                                                          .then(
-                                                                              (result) {
-                                                                        if (result) {
-                                                                          setState(
-                                                                              () {
-                                                                            widget
-                                                                                .note
-                                                                                .isLocked = widget.note.isLocked ==
-                                                                                    null
-                                                                                ? DateTime.now().millisecondsSinceEpoch
-                                                                                : null;
+                                                                      buttonAudio:
+                                                                          commonAudioOnPressButton,
+                                                                      onPressed:
+                                                                          () async {
+                                                                        if (await CoreHelperWidget.confirmFunction(
+                                                                            context:
+                                                                                context,
+                                                                            settingNotifier:
+                                                                                settingNotifier)) {
+                                                                          _onUnlockNote(context, widget.note)
+                                                                              .then((result) {
+                                                                            if (result) {
+                                                                              setState(() {
+                                                                                widget.note.isLocked = widget.note.isLocked == null ? DateTime.now().millisecondsSinceEpoch : null;
+                                                                              });
+
+                                                                              CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success, CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'notification.action.unlocked'));
+                                                                            } else {
+                                                                              CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error, CommonLanguages.convert(lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(), word: 'notification.action.error'));
+                                                                            }
                                                                           });
-
-                                                                          CoreNotification.showMessage(
-                                                                              context,
-                                                                              settingNotifier,
-                                                                              CoreNotificationStatus
-                                                                                  .success,
-                                                                              CommonLanguages.convert(
-                                                                                  lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
-                                                                                  word: 'notification.action.unlocked'));
-                                                                        } else {
-                                                                          CoreNotification.showMessage(
-                                                                              context,
-                                                                              settingNotifier,
-                                                                              CoreNotificationStatus
-                                                                                  .error,
-                                                                              CommonLanguages.convert(
-                                                                                  lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
-                                                                                  word: 'notification.action.error'));
                                                                         }
-                                                                      });
-                                                                    }
-                                                                  },
-                                                                  coreButtonStyle:
-                                                                      ThemeDataCenter
-                                                                          .getUpdateButtonStyle(
+                                                                      },
+                                                                      coreButtonStyle:
+                                                                          ThemeDataCenter.getUpdateButtonStyle(
                                                                               context),
-                                                                  icon: const Icon(
-                                                                      Icons
-                                                                          .lock_open_rounded,
-                                                                      size: 26.0),
-                                                                ),
-                                                              )
-                                                      ],
-                                                    )
-                                                  : Column(
-                                                      children: [
-                                                        Tooltip(
-                                                          message: CommonLanguages.convert(
-                                                              lang: settingNotifier.languageString ??
-                                                                  CommonLanguages.languageStringDefault(),
-                                                              word: 'tooltip.button.restore'),
-                                                          child:
-                                                              CoreElevatedButton
-                                                                  .iconOnly(
-                                                            buttonAudio:
-                                                                commonAudioOnPressButton,
-                                                            onPressed: () {
-                                                              _onRestoreNoteFromTrash(
-                                                                      context)
-                                                                  .then((result) {
-                                                                if (result) {
-                                                                  Provider.of<NoteNotifier>(
-                                                                          context,
-                                                                          listen:
-                                                                              false)
-                                                                      .onCountAll();
+                                                                      icon: const Icon(
+                                                                          Icons
+                                                                              .lock_open_rounded,
+                                                                          size:
+                                                                              26.0),
+                                                                    ),
+                                                                  )
+                                                          ],
+                                                        )
+                                                      : Column(
+                                                          children: [
+                                                            Tooltip(
+                                                              message: CommonLanguages.convert(
+                                                                  lang: settingNotifier
+                                                                          .languageString ??
+                                                                      CommonLanguages
+                                                                          .languageStringDefault(),
+                                                                  word:
+                                                                      'tooltip.button.restore'),
+                                                              child:
+                                                                  CoreElevatedButton
+                                                                      .iconOnly(
+                                                                buttonAudio:
+                                                                    commonAudioOnPressButton,
+                                                                onPressed: () {
+                                                                  _onRestoreNoteFromTrash(
+                                                                          context)
+                                                                      .then(
+                                                                          (result) {
+                                                                    if (result) {
+                                                                      Provider.of<NoteNotifier>(
+                                                                              context,
+                                                                              listen: false)
+                                                                          .onCountAll();
 
-                                                                  Navigator
-                                                                      .pushAndRemoveUntil(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                        builder:
-                                                                            (context) =>
+                                                                      Navigator
+                                                                          .pushAndRemoveUntil(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                            builder: (context) =>
                                                                                 const NoteListScreen(
                                                                                   noteConditionModel: null,
                                                                                   isOpenSubjectsForFilter: null,
                                                                                   redirectFrom: null,
                                                                                 )),
-                                                                    (route) =>
-                                                                        false,
-                                                                  );
+                                                                        (route) =>
+                                                                            false,
+                                                                      );
 
-                                                                  CoreNotification.showMessage(
-                                                                      context,
-                                                                      settingNotifier,
-                                                                      CoreNotificationStatus
-                                                                          .success,
-                                                                      CommonLanguages.convert(
-                                                                          lang: settingNotifier.languageString ??
-                                                                              CommonLanguages
-                                                                                  .languageStringDefault(),
-                                                                          word:
-                                                                              'notification.action.restored'));
-                                                                } else {
-                                                                  CoreNotification.showMessage(
-                                                                      context,
-                                                                      settingNotifier,
-                                                                      CoreNotificationStatus
-                                                                          .error,
-                                                                      CommonLanguages.convert(
-                                                                          lang: settingNotifier.languageString ??
-                                                                              CommonLanguages
-                                                                                  .languageStringDefault(),
-                                                                          word:
-                                                                              'notification.action.error'));
-                                                                }
-                                                              });
-                                                            },
-                                                            coreButtonStyle:
-                                                                ThemeDataCenter
-                                                                    .getRestoreButtonStyle(
-                                                                        context),
-                                                            icon: const Icon(
-                                                                Icons
-                                                                    .restore_from_trash_rounded,
-                                                                size: 26.0),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 2.0),
-                                                        Tooltip(
-                                                          message:
-                                                          CommonLanguages.convert(
-                                                              lang: settingNotifier.languageString ??
-                                                                  CommonLanguages.languageStringDefault(),
-                                                              word: 'tooltip.button.deleteForever'),
-                                                          child:
-                                                              CoreElevatedButton
-                                                                  .iconOnly(
-                                                            buttonAudio:
-                                                                commonAudioOnPressButton,
-                                                            onPressed: () async {
-                                                              if (await CoreHelperWidget
-                                                                  .confirmFunction(
+                                                                      CoreNotification.showMessage(
+                                                                          context,
+                                                                          settingNotifier,
+                                                                          CoreNotificationStatus
+                                                                              .success,
+                                                                          CommonLanguages.convert(
+                                                                              lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                              word: 'notification.action.restored'));
+                                                                    } else {
+                                                                      CoreNotification.showMessage(
+                                                                          context,
+                                                                          settingNotifier,
+                                                                          CoreNotificationStatus
+                                                                              .error,
+                                                                          CommonLanguages.convert(
+                                                                              lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                              word: 'notification.action.error'));
+                                                                    }
+                                                                  });
+                                                                },
+                                                                coreButtonStyle:
+                                                                    ThemeDataCenter
+                                                                        .getRestoreButtonStyle(
+                                                                            context),
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .restore_from_trash_rounded,
+                                                                    size: 26.0),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                                height: 2.0),
+                                                            Tooltip(
+                                                              message: CommonLanguages.convert(
+                                                                  lang: settingNotifier
+                                                                          .languageString ??
+                                                                      CommonLanguages
+                                                                          .languageStringDefault(),
+                                                                  word:
+                                                                      'tooltip.button.deleteForever'),
+                                                              child:
+                                                                  CoreElevatedButton
+                                                                      .iconOnly(
+                                                                buttonAudio:
+                                                                    commonAudioOnPressButton,
+                                                                onPressed:
+                                                                    () async {
+                                                                  if (await CoreHelperWidget.confirmFunction(
                                                                       context:
                                                                           context,
                                                                       settingNotifier:
                                                                           settingNotifier)) {
-                                                                _onDeleteNoteForever(
-                                                                        context)
-                                                                    .then(
-                                                                        (result) {
-                                                                  if (result) {
-                                                                    Provider.of<NoteNotifier>(
+                                                                    _onDeleteNoteForever(
+                                                                            context)
+                                                                        .then(
+                                                                            (result) {
+                                                                      if (result) {
+                                                                        Provider.of<NoteNotifier>(context,
+                                                                                listen: false)
+                                                                            .onCountAll();
+
+                                                                        Navigator
+                                                                            .pushAndRemoveUntil(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                              builder: (context) => const NoteListScreen(
+                                                                                    noteConditionModel: null,
+                                                                                    isOpenSubjectsForFilter: null,
+                                                                                    redirectFrom: null,
+                                                                                  )),
+                                                                          (route) =>
+                                                                              false,
+                                                                        );
+
+                                                                        CoreNotification.showMessage(
                                                                             context,
-                                                                            listen:
-                                                                                false)
-                                                                        .onCountAll();
-
-                                                                    Navigator
-                                                                        .pushAndRemoveUntil(
-                                                                      context,
-                                                                      MaterialPageRoute(
-                                                                          builder: (context) =>
-                                                                              const NoteListScreen(
-                                                                                noteConditionModel: null,
-                                                                                isOpenSubjectsForFilter: null,
-                                                                                redirectFrom: null,
-                                                                              )),
-                                                                      (route) =>
-                                                                          false,
-                                                                    );
-
-                                                                    CoreNotification.showMessage(
-                                                                        context,
-                                                                        settingNotifier,
-                                                                        CoreNotificationStatus
-                                                                            .success,
-                                                                        CommonLanguages.convert(
-                                                                            lang: settingNotifier.languageString ??
-                                                                                CommonLanguages.languageStringDefault(),
-                                                                            word: 'notification.action.deleted'));
-                                                                  } else {
-                                                                    CoreNotification.showMessage(
-                                                                        context,
-                                                                        settingNotifier,
-                                                                        CoreNotificationStatus
-                                                                            .error,
-                                                                        CommonLanguages.convert(
-                                                                            lang: settingNotifier.languageString ??
-                                                                                CommonLanguages.languageStringDefault(),
-                                                                            word: 'notification.action.error'));
+                                                                            settingNotifier,
+                                                                            CoreNotificationStatus
+                                                                                .success,
+                                                                            CommonLanguages.convert(
+                                                                                lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                                word: 'notification.action.deleted'));
+                                                                      } else {
+                                                                        CoreNotification.showMessage(
+                                                                            context,
+                                                                            settingNotifier,
+                                                                            CoreNotificationStatus
+                                                                                .error,
+                                                                            CommonLanguages.convert(
+                                                                                lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                                word: 'notification.action.error'));
+                                                                      }
+                                                                    });
                                                                   }
-                                                                });
-                                                              }
-                                                            },
-                                                            coreButtonStyle:
-                                                                ThemeDataCenter
-                                                                    .getDeleteForeverButtonStyle(
-                                                                        context),
-                                                            icon: const Icon(
-                                                                Icons
-                                                                    .delete_forever_rounded,
-                                                                size: 26.0),
-                                                          ),
+                                                                },
+                                                                coreButtonStyle:
+                                                                    ThemeDataCenter
+                                                                        .getDeleteForeverButtonStyle(
+                                                                            context),
+                                                                icon: const Icon(
+                                                                    Icons
+                                                                        .delete_forever_rounded,
+                                                                    size: 26.0),
+                                                              ),
+                                                            ),
+                                                          ],
                                                         ),
-                                                      ],
-                                                    ),
                                             )
                                           : Container(),
                                     ],
@@ -1176,10 +1176,10 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                     children: [
                                       Text(
                                         CommonLanguages.convert(
-                                            lang:
-                                                settingNotifier.languageString ??
-                                                    CommonLanguages
-                                                        .languageStringDefault(),
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
                                             word: 'screen.title.content'),
                                         style: const TextStyle(
                                             fontSize: 13.0,
@@ -1225,7 +1225,8 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                   children: <Widget>[
                                     flutter_quill.QuillEditor(
                                         controller: _descriptionQuillController,
-                                        readOnly: true, // true for view only mode
+                                        readOnly:
+                                            true, // true for view only mode
                                         autoFocus: false,
                                         expands: false,
                                         focusNode: _focusNode,
@@ -1234,11 +1235,11 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                         scrollable: false,
                                         showCursor: false),
                                     GestureDetector(
-                                        onTap: () {
-                                        },
+                                        onTap: () {},
                                         child: Container(
                                             color: Colors.transparent,
-                                            child: _buildSelectedImages(context, settingNotifier)))
+                                            child: _buildSelectedImages(
+                                                context, settingNotifier)))
                                   ],
                                 ),
                                 builder: (_, collapsed, expanded) {
@@ -1272,137 +1273,358 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   Widget _buildSelectedImages(
       BuildContext context, SettingNotifier settingNotifier) {
     if (_imageSourceStrings.isNotEmpty) {
-      return Column(
-        children: List.generate(
-          _imageSourceStrings.length,
-              (index) => Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    await showDialog<bool>(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (BuildContext context) {
-                          return CoreBasicDialog(
-                            insetPadding: const EdgeInsets.all(5.0),
-                            backgroundColor: Colors.white.withOpacity(0.95),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0)),
-                            child: SizedBox(
-                              height:
-                              CommonDimensions.maxHeightScreen(context) *
-                                  0.75,
-                              child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                      5.0, 20.0, 5.0, 10.0),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: [
-                                          Flexible(
-                                            child: Text(
-                                              CommonLanguages.convert(
-                                                  lang: settingNotifier
-                                                      .languageString ??
-                                                      CommonLanguages
-                                                          .languageStringDefault(),
-                                                  word:
-                                                  'screen.title.viewImage'),
-                                              style: CommonStyles
-                                                  .screenTitleTextStyle(
-                                                  fontSize: 16.0,
-                                                  color: const Color(
-                                                      0xFF1f1f1f)),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10.0),
-                                      Expanded(
-                                        child: Container(
-                                          constraints: BoxConstraints(
-                                              maxWidth: CommonDimensions
-                                                  .maxWidthScreen(context) *
-                                                  0.9),
-                                          child: PhotoView(
-                                            maxScale: 25.0,
-                                            minScale: 0.2,
-                                            backgroundDecoration:
-                                            const BoxDecoration(
-                                                color: Colors.transparent),
-                                            imageProvider: FileImage(File(
-                                                _imageSourceStrings[index])),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 10.0),
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: [
-                                          CoreElevatedButton.icon(
-                                            buttonAudio:
-                                            commonAudioOnPressButton,
-                                            icon: const FaIcon(
-                                                FontAwesomeIcons.check,
-                                                size: 18.0),
-                                            label: Text(
+      if (_imageSourceStrings.length == 1) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            _imageSourceStrings.length,
+                (index) => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
+                  child: GestureDetector(
+                    onTap: () async {
+                      await showDialog<bool>(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (BuildContext context) {
+                            return CoreBasicDialog(
+                              insetPadding: const EdgeInsets.all(5.0),
+                              backgroundColor: Colors.white.withOpacity(0.95),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: SizedBox(
+                                height:
+                                CommonDimensions.maxHeightScreen(context) *
+                                    0.75,
+                                child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        5.0, 20.0, 5.0, 10.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            Flexible(
+                                              child: Text(
                                                 CommonLanguages.convert(
                                                     lang: settingNotifier
                                                         .languageString ??
                                                         CommonLanguages
                                                             .languageStringDefault(),
-                                                    word: 'button.title.close'),
+                                                    word:
+                                                    'screen.title.viewImage'),
                                                 style: CommonStyles
-                                                    .labelTextStyle),
-                                            onPressed: () {
-                                              if (Navigator.canPop(context)) {
-                                                Navigator.pop(context, true);
-                                              }
-                                            },
-                                            coreButtonStyle:
-                                            CoreButtonStyle.options(
-                                                coreStyle: CoreStyle.filled,
-                                                coreColor:
-                                                CoreColor.success,
-                                                coreRadius:
-                                                CoreRadius.radius_6,
-                                                kitBorderColorOption:
-                                                Colors.black,
-                                                kitForegroundColorOption:
-                                                Colors.black,
-                                                coreFixedSizeButton:
-                                                CoreFixedSizeButton
-                                                    .medium_48),
+                                                    .screenTitleTextStyle(
+                                                    fontSize: 16.0,
+                                                    color: const Color(
+                                                        0xFF1f1f1f)),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Expanded(
+                                          child: Container(
+                                            constraints: BoxConstraints(
+                                                maxWidth: CommonDimensions
+                                                    .maxWidthScreen(
+                                                    context) *
+                                                    0.9),
+                                            child: PhotoView(
+                                              maxScale: 25.0,
+                                              minScale: 0.1,
+                                              backgroundDecoration:
+                                              const BoxDecoration(
+                                                  color:
+                                                  Colors.transparent),
+                                              imageProvider: FileImage(File(
+                                                  _imageSourceStrings[index])),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10.0),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                          children: [
+                                            CoreElevatedButton.icon(
+                                              playSound: false,
+                                              buttonAudio:
+                                              commonAudioOnPressButton,
+                                              icon: const FaIcon(
+                                                  FontAwesomeIcons.xmark,
+                                                  size: 18.0),
+                                              label: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                          .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                      'button.title.close'),
+                                                  style: CommonStyles
+                                                      .labelTextStyle),
+                                              onPressed: () {
+                                                if (Navigator.canPop(context)) {
+                                                  Navigator.pop(context, true);
+                                                }
+                                              },
+                                              coreButtonStyle:
+                                              CoreButtonStyle.options(
+                                                  coreStyle:
+                                                  CoreStyle.filled,
+                                                  coreColor:
+                                                  CoreColor.success,
+                                                  coreRadius:
+                                                  CoreRadius.radius_6,
+                                                  kitBorderColorOption:
+                                                  Colors.black,
+                                                  kitForegroundColorOption:
+                                                  Colors.black,
+                                                  coreFixedSizeButton:
+                                                  CoreFixedSizeButton
+                                                      .medium_48),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    )),
+                              ),
+                            );
+                          });
+                    },
+                    child: Material(
+                      elevation: 3,
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(5.0),
+                        child: Container(
+                          constraints: BoxConstraints(
+                              maxWidth:
+                              CommonDimensions.maxWidthScreen(context) *
+                                  0.7),
+                          child: Image.file(
+                            File(_imageSourceStrings[index]),
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        int viewingIndex = 0;
+        String? viewingImageSourceString;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(
+              _imageSourceStrings.length,
+                  (index) => Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    viewingIndex = index;
+                    viewingImageSourceString = _imageSourceStrings[index];
+                    await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return CoreBasicDialog(
+                              insetPadding: const EdgeInsets.all(5.0),
+                              backgroundColor: Colors.white.withOpacity(0.95),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
+                              child: StatefulBuilder(builder:
+                                  (BuildContext context, StateSetter setState) {
+                                return SizedBox(
+                                  height: CommonDimensions.maxHeightScreen(
+                                      context) *
+                                      0.75,
+                                  child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          5.0, 20.0, 5.0, 10.0),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                          .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                      'screen.title.viewImage'),
+                                                  style: CommonStyles
+                                                      .screenTitleTextStyle(
+                                                      fontSize: 16.0,
+                                                      color: const Color(
+                                                          0xFF1f1f1f)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Expanded(
+                                            child: Container(
+                                              constraints: BoxConstraints(
+                                                  maxWidth: CommonDimensions
+                                                      .maxWidthScreen(
+                                                      context) *
+                                                      0.9),
+                                              child: PhotoView(
+                                                maxScale: 25.0,
+                                                minScale: 0.1,
+                                                backgroundDecoration:
+                                                const BoxDecoration(
+                                                    color:
+                                                    Colors.transparent),
+                                                imageProvider: FileImage(File(
+                                                    viewingImageSourceString ??
+                                                        _imageSourceStrings[
+                                                        index])),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 10.0),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                4.0, 0, 4.0, 0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment
+                                                  .spaceBetween,
+                                              children: [
+                                                CoreElevatedButton.iconOnly(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                  commonAudioOnPressButton,
+                                                  onPressed: () {
+                                                    if (viewingIndex > 0) {
+                                                      setState(() {
+                                                        viewingIndex--;
+                                                        viewingImageSourceString =
+                                                        _imageSourceStrings[
+                                                        viewingIndex];
+                                                      });
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                  ThemeDataCenter
+                                                      .getUpdateButtonStyle(
+                                                      context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .arrow_back_ios_rounded,
+                                                      size: 26.0),
+                                                ),
+                                                CoreElevatedButton.icon(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                  commonAudioOnPressButton,
+                                                  icon: const FaIcon(
+                                                      FontAwesomeIcons.xmark,
+                                                      size: 18.0),
+                                                  label: Text(
+                                                      CommonLanguages.convert(
+                                                          lang: settingNotifier
+                                                              .languageString ??
+                                                              CommonLanguages
+                                                                  .languageStringDefault(),
+                                                          word:
+                                                          'button.title.close'),
+                                                      style: CommonStyles
+                                                          .labelTextStyle),
+                                                  onPressed: () {
+                                                    if (Navigator.canPop(
+                                                        context)) {
+                                                      Navigator.pop(
+                                                          context, true);
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                  CoreButtonStyle.options(
+                                                      coreStyle:
+                                                      CoreStyle.filled,
+                                                      coreColor:
+                                                      CoreColor.success,
+                                                      coreRadius: CoreRadius
+                                                          .radius_6,
+                                                      kitBorderColorOption:
+                                                      Colors.black,
+                                                      kitForegroundColorOption:
+                                                      Colors.black,
+                                                      coreFixedSizeButton:
+                                                      CoreFixedSizeButton
+                                                          .medium_48),
+                                                ),
+                                                CoreElevatedButton.iconOnly(
+                                                  playSound: false,
+                                                  buttonAudio:
+                                                  commonAudioOnPressButton,
+                                                  onPressed: () {
+                                                    if (viewingIndex <
+                                                        _imageSourceStrings
+                                                            .length -
+                                                            1) {
+                                                      setState(() {
+                                                        viewingIndex++;
+                                                        viewingImageSourceString =
+                                                        _imageSourceStrings[
+                                                        viewingIndex];
+                                                      });
+                                                    }
+                                                  },
+                                                  coreButtonStyle:
+                                                  ThemeDataCenter
+                                                      .getUpdateButtonStyle(
+                                                      context),
+                                                  icon: const Icon(
+                                                      Icons
+                                                          .arrow_forward_ios_rounded,
+                                                      size: 26.0),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
-                                      ),
-                                    ],
-                                  )),
-                            ),
-                          );
+                                      )),
+                                );
+                              }));
                         });
                   },
-                  child: Container(
-                    constraints: BoxConstraints(
-                        maxWidth:
-                        CommonDimensions.maxWidthScreen(context) * 0.7),
-                    child: Image.file(
-                      File(_imageSourceStrings[index]),
-                      fit: BoxFit.contain,
+                  child: Material(
+                    elevation: 3,
+                    borderRadius: BorderRadius.circular(5.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5.0),
+                      child: SizedBox(
+                        width: 100.0,
+                        height: 100.0,
+                        child: Image.file(
+                          File(_imageSourceStrings[index]),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
     return Container();
   }

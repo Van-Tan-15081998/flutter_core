@@ -600,7 +600,7 @@ class _SubjectListFolderModeScreenState
               ),
             ),
             Tooltip(
-              message:  CommonLanguages.convert(
+              message: CommonLanguages.convert(
                   lang: settingNotifier.languageString ??
                       CommonLanguages.languageStringDefault(),
                   word: 'tooltip.button.createSubject'),
@@ -621,7 +621,8 @@ class _SubjectListFolderModeScreenState
                         builder: (context) => SubjectCreateScreen(
                               parentSubject: currentParentSubject,
                               actionMode: ActionModeEnum.create,
-                              redirectFrom: RedirectFromEnum.subjectsInFolderMode,
+                              redirectFrom:
+                                  RedirectFromEnum.subjectsInFolderMode,
                               breadcrumb: null,
                             )),
                   );
@@ -875,16 +876,15 @@ class _SubjectListFolderModeScreenState
 
     return noteLabelIds;
   }
+
   List<LabelModel>? _getNoteLabels(NoteModel note) {
     List<LabelModel>? noteLabels = [];
     List<dynamic> labelIds = _getNoteLabelIds(note);
 
     if (_labelList != null && _labelList!.isNotEmpty) {
-      noteLabels = _labelList!
-          .where((model) => labelIds.contains(model.id))
-          .toList();
+      noteLabels =
+          _labelList!.where((model) => labelIds.contains(model.id)).toList();
     }
-
 
     return noteLabels;
   }

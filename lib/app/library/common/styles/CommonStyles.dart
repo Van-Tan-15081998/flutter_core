@@ -28,7 +28,6 @@ class CommonStyles {
       'assets/images/background-image-19.jpg',
       'assets/images/background-image-20.jpg',
       'assets/images/background-image-21.jpg',
-
       'assets/images/background-image-22.jpg',
       'assets/images/background-image-23.jpg',
       'assets/images/background-image-24.jpg',
@@ -46,6 +45,8 @@ class CommonStyles {
       'assets/images/background-image-36.jpg',
       'assets/images/background-image-37.jpg',
       'assets/images/background-image-38.jpg',
+      'assets/images/background-image-39.jpg',
+      'assets/images/background-image-40.jpg',
     ];
 
     return imageSourceStringList;
@@ -71,8 +72,10 @@ class CommonStyles {
   }
 
   static String avatarImageSourceString() {
-    return 'assets/images/avatars/app_avatar.png';
+    // return 'assets/images/avatars/app_avatar.png';
+    return 'assets/images/avatars/hinotes.png';
   }
+
 
   /*
   CommonStyles.commonSubjectColorStringList()

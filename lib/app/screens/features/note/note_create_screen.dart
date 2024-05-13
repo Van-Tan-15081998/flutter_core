@@ -139,10 +139,10 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
             bool isExist = await File(element).exists();
 
             if (isExist) {
-             setState(() {
-               _imageSourceStrings.add(element);
-               _oldAvatarSourceStrings.add(element);
-             });
+              setState(() {
+                _imageSourceStrings.add(element);
+                _oldAvatarSourceStrings.add(element);
+              });
             }
           }
         }
@@ -1614,8 +1614,14 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
               _detailContentQuillController.document.toDelta().toJson());
 
           if (_detailContentQuillController.document.isEmpty()) {
-            CoreNotification.showMessage(context, settingNotifier,
-                CoreNotificationStatus.warning, 'Please enter your content!');
+            CoreNotification.showMessage(
+                context,
+                settingNotifier,
+                CoreNotificationStatus.warning,
+                CommonLanguages.convert(
+                    lang: settingNotifier.languageString ??
+                        CommonLanguages.languageStringDefault(),
+                    word: 'notification.action.requiredNoteContent'));
             return;
           }
 
@@ -1735,12 +1741,6 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
               if (savedImageSourceStrings.isNotEmpty) {
                 imagesJson = jsonEncode(savedImageSourceStrings);
               }
-
-              // Delete old images
-              if (_oldAvatarSourceStrings.isNotEmpty) {
-                for (var element in _oldAvatarSourceStrings) {
-                  _deleteImage(element);
-                }}
             } catch (e) {
               CoreNotification.showMessage(
                   context,
@@ -1779,6 +1779,26 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
 
             _onUpdateNote(context, model).then((result) {
               if (result) {
+
+                try  {
+                  // Delete old images
+                  if (_oldAvatarSourceStrings.isNotEmpty) {
+                    for (var element in _oldAvatarSourceStrings) {
+                      _deleteImage(element);
+                    }
+                  }
+                }   catch(e) {
+                  CoreNotification.showMessage(
+                      context,
+                      settingNotifier,
+                      CoreNotificationStatus.error,
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'notification.action.error'));
+                  return;
+                }
+
                 CoreNotification.showMessage(
                     context,
                     settingNotifier,
@@ -1947,7 +1967,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                         padding: _titlePadding,
                         scrollController: _titleScrollController,
                         scrollable: _titleScrollable,
-                        placeholder: 'Tap to enter your title',
+                        placeholder: CommonLanguages.convert(
+                            lang: settingNotifier
+                                .languageString ??
+                                CommonLanguages
+                                    .languageStringDefault(),
+                            word:
+                            'form.field.enterTitleNote'),
                         customStyles: flutter_quill.DefaultStyles(
                             placeHolder: flutter_quill.DefaultTextBlockStyle(
                                 const TextStyle(
@@ -2028,7 +2054,13 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                         padding: _detailContentPadding,
                         scrollController: _detailContentScrollController,
                         scrollable: _detailContentScrollable,
-                        placeholder: 'Tap to enter your content',
+                        placeholder: CommonLanguages.convert(
+                            lang: settingNotifier
+                                .languageString ??
+                                CommonLanguages
+                                    .languageStringDefault(),
+                            word:
+                            'form.field.enterContentNote'),
                         customStyles: flutter_quill.DefaultStyles(
                             placeHolder: flutter_quill.DefaultTextBlockStyle(
                                 const TextStyle(
@@ -2463,7 +2495,12 @@ class _NoteCreateScreenState extends State<NoteCreateScreen> {
                               ? const EdgeInsets.all(5.0)
                               : const EdgeInsets.fromLTRB(0, 5.0, 0, 5.0),
                           child: Text(
-                            'Images',
+                            CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.field.title.images')
+                                .addColon()
+                                .toString(),
                             style: GoogleFonts.montserrat(
                                 fontStyle: FontStyle.italic,
                                 fontSize: 16,

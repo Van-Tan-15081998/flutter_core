@@ -193,6 +193,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
   Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
+        insetPadding: const EdgeInsets.all(5.0),
+        backgroundColor: Colors.white.withOpacity(0.95),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: Padding(
@@ -201,6 +203,21 @@ class _LabelListScreenState extends State<LabelListScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'form.filter.filter'),
+                      style: CommonStyles.screenTitleTextStyle(
+                          fontSize: 16.0, color: const Color(0xFF1f1f1f)),
+                    ),
+                  ),
+                ],
+              ),
               _labelConditionModel.searchText != null
                   ? Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -212,10 +229,13 @@ class _LabelListScreenState extends State<LabelListScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Text(CommonLanguages.convert(
-                                      lang: settingNotifier.languageString ??
-                                          CommonLanguages.languageStringDefault(),
-                                      word: 'form.filter.searchKeyword'),
+                                  Text(
+                                      CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'form.filter.searchKeyword'),
                                       style: CommonStyles.labelFilterTextStyle),
                                 ],
                               ),
@@ -248,10 +268,12 @@ class _LabelListScreenState extends State<LabelListScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(CommonLanguages.convert(
-                                lang: settingNotifier.languageString ??
-                                    CommonLanguages.languageStringDefault(),
-                                word: 'form.filter.trash'), style: CommonStyles.labelFilterTextStyle),
+                            Text(
+                                CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.trash'),
+                                style: CommonStyles.labelFilterTextStyle),
                           ],
                         ),
                       ),
@@ -274,8 +296,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
               const SizedBox(height: 20.0),
               CoreElevatedButton.icon(
                 buttonAudio: commonAudioOnPressButton,
-                icon: const FaIcon(FontAwesomeIcons.check,
-                    size: 18.0),
+                icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
                 label: Text(
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
@@ -297,8 +318,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                     coreRadius: CoreRadius.radius_6,
                     kitBorderColorOption: Colors.black,
                     kitForegroundColorOption: Colors.black,
-                    coreFixedSizeButton:
-                    CoreFixedSizeButton.medium_48),
+                    coreFixedSizeButton: CoreFixedSizeButton.medium_48),
               ),
             ],
           ),
@@ -434,7 +454,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                   CommonLanguages.languageStringDefault(),
                               word: 'screen.title.labels'),
                           style: CommonStyles.screenTitleTextStyle(
-                            fontSize: 20.0,
+                              fontSize: 20.0,
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context))),
                     ),
@@ -478,7 +498,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
         Expanded(
           child: PagedListView<int, LabelModel>(
             padding: EdgeInsets.only(
-                top: CommonDimensions.scaffoldAppBarHeight(context) / 5, bottom: 150.0),
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5,
+                bottom: 150.0),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<LabelModel>(
@@ -493,7 +514,7 @@ class _LabelListScreenState extends State<LabelListScreen> {
                           builder: (context) => LabelCreateScreen(
                                 label: item,
                                 actionMode: ActionModeEnum.update,
-                            redirectFrom: null,
+                                redirectFrom: null,
                               )));
                   setState(() {});
                 },
@@ -507,7 +528,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                       });
 
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -515,7 +537,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                               word: 'notification.action.deleted'));
                     } else {
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.error,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -526,7 +549,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 },
                 onDeleteForever: () async {
                   if (await CoreHelperWidget.confirmFunction(
-                      context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
+                      context: context,
+                      settingNotifier: settingNotifier,
+                      confirmDelete: true)) {
                     _onDeleteLabelForever(context, item).then((result) {
                       if (result) {
                         labelNotifier.onCountAll();
@@ -536,7 +561,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                         });
 
                         CoreNotification.showMessage(
-                            context, settingNotifier,
+                            context,
+                            settingNotifier,
                             CoreNotificationStatus.success,
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
@@ -544,7 +570,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                 word: 'notification.action.deleted'));
                       } else {
                         CoreNotification.showMessage(
-                            context, settingNotifier,
+                            context,
+                            settingNotifier,
                             CoreNotificationStatus.error,
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
@@ -564,7 +591,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                       });
 
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -572,7 +600,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                               word: 'notification.action.restored'));
                     } else {
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.error,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -635,7 +664,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(
+      BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
@@ -645,18 +675,16 @@ class _LabelListScreenState extends State<LabelListScreen> {
     );
   }
 
-  Row _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
+  Row _buildBottomNavigationBarActionList(
+      BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.reload'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.reload'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () {
@@ -675,12 +703,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
         const SizedBox(width: 5),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.search'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.search'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
@@ -688,25 +713,48 @@ class _LabelListScreenState extends State<LabelListScreen> {
                   context: context,
                   builder: (BuildContext context) => Form(
                         child: CoreBasicDialog(
+                          insetPadding: const EdgeInsets.all(5.0),
+                          backgroundColor: Colors.white.withOpacity(0.95),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(24.0),
+                            padding:
+                                const EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 10.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'tooltip.button.search'),
+                                        style:
+                                            CommonStyles.screenTitleTextStyle(
+                                                fontSize: 16.0,
+                                                color: const Color(0xFF1f1f1f)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10.0),
                                 Form(
                                   key: _formKey,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       CoreTextFormField(
-                                        style: TextStyle(
-                                            color: ThemeDataCenter
-                                                .getAloneTextColorStyle(context)),
+                                        style: const TextStyle(
+                                            color: Color(0xFF1f1f1f)),
                                         onChanged: (String value) {
                                           if (value.isNotEmpty) {
                                             setState(() {
@@ -716,17 +764,23 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                         },
                                         controller: _searchController,
                                         focusNode: _searchFocusNode,
-                                        validateString:
-                                            'Please enter search string!',
+                                        validateString: CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'notification.action.requiredSearchKeyWord'),
                                         maxLength: 60,
                                         icon: Icon(Icons.edit,
                                             color: ThemeDataCenter
                                                 .getFormFieldLabelColorStyle(
                                                     context)),
-                                        label: 'Search',
+                                        label: '',
                                         labelColor: ThemeDataCenter
-                                            .getFormFieldLabelColorStyle(context),
-                                        placeholder: 'Search on labels',
+                                            .getFormFieldLabelColorStyle(
+                                                context),
+                                        placeholder: '',
                                         helper: '',
                                       ),
                                     ],
@@ -742,7 +796,8 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                         buttonAudio: commonAudioOnPressButton,
                                         icon: const Icon(Icons.close_rounded),
                                         onPressed: () {
-                                          if (_searchController.text.isNotEmpty) {
+                                          if (_searchController
+                                              .text.isNotEmpty) {
                                             setState(() {
                                               _searchController.text = "";
                                               _searchText =
@@ -761,13 +816,14 @@ class _LabelListScreenState extends State<LabelListScreen> {
                                         buttonAudio: commonAudioOnPressButton,
                                         icon: const Icon(Icons.search_rounded),
                                         onPressed: () {
-                                          if (_formKey.currentState!.validate()) {
+                                          if (_formKey.currentState!
+                                              .validate()) {
                                             setState(() {
                                               // Set Condition
                                               if (_searchController
                                                   .text.isNotEmpty) {
-                                                _labelConditionModel.searchText =
-                                                    _searchText;
+                                                _labelConditionModel
+                                                    .searchText = _searchText;
 
                                                 // Reload Data
                                                 _reloadPage();
@@ -800,18 +856,16 @@ class _LabelListScreenState extends State<LabelListScreen> {
         const SizedBox(width: 5.0),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.filter'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.filter'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
               await showDialog<bool>(
                   context: context,
-                  builder: (BuildContext context) => _filterPopup(context, settingNotifier));
+                  builder: (BuildContext context) =>
+                      _filterPopup(context, settingNotifier));
             },
             coreButtonStyle:
                 ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -824,12 +878,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
         const SizedBox(width: 5),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.createLabel'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.createLabel'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () {
@@ -837,7 +888,9 @@ class _LabelListScreenState extends State<LabelListScreen> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => const LabelCreateScreen(
-                        actionMode: ActionModeEnum.create, redirectFrom: null,)),
+                          actionMode: ActionModeEnum.create,
+                          redirectFrom: null,
+                        )),
               );
             },
             coreButtonStyle:

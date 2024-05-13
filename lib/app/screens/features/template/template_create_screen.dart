@@ -915,7 +915,8 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                               return StatefulBuilder(builder:
                                   (BuildContext context, StateSetter setState) {
                                 return Container(
-                                  color: _onCheckSelectedLabelsContainsById(labelList![index].id!)
+                                  color: _onCheckSelectedLabelsContainsById(
+                                          labelList![index].id!)
                                       ? Colors.lightGreenAccent.withOpacity(0.3)
                                       : Colors.transparent,
                                   child: SwitchListTile(
@@ -1007,10 +1008,13 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                           ],
                                         ),
                                       ),
-                                      value: _onCheckSelectedLabelsContainsById(labelList![index].id!),
+                                      value: _onCheckSelectedLabelsContainsById(
+                                          labelList![index].id!),
                                       onChanged: (bool value) {
                                         if (value) {
-                                          if (selectedLabels.length < 5 && !_onCheckSelectedLabelsContainsById(labelList![index].id!)) {
+                                          if (selectedLabels.length < 5 &&
+                                              !_onCheckSelectedLabelsContainsById(
+                                                  labelList![index].id!)) {
                                             setState(() {
                                               selectedLabels
                                                   .add(labelList![index]);
@@ -1018,8 +1022,10 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                           }
                                         } else {
                                           setState(() {
-                                            selectedLabels
-                                                .removeWhere((element) => element.id == labelList![index].id!);
+                                            selectedLabels.removeWhere(
+                                                (element) =>
+                                                    element.id ==
+                                                    labelList![index].id!);
                                           });
                                         }
                                       }),
@@ -1308,9 +1314,12 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                                 color: element.color.toColor(),
                               ),
                               Flexible(
-                                child: Text(element.title, style: const TextStyle(
-                                    fontSize: 16.0, fontWeight: FontWeight.w500),
-                                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                                child: Text(element.title,
+                                    style: const TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w500),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis),
                               ),
                             ],
                           ),
@@ -1354,9 +1363,12 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                             color: selectedSubject!.color.toColor(),
                           ),
                           Flexible(
-                            child: Text(selectedSubject!.title, style: const TextStyle(
-                                fontSize: 16.0, fontWeight: FontWeight.w500),
-                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                            child: Text(selectedSubject!.title,
+                                style: const TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
                           ),
                         ],
                       ),
@@ -1400,7 +1412,10 @@ class _TemplateCreateScreenState extends State<TemplateCreateScreen> {
                 context,
                 settingNotifier,
                 CoreNotificationStatus.warning,
-                'Please enter your content or title!');
+                CommonLanguages.convert(
+                    lang: settingNotifier.languageString ??
+                        CommonLanguages.languageStringDefault(),
+                    word: 'notification.action.requiredNoteContent'));
             return;
           }
 

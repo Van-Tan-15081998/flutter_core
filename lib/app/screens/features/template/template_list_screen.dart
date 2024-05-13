@@ -366,6 +366,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
   Widget _filterPopup(BuildContext context, SettingNotifier settingNotifier) {
     return Form(
       child: CoreBasicDialog(
+        insetPadding: const EdgeInsets.all(5.0),
+        backgroundColor: Colors.white.withOpacity(0.95),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         child: Padding(
@@ -374,6 +376,21 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      CommonLanguages.convert(
+                          lang: settingNotifier.languageString ??
+                              CommonLanguages.languageStringDefault(),
+                          word: 'form.filter.filter'),
+                      style: CommonStyles.screenTitleTextStyle(
+                          fontSize: 16.0, color: const Color(0xFF1f1f1f)),
+                    ),
+                  ),
+                ],
+              ),
               _templateConditionModel.searchText != null
                   ? Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -382,10 +399,14 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(CommonLanguages.convert(
-                                  lang: settingNotifier.languageString ??
-                                      CommonLanguages.languageStringDefault(),
-                                  word: 'form.filter.searchKeyword').addColon(),
+                              Text(
+                                  CommonLanguages.convert(
+                                          lang:
+                                              settingNotifier.languageString ??
+                                                  CommonLanguages
+                                                      .languageStringDefault(),
+                                          word: 'form.filter.searchKeyword')
+                                      .addColon(),
                                   style: CommonStyles.labelFilterTextStyle),
                               const SizedBox(width: 10.0),
                               Expanded(
@@ -413,10 +434,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.trash').addColon(),
+                        child: Text(
+                            CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.trash')
+                                .addColon(),
                             style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
@@ -443,10 +466,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.favourite').addColon(),
+                        child: Text(
+                            CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.favourite')
+                                .addColon(),
                             style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
@@ -473,10 +498,12 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Flexible(
-                        child: Text(CommonLanguages.convert(
-                            lang: settingNotifier.languageString ??
-                                CommonLanguages.languageStringDefault(),
-                            word: 'form.filter.recentlyUpdated').addColon(),
+                        child: Text(
+                            CommonLanguages.convert(
+                                    lang: settingNotifier.languageString ??
+                                        CommonLanguages.languageStringDefault(),
+                                    word: 'form.filter.recentlyUpdated')
+                                .addColon(),
                             style: CommonStyles.labelFilterTextStyle),
                       ),
                       Checkbox(
@@ -499,8 +526,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
               const SizedBox(height: 20.0),
               CoreElevatedButton.icon(
                 buttonAudio: commonAudioOnPressButton,
-                icon: const FaIcon(FontAwesomeIcons.check,
-                    size: 18.0),
+                icon: const FaIcon(FontAwesomeIcons.check, size: 18.0),
                 label: Text(
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
@@ -522,8 +548,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                     coreRadius: CoreRadius.radius_6,
                     kitBorderColorOption: Colors.black,
                     kitForegroundColorOption: Colors.black,
-                    coreFixedSizeButton:
-                    CoreFixedSizeButton.medium_48),
+                    coreFixedSizeButton: CoreFixedSizeButton.medium_48),
               ),
             ],
           ),
@@ -659,7 +684,7 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                   CommonLanguages.languageStringDefault(),
                               word: 'screen.title.templates'),
                           style: CommonStyles.screenTitleTextStyle(
-                            fontSize: 20.0,
+                              fontSize: 20.0,
                               color: ThemeDataCenter.getScreenTitleTextColor(
                                   context)),
                           overflow: TextOverflow.ellipsis),
@@ -735,7 +760,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     );
   }
 
-  CoreBottomNavigationBar _buildBottomNavigationBar(BuildContext context, SettingNotifier settingNotifier) {
+  CoreBottomNavigationBar _buildBottomNavigationBar(
+      BuildContext context, SettingNotifier settingNotifier) {
     return CoreBottomNavigationBar(
       backgroundColor: ThemeDataCenter.getBackgroundColor(context),
       child: IconTheme(
@@ -745,18 +771,16 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
     );
   }
 
-  Row _buildBottomNavigationBarActionList(BuildContext context, SettingNotifier settingNotifier) {
+  Row _buildBottomNavigationBarActionList(
+      BuildContext context, SettingNotifier settingNotifier) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.reload'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.reload'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () {
@@ -773,12 +797,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         const SizedBox(width: 5),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.search'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.search'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
@@ -786,6 +807,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                   context: context,
                   builder: (BuildContext context) => Form(
                         child: CoreBasicDialog(
+                          insetPadding: const EdgeInsets.all(5.0),
+                          backgroundColor: Colors.white.withOpacity(0.95),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
@@ -795,16 +818,36 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'tooltip.button.search'),
+                                        style:
+                                            CommonStyles.screenTitleTextStyle(
+                                                fontSize: 16.0,
+                                                color: const Color(0xFF1f1f1f)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10.0),
                                 Form(
                                   key: _formKey,
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       CoreTextFormField(
-                                        style: TextStyle(
-                                            color: ThemeDataCenter
-                                                .getAloneTextColorStyle(context)),
+                                        style: const TextStyle(
+                                            color: Color(0xFF1f1f1f)),
                                         onChanged: (String value) {
                                           if (value.isNotEmpty) {
                                             setState(() {
@@ -814,17 +857,23 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                         },
                                         controller: _searchController,
                                         focusNode: _searchFocusNode,
-                                        validateString:
-                                            'Please enter search string!',
+                                        validateString: CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word:
+                                                'notification.action.requiredSearchKeyWord'),
                                         maxLength: 60,
                                         icon: Icon(Icons.edit,
                                             color: ThemeDataCenter
                                                 .getFormFieldLabelColorStyle(
                                                     context)),
-                                        label: 'Search',
+                                        label: '',
                                         labelColor: ThemeDataCenter
-                                            .getFormFieldLabelColorStyle(context),
-                                        placeholder: 'Search on templates',
+                                            .getFormFieldLabelColorStyle(
+                                                context),
+                                        placeholder: '',
                                         helper: '',
                                       ),
                                     ],
@@ -840,12 +889,13 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                         buttonAudio: commonAudioOnPressButton,
                                         icon: const Icon(Icons.close_rounded),
                                         onPressed: () {
-                                          if (_searchController.text.isNotEmpty) {
+                                          if (_searchController
+                                              .text.isNotEmpty) {
                                             setState(() {
                                               _searchController.text = "";
                                               _searchText = "";
-                                              _templateConditionModel.searchText =
-                                                  _searchText;
+                                              _templateConditionModel
+                                                  .searchText = _searchText;
                                             });
                                             // Reload Page
                                             _reloadPage();
@@ -863,8 +913,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                             // Set Condition
                                             if (_searchController
                                                 .text.isNotEmpty) {
-                                              _templateConditionModel.searchText =
-                                                  _searchText;
+                                              _templateConditionModel
+                                                  .searchText = _searchText;
 
                                               // Reload Data
                                               _reloadPage();
@@ -898,18 +948,16 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         const SizedBox(width: 5),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.filter'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.filter'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () async {
               await showDialog<bool>(
                   context: context,
-                  builder: (BuildContext context) => _filterPopup(context, settingNotifier));
+                  builder: (BuildContext context) =>
+                      _filterPopup(context, settingNotifier));
             },
             coreButtonStyle:
                 ThemeDataCenter.getCoreScreenButtonStyle(context: context),
@@ -922,12 +970,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         const SizedBox(width: 5),
         Tooltip(
           message: CommonLanguages.convert(
-              lang: settingNotifier
-                  .languageString ??
-                  CommonLanguages
-                      .languageStringDefault(),
-              word:
-              'tooltip.button.createTemplate'),
+              lang: settingNotifier.languageString ??
+                  CommonLanguages.languageStringDefault(),
+              word: 'tooltip.button.createTemplate'),
           child: CoreElevatedButton(
             buttonAudio: commonAudioOnPressButton,
             onPressed: () {
@@ -1036,7 +1081,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
         Expanded(
           child: PagedListView<int, TemplateModel>(
             padding: EdgeInsets.only(
-                top: CommonDimensions.scaffoldAppBarHeight(context) / 5, bottom: 150.0),
+                top: CommonDimensions.scaffoldAppBarHeight(context) / 5,
+                bottom: 150.0),
             scrollController: _scrollController,
             pagingController: _pagingController,
             builderDelegate: PagedChildBuilderDelegate<TemplateModel>(
@@ -1060,7 +1106,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                       });
 
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -1068,7 +1115,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                               word: 'notification.action.deleted'));
                     } else {
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.error,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -1079,7 +1127,9 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                 },
                 onDeleteForever: () async {
                   if (await CoreHelperWidget.confirmFunction(
-                      context: context, settingNotifier: settingNotifier, confirmDelete: true)) {
+                      context: context,
+                      settingNotifier: settingNotifier,
+                      confirmDelete: true)) {
                     _onDeleteTemplateForever(context, item).then((result) {
                       if (result) {
                         templateNotifier.onCountAll();
@@ -1089,7 +1139,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                         });
 
                         CoreNotification.showMessage(
-                            context, settingNotifier,
+                            context,
+                            settingNotifier,
                             CoreNotificationStatus.success,
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
@@ -1097,7 +1148,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                                 word: 'notification.action.deleted'));
                       } else {
                         CoreNotification.showMessage(
-                            context, settingNotifier,
+                            context,
+                            settingNotifier,
                             CoreNotificationStatus.error,
                             CommonLanguages.convert(
                                 lang: settingNotifier.languageString ??
@@ -1117,7 +1169,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                       });
 
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.success,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -1125,7 +1178,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                               word: 'notification.action.restored'));
                     } else {
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.error,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??
@@ -1153,7 +1207,8 @@ class _TemplateListScreenState extends State<TemplateListScreen> {
                       commonAudioOnPressButton.playAudioOnFavourite();
                     } else {
                       CoreNotification.showMessage(
-                          context, settingNotifier,
+                          context,
+                          settingNotifier,
                           CoreNotificationStatus.error,
                           CommonLanguages.convert(
                               lang: settingNotifier.languageString ??

@@ -689,7 +689,8 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                           )
                         : Container(),
                     Card(
-                      color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
+                      color: Colors.white
+                          .withOpacity(settingNotifier.opacityNumber ?? 1),
                       shadowColor: const Color(0xff1f1f1f),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -757,10 +758,9 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
                                               onPressed: () {
                                                 _onUpdate();
                                               },
-                                              coreButtonStyle:
-                                              ThemeDataCenter
+                                              coreButtonStyle: ThemeDataCenter
                                                   .getUpdateButtonStyle(
-                                                  context),
+                                                      context),
                                               icon: const Icon(
                                                   Icons.edit_note_rounded,
                                                   size: 26.0),

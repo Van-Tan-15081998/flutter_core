@@ -26,7 +26,11 @@ class LabelCreateScreen extends StatefulWidget {
   final LabelModel? label;
   final ActionModeEnum actionMode;
   final RedirectFromEnum? redirectFrom;
-  const LabelCreateScreen({super.key, this.label, required this.actionMode, required this.redirectFrom});
+  const LabelCreateScreen(
+      {super.key,
+      this.label,
+      required this.actionMode,
+      required this.redirectFrom});
 
   @override
   State<LabelCreateScreen> createState() => _LabelCreateScreenState();
@@ -153,7 +157,10 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
               if (result) {
                 labelNotifier.onCountAll();
 
-                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.success,
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
                             CommonLanguages.languageStringDefault(),
@@ -165,16 +172,18 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                        const LabelListScreen(
-                          labelConditionModel: null,
-                          redirectFrom: null,
-                        )),
-                        (route) => false,
+                        builder: (context) => const LabelListScreen(
+                              labelConditionModel: null,
+                              redirectFrom: null,
+                            )),
+                    (route) => false,
                   );
                 }
               } else {
-                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.error,
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
                             CommonLanguages.languageStringDefault(),
@@ -192,7 +201,10 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
 
             _onUpdateLabel(context, model).then((result) {
               if (result) {
-                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.success,
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.success,
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
                             CommonLanguages.languageStringDefault(),
@@ -211,7 +223,10 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                   }
                 });
               } else {
-                CoreNotification.showMessage(context, settingNotifier, CoreNotificationStatus.error,
+                CoreNotification.showMessage(
+                    context,
+                    settingNotifier,
+                    CoreNotificationStatus.error,
                     CommonLanguages.convert(
                         lang: settingNotifier.languageString ??
                             CommonLanguages.languageStringDefault(),
@@ -246,7 +261,10 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
     return WillPopScope(
       onWillPop: () async {
         onBack();
-        if (await CoreHelperWidget.confirmFunction(context: context, settingNotifier: settingNotifier, confirmExitScreen: true)) {
+        if (await CoreHelperWidget.confirmFunction(
+            context: context,
+            settingNotifier: settingNotifier,
+            confirmExitScreen: true)) {
           return true;
         }
         return false;
@@ -344,7 +362,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                         lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
-                                        word: 'form.field.title.title')
+                                        word: 'form.field.title.labelName')
                                     .addColon()
                                     .toString(),
                                 style: GoogleFonts.montserrat(
@@ -376,17 +394,20 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                           },
                           controller: myController,
                           focusNode: myFocusNode,
-                          validateString: 'Please enter your title',
+                          validateString: CommonLanguages.convert(
+                              lang: settingNotifier.languageString ??
+                                  CommonLanguages.languageStringDefault(),
+                              word: 'notification.action.requiredLabelName'),
                           maxLength: 30,
                           icon: Icon(Icons.edit,
                               color:
                                   ThemeDataCenter.getFormFieldLabelColorStyle(
                                       context)),
-                          label: 'Title',
+                          label: '',
                           labelColor:
                               ThemeDataCenter.getFormFieldLabelColorStyle(
                                   context),
-                          placeholder: 'Enter you title',
+                          placeholder: '',
                           helper: '',
                         ),
                       ),
@@ -575,7 +596,13 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                                             const Color(0xff1f1f1f),
                                         coreFixedSizeButton:
                                             CoreFixedSizeButton.medium_40),
-                                    child: Text('Color palette',
+                                    child: Text(
+                                        CommonLanguages.convert(
+                                            lang: settingNotifier
+                                                    .languageString ??
+                                                CommonLanguages
+                                                    .languageStringDefault(),
+                                            word: 'button.title.colorPalette'),
                                         style: CommonStyles.buttonTextStyle),
                                   ),
                                 ],

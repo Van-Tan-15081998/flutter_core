@@ -102,14 +102,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Selected date",
     "screen.title.content": "Content",
     "screen.title.titleNotSet": "Title not set",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Set the background color for the note title (the background color of the note's topic)",
-    "screen.title.settings.setNoteContentExpanded": "The content of the note has been expanded",
-    "screen.title.settings.setTemplateContentExpanded": "The content of the note template has been expanded",
-    "screen.title.settings.setSubjectActionsExpanded": "The list of actions for the Topic (List view mode) has been expanded",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Stick note title when scrolling note list",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Set the background color for the note title (the background color of the note's topic)",
+    "screen.title.settings.setNoteContentExpanded":
+        "The content of the note has been expanded",
+    "screen.title.settings.setTemplateContentExpanded":
+        "The content of the note template has been expanded",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "The list of actions for the Topic (List view mode) has been expanded",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Stick note title when scrolling note list",
     "screen.title.settings.setBackgroundImage": "Set background image",
     "screen.title.settings.opacityNumber": "Transparency level",
     "screen.title.viewImage": "View image",
+
     ///
     "screen.title.create": "Create new",
     "screen.title.update": "Update",
@@ -144,10 +150,13 @@ class CommonLanguages {
     "button.title.cancel": "Cancel",
     "button.title.close": "Close",
     "button.title.createNote": "Create a note",
-    "button.title.createNoteForSelectedDay": "Create a note for the selected date",
+    "button.title.createNoteForSelectedDay":
+        "Create a note for the selected date",
     "button.title.selectLabel": "Select labels",
     "button.title.selectSubject": "Select a topic",
     "button.title.selectPicture": "Select an image",
+    "button.title.colorPalette": "Color palette",
+
     ///
     "card.title.total": "Total",
     "card.title.youWroteAt": "You wrote at",
@@ -157,9 +166,12 @@ class CommonLanguages {
     "form.field.title.subject": "Topic",
     "form.field.title.parentSubject": "Parent topic",
     "form.field.title.label": "Labels",
+    "form.field.title.labelName": "Label name",
+    "form.field.title.subjectName": "Topic name",
     "form.field.title.color": "Color",
     "form.field.title.lock": "Lock note",
     "form.field.title.avatar": "Profile picture",
+    "form.field.title.images": "Images",
     "form.filter.filter": "Filter",
     "form.filter.subject": "Topic",
     "form.filter.label": "Label",
@@ -173,6 +185,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Not select",
+    "form.field.enterContentNote": "Enter your note content",
+    "form.field.enterTitleNote": "Enter your note title",
+
     ///
     "notification.noItem.note": "No notes found!",
     "notification.noItem.subject": "No topics found!",
@@ -186,12 +201,24 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Completed",
     "notification.action.titleError": "Error",
     "notification.action.titleWarning": "Warning",
-    "notification.action.error": "An error occurred, please check and try again",
-    "notification.action.cannotDelete.subject": "Unable to delete because this topic has subtopics or notes! To delete this topic, please delete all subtopics and notes of this topic.",
-    "notification.action.confirm.exitScreen": "Please confirm to exit this screen.",
+    "notification.action.error":
+        "An error occurred, please check and try again",
+    "notification.action.cannotDelete.subject":
+        "You cannot delete because this topic has subtopics or notes! Please delete all subtopics and notes to delete this topic.",
+    "notification.action.confirm.exitScreen":
+        "Please confirm to exit this screen.",
     "notification.action.confirm.delete": "Please confirm to delete.",
     "notification.action.confirm.unlock": "Please confirm to unlock.",
     "notification.action.updatedSetting": "Settings updated successfully",
+    "notification.action.requiredNoteContent":
+        "You haven't entered any content.",
+    "notification.action.requiredLabelName":
+        "You haven't entered the label name.",
+    "notification.action.requiredSubjectName":
+        "You haven't entered the topic name.",
+    "notification.action.requiredSearchKeyWord":
+        "You haven't entered a search keyword.",
+
     ///
     "tooltip.button.notesHome": "Notes",
     "tooltip.button.createNote": "Create note",
@@ -239,14 +266,21 @@ class CommonLanguages {
     "screen.title.selectedDate": "Выбранная дата",
     "screen.title.content": "Содержание",
     "screen.title.titleNotSet": "Заголовок не установлен",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Установите цвет фона для заголовка заметки (цвет фона темы заметки)",
-    "screen.title.settings.setNoteContentExpanded": "Содержимое заметки было расширено",
-    "screen.title.settings.setTemplateContentExpanded": "Содержимое шаблона заметки было расширено",
-    "screen.title.settings.setSubjectActionsExpanded": "Список действий для темы (режим просмотра списка) был расширен",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Закрепить заголовок заметки при прокрутке списка заметок",
-    "screen.title.settings.setBackgroundImage": "Установить фоновое изображение",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Установите цвет фона для заголовка заметки (цвет фона темы заметки)",
+    "screen.title.settings.setNoteContentExpanded":
+        "Содержимое заметки было расширено",
+    "screen.title.settings.setTemplateContentExpanded":
+        "Содержимое шаблона заметки было расширено",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "Список действий для темы (режим просмотра списка) был расширен",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Закрепить заголовок заметки при прокрутке списка заметок",
+    "screen.title.settings.setBackgroundImage":
+        "Установить фоновое изображение",
     "screen.title.settings.opacityNumber": "Уровень прозрачности",
     "screen.title.viewImage": "Просмотреть изображение",
+
     ///
     "screen.title.create": "Создать новый",
     "screen.title.update": "Обновить",
@@ -281,10 +315,13 @@ class CommonLanguages {
     "button.title.cancel": "Отменить",
     "button.title.close": "Закрыть",
     "button.title.createNote": "Создать заметку",
-    "button.title.createNoteForSelectedDay": "Создать заметку для выбранной даты",
+    "button.title.createNoteForSelectedDay":
+        "Создать заметку для выбранной даты",
     "button.title.selectLabel": "Выберите ярлыки",
     "button.title.selectSubject": "Выберите тему",
     "button.title.selectPicture": "Выберите изображение",
+    "button.title.colorPalette": "Цветовая палитра",
+
     ///
     "card.title.total": "Общее количество",
     "card.title.youWroteAt": "Вы написали в",
@@ -294,9 +331,12 @@ class CommonLanguages {
     "form.field.title.subject": "Тема",
     "form.field.title.parentSubject": "Родительская тема",
     "form.field.title.label": "Метки",
+    "form.field.title.labelName": "Название ярлыка",
+    "form.field.title.subjectName": "Название темы",
     "form.field.title.color": "Цвет",
     "form.field.title.lock": "Заблокировать заметку",
     "form.field.title.avatar": "Аватар",
+    "form.field.title.images": "Изображения",
     "form.filter.filter": "Фильтровать",
     "form.filter.subject": "Тема",
     "form.filter.label": "Ярлык",
@@ -310,6 +350,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Не выбирать",
+    "form.field.enterContentNote": "Введите содержание вашей заметки",
+    "form.field.enterTitleNote": "Введите заголовок вашей заметки",
+
     ///
     "notification.noItem.note": "Нет заметок!",
     "notification.noItem.subject": "Нет тем!",
@@ -323,12 +366,23 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Завершено",
     "notification.action.titleError": "Ошибка",
     "notification.action.titleWarning": "Предупреждение",
-    "notification.action.error": "Произошла ошибка, пожалуйста, проверьте и повторите попытку",
-    "notification.action.cannotDelete.subject": "Невозможно удалить, потому что у этой темы есть подтемы или заметки! Чтобы удалить эту тему, пожалуйста, удалите все подтемы и заметки этой темы.",
-    "notification.action.confirm.exitScreen": "Пожалуйста, подтвердите, чтобы выйти с этого экрана.",
-    "notification.action.confirm.delete": "Пожалуйста, подтвердите, чтобы удалить.",
-    "notification.action.confirm.unlock": "Пожалуйста, подтвердите, чтобы разблокировать.",
+    "notification.action.error":
+        "Произошла ошибка, пожалуйста, проверьте и повторите попытку",
+    "notification.action.cannotDelete.subject":
+        "Вы не можете удалить, так как у этой темы есть подтемы или заметки! Пожалуйста, удалите все подтемы и заметки, чтобы удалить эту тему.",
+    "notification.action.confirm.exitScreen":
+        "Пожалуйста, подтвердите, чтобы выйти с этого экрана.",
+    "notification.action.confirm.delete":
+        "Пожалуйста, подтвердите, чтобы удалить.",
+    "notification.action.confirm.unlock":
+        "Пожалуйста, подтвердите, чтобы разблокировать.",
     "notification.action.updatedSetting": "Настройки успешно обновлены",
+    "notification.action.requiredNoteContent": "Вы не ввели содержание.",
+    "notification.action.requiredLabelName": "Вы не ввели название метки.",
+    "notification.action.requiredSubjectName": "Вы не ввели название темы.",
+    "notification.action.requiredSearchKeyWord":
+        "Вы не ввели ключевое слово для поиска.",
+
     ///
     "tooltip.button.notesHome": "Заметки",
     "tooltip.button.createNote": "Создать заметку",
@@ -376,14 +430,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Ngày đã chọn",
     "screen.title.content": "Nội dung",
     "screen.title.titleNotSet": "Chưa đặt tiêu đề",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Đặt màu nền cho tiêu đề của ghi chú (màu nền của chủ đề của ghi chú)",
-    "screen.title.settings.setNoteContentExpanded": "Nội dung của ghi chú đã được mở rộng",
-    "screen.title.settings.setTemplateContentExpanded": "Nội dung của mẫu ghi chú đã được mở rộng",
-    "screen.title.settings.setSubjectActionsExpanded": "Danh sách các thao tác của Chủ đề (Chế độ xem danh sách) đã được mở rộng",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Ghim tiêu đề ghi chú khi cuộn danh sách ghi chú",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Đặt màu nền cho tiêu đề của ghi chú (màu nền của chủ đề của ghi chú)",
+    "screen.title.settings.setNoteContentExpanded":
+        "Nội dung của ghi chú đã được mở rộng",
+    "screen.title.settings.setTemplateContentExpanded":
+        "Nội dung của mẫu ghi chú đã được mở rộng",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "Danh sách các thao tác của Chủ đề (Chế độ xem danh sách) đã được mở rộng",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Ghim tiêu đề ghi chú khi cuộn danh sách ghi chú",
     "screen.title.settings.setBackgroundImage": "Đặt hình nền",
     "screen.title.settings.opacityNumber": "Độ trong suốt",
     "screen.title.viewImage": "Xem ảnh",
+
     ///
     "screen.title.create": "Tạo mới",
     "screen.title.update": "Cập nhật",
@@ -422,6 +482,8 @@ class CommonLanguages {
     "button.title.selectLabel": "Chọn các nhãn dán",
     "button.title.selectSubject": "Chọn một chủ đề",
     "button.title.selectPicture": "Chọn một hình ảnh",
+    "button.title.colorPalette": "Bảng màu",
+
     ///
     "card.title.total": "Tổng",
     "card.title.youWroteAt": "Bạn đã viết vào lúc",
@@ -431,9 +493,12 @@ class CommonLanguages {
     "form.field.title.subject": "Chủ đề",
     "form.field.title.parentSubject": "Chủ đề cha",
     "form.field.title.label": "Nhãn dán",
+    "form.field.title.labelName": "Tên nhãn dán",
+    "form.field.title.subjectName": "Tên chủ đề",
     "form.field.title.color": "Màu sắc",
     "form.field.title.lock": "Khóa ghi chú",
     "form.field.title.avatar": "Ảnh đại diện",
+    "form.field.title.images": "Hình ảnh",
     "form.filter.filter": "Bộ lọc",
     "form.filter.subject": "Chủ đề",
     "form.filter.label": "Nhãn dán",
@@ -447,6 +512,8 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Không chọn",
+    "form.field.enterContentNote": "Nhập nội dung ghi chú của bạn",
+    "form.field.enterTitleNote": "Nhập tiêu đề ghi chú của bạn",
     ///
     "notification.noItem.note": "Không có ghi chú nào!",
     "notification.noItem.subject": "Không có chủ đề nào!",
@@ -461,11 +528,19 @@ class CommonLanguages {
     "notification.action.titleError": "Lỗi",
     "notification.action.titleWarning": "Cảnh báo",
     "notification.action.error": "Đã xảy ra lỗi, vui lòng kiểm tra và thử lại",
-    "notification.action.cannotDelete.subject": "Không thể xóa vì chủ đề này có các chủ đề con hoặc ghi chú! Để xóa chủ đề này, vui lòng xóa tất cả các chủ đề con và ghi chú của chủ đề này.",
-    "notification.action.confirm.exitScreen": "Vui lòng xác nhận để thoát khỏi màn hình này.",
+    "notification.action.cannotDelete.subject":
+        "Bạn không thể xóa vì chủ đề này có các chủ đề con hoặc ghi chú! Vui lòng xóa tất cả các chủ đề con và ghi chú để có thể xóa chủ đề này.",
+    "notification.action.confirm.exitScreen":
+        "Vui lòng xác nhận để thoát khỏi màn hình này.",
     "notification.action.confirm.delete": "Vui lòng xác nhận để xóa.",
     "notification.action.confirm.unlock": "Vui lòng xác nhận để mở khóa.",
     "notification.action.updatedSetting": "Cập nhật cài đặt thành công",
+    "notification.action.requiredNoteContent": "Bạn chưa nhập nội dung.",
+    "notification.action.requiredLabelName": "Bạn chưa nhập tên nhãn dán.",
+    "notification.action.requiredSubjectName": "Bạn chưa nhập tên chủ đề.",
+    "notification.action.requiredSearchKeyWord":
+        "Bạn chưa nhập từ khóa tìm kiếm.",
+
     ///
     "tooltip.button.notesHome": "Ghi chú",
     "tooltip.button.createNote": "Tạo ghi chú",
@@ -513,14 +588,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Data selecionada",
     "screen.title.content": "Conteúdo",
     "screen.title.titleNotSet": "Título não definido",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Defina a cor de fundo para o título da nota (a cor de fundo do tópico da nota)",
-    "screen.title.settings.setNoteContentExpanded": "O conteúdo da nota foi expandido",
-    "screen.title.settings.setTemplateContentExpanded": "O conteúdo do modelo de nota foi expandido",
-    "screen.title.settings.setSubjectActionsExpanded": "A lista de ações para o Tópico (modo de visualização de lista) foi expandida",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Fixar o título da nota ao rolar a lista de notas",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Defina a cor de fundo para o título da nota (a cor de fundo do tópico da nota)",
+    "screen.title.settings.setNoteContentExpanded":
+        "O conteúdo da nota foi expandido",
+    "screen.title.settings.setTemplateContentExpanded":
+        "O conteúdo do modelo de nota foi expandido",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "A lista de ações para o Tópico (modo de visualização de lista) foi expandida",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Fixar o título da nota ao rolar a lista de notas",
     "screen.title.settings.setBackgroundImage": "Definir imagem de fundo",
     "screen.title.settings.opacityNumber": "Nível de transparência",
     "screen.title.viewImage": "Ver imagem",
+
     ///
     "screen.title.create": "Criar novo",
     "screen.title.update": "Atualizar",
@@ -555,10 +636,13 @@ class CommonLanguages {
     "button.title.cancel": "Cancelar",
     "button.title.close": "Fechar",
     "button.title.createNote": "Criar uma nota",
-    "button.title.createNoteForSelectedDay": "Criar uma nota para a data selecionada",
+    "button.title.createNoteForSelectedDay":
+        "Criar uma nota para a data selecionada",
     "button.title.selectLabel": "Selecionar etiquetas",
     "button.title.selectSubject": "Selecionar um tópico",
     "button.title.selectPicture": "Selecione uma imagem",
+    "button.title.colorPalette": "Paleta de cores",
+
     ///
     "card.title.total": "Total",
     "card.title.youWroteAt": "Você escreveu às",
@@ -568,9 +652,12 @@ class CommonLanguages {
     "form.field.title.subject": "Tópico",
     "form.field.title.parentSubject": "Tópico pai",
     "form.field.title.label": "Etiquetas",
+    "form.field.title.labelName": "Nome da etiqueta",
+    "form.field.title.subjectName": "Nome do tópico",
     "form.field.title.color": "Cor",
     "form.field.title.lock": "Bloquear nota",
     "form.field.title.avatar": "Foto de perfil",
+    "form.field.title.images": "Imagens",
     "form.filter.filter": "Filtrar",
     "form.filter.subject": "Tópico",
     "form.filter.label": "Etiqueta",
@@ -584,6 +671,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Não selecionar",
+    "form.field.enterContentNote": "Digite o conteúdo da sua nota",
+    "form.field.enterTitleNote": "Digite o título da sua nota",
+
     ///
     "notification.noItem.note": "Sem notas!",
     "notification.noItem.subject": "Sem tópicos!",
@@ -597,12 +687,26 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Concluído",
     "notification.action.titleError": "Erro",
     "notification.action.titleWarning": "Aviso",
-    "notification.action.error": "Ocorreu um erro, por favor, verifique e tente novamente",
-    "notification.action.cannotDelete.subject": "Não é possível excluir porque este tópico possui subtemas ou notas! Para excluir este tópico, por favor, exclua todos os subtemas e notas deste tópico.",
-    "notification.action.confirm.exitScreen": "Por favor, confirme para sair desta tela.",
+    "notification.action.error":
+        "Ocorreu um erro, por favor, verifique e tente novamente",
+    "notification.action.cannotDelete.subject":
+        "Você não pode excluir porque este tópico possui sub-tópicos ou notas! Por favor, exclua todos os sub-tópicos e notas para excluir este tópico.",
+    "notification.action.confirm.exitScreen":
+        "Por favor, confirme para sair desta tela.",
     "notification.action.confirm.delete": "Por favor, confirme para excluir.",
-    "notification.action.confirm.unlock": "Por favor, confirme para desbloquear.",
-    "notification.action.updatedSetting": "Configurações atualizadas com sucesso",
+    "notification.action.confirm.unlock":
+        "Por favor, confirme para desbloquear.",
+    "notification.action.updatedSetting":
+        "Configurações atualizadas com sucesso",
+    "notification.action.requiredNoteContent":
+        "Você não inseriu nenhum conteúdo.",
+    "notification.action.requiredLabelName":
+        "Você não inseriu o nome da etiqueta.",
+    "notification.action.requiredSubjectName":
+        "Você não inseriu o nome do tópico.",
+    "notification.action.requiredSearchKeyWord":
+        "Você não inseriu uma palavra-chave de pesquisa.",
+
     ///
     "tooltip.button.notesHome": "Notas",
     "tooltip.button.createNote": "Criar nota",
@@ -650,14 +754,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Fecha seleccionada",
     "screen.title.content": "Contenido",
     "screen.title.titleNotSet": "Título no establecido",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Establecer el color de fondo para el título de la nota (el color de fondo del tema de la nota)",
-    "screen.title.settings.setNoteContentExpanded": "El contenido de la nota ha sido expandido",
-    "screen.title.settings.setTemplateContentExpanded": "El contenido de la plantilla de la nota ha sido expandido",
-    "screen.title.settings.setSubjectActionsExpanded": "La lista de acciones para el Tema (modo de vista de lista) ha sido ampliada",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Fijar el título de la nota al desplazarse por la lista de notas",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Establecer el color de fondo para el título de la nota (el color de fondo del tema de la nota)",
+    "screen.title.settings.setNoteContentExpanded":
+        "El contenido de la nota ha sido expandido",
+    "screen.title.settings.setTemplateContentExpanded":
+        "El contenido de la plantilla de la nota ha sido expandido",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "La lista de acciones para el Tema (modo de vista de lista) ha sido ampliada",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Fijar el título de la nota al desplazarse por la lista de notas",
     "screen.title.settings.setBackgroundImage": "Establecer imagen de fondo",
     "screen.title.settings.opacityNumber": "Nivel de transparencia",
     "screen.title.viewImage": "Ver imagen",
+
     ///
     "screen.title.create": "Crear nuevo",
     "screen.title.update": "Actualizar",
@@ -692,10 +802,13 @@ class CommonLanguages {
     "button.title.cancel": "Cancelar",
     "button.title.close": "Cerrar",
     "button.title.createNote": "Crear una nota",
-    "button.title.createNoteForSelectedDay": "Crear una nota para la fecha seleccionada",
+    "button.title.createNoteForSelectedDay":
+        "Crear una nota para la fecha seleccionada",
     "button.title.selectLabel": "Seleccionar etiquetas",
     "button.title.selectSubject": "Seleccionar un tema",
     "button.title.selectPicture": "Seleccionar una imagen",
+    "button.title.colorPalette": "Paleta de colores",
+
     ///
     "card.title.total": "Total",
     "card.title.youWroteAt": "Usted escribió a las",
@@ -705,9 +818,12 @@ class CommonLanguages {
     "form.field.title.subject": "Tema",
     "form.field.title.parentSubject": "Tema padre",
     "form.field.title.label": "Etiquetas",
+    "form.field.title.labelName": "Nombre de la etiqueta",
+    "form.field.title.subjectName": "Nombre del tema",
     "form.field.title.color": "Color",
     "form.field.title.lock": "Bloquear nota",
     "form.field.title.avatar": "Foto de perfil",
+    "form.field.title.images": "Imágenes",
     "form.filter.filter": "Filtrar",
     "form.filter.subject": "Tema",
     "form.filter.label": "Etiqueta",
@@ -721,6 +837,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "No seleccionar",
+    "form.field.enterContentNote": "Ingrese el contenido de su nota",
+    "form.field.enterTitleNote": "Ingrese el título de su nota",
+
     ///
     "notification.noItem.note": "¡No hay notas!",
     "notification.noItem.subject": "¡No hay temas!",
@@ -734,12 +853,25 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Completado",
     "notification.action.titleError": "Error",
     "notification.action.titleWarning": "Advertencia",
-    "notification.action.error": "Se ha producido un error, por favor, compruebe e inténtelo de nuevo",
-    "notification.action.cannotDelete.subject": "¡No se puede eliminar porque este tema tiene subtemas o notas! Para eliminar este tema, por favor, elimine todos los subtemas y notas de este tema.",
-    "notification.action.confirm.exitScreen": "Por favor, confirme para salir de esta pantalla.",
+    "notification.action.error":
+        "Se ha producido un error, por favor, compruebe e inténtelo de nuevo",
+    "notification.action.cannotDelete.subject":
+        "¡No puedes eliminar porque este tema tiene subtemas o notas! Por favor, elimina todos los subtemas y notas para eliminar este tema.",
+    "notification.action.confirm.exitScreen":
+        "Por favor, confirme para salir de esta pantalla.",
     "notification.action.confirm.delete": "Por favor, confirme para eliminar.",
-    "notification.action.confirm.unlock": "Por favor, confirme para desbloquear.",
+    "notification.action.confirm.unlock":
+        "Por favor, confirme para desbloquear.",
     "notification.action.updatedSetting": "Ajustes actualizados correctamente",
+    "notification.action.requiredNoteContent":
+        "No has introducido ningún contenido.",
+    "notification.action.requiredLabelName":
+        "No has introducido el nombre de la etiqueta.",
+    "notification.action.requiredSubjectName":
+        "No has introducido el nombre del tema.",
+    "notification.action.requiredSearchKeyWord":
+        "No has ingresado una palabra clave de búsqueda.",
+
     ///
     "tooltip.button.notesHome": "Notas",
     "tooltip.button.createNote": "Crear nota",
@@ -787,7 +919,8 @@ class CommonLanguages {
     "screen.title.selectedDate": "已选择日期",
     "screen.title.content": "内容",
     "screen.title.titleNotSet": "标题未设置",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "设置便签标题的背景色（便签主题的背景色）",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "设置便签标题的背景色（便签主题的背景色）",
     "screen.title.settings.setNoteContentExpanded": "笔记的内容已经扩展了",
     "screen.title.settings.setTemplateContentExpanded": "笔记模板的内容已经扩展了",
     "screen.title.settings.setSubjectActionsExpanded": "主题的操作列表（列表视图模式）已经扩展了",
@@ -795,6 +928,7 @@ class CommonLanguages {
     "screen.title.settings.setBackgroundImage": "设置背景图片",
     "screen.title.settings.opacityNumber": "透明度水平",
     "screen.title.viewImage": "查看图片",
+
     ///
     "screen.title.create": "创建新的",
     "screen.title.update": "更新",
@@ -833,6 +967,8 @@ class CommonLanguages {
     "button.title.selectLabel": "选择标签",
     "button.title.selectSubject": "选择一个主题",
     "button.title.selectPicture": "选择一张图片",
+    "button.title.colorPalette": "调色板",
+
     ///
     "card.title.total": "总数",
     "card.title.youWroteAt": "您在以下时间写下",
@@ -842,9 +978,12 @@ class CommonLanguages {
     "form.field.title.subject": "主题",
     "form.field.title.parentSubject": "父主题",
     "form.field.title.label": "标签",
+    "form.field.title.labelName": "标签名称",
+    "form.field.title.subjectName": "主题名称",
     "form.field.title.color": "颜色",
     "form.field.title.lock": "锁定笔记",
     "form.field.title.avatar": "头像",
+    "form.field.title.images": "图片",
     "form.filter.filter": "过滤",
     "form.filter.subject": "主题",
     "form.filter.label": "标签",
@@ -858,6 +997,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "不选择",
+    "form.field.enterContentNote": "输入您的笔记内容。",
+    "form.field.enterTitleNote": "输入您的笔记标题。",
+
     ///
     "notification.noItem.note": "没有笔记！",
     "notification.noItem.subject": "没有主题！",
@@ -872,11 +1014,17 @@ class CommonLanguages {
     "notification.action.titleError": "错误",
     "notification.action.titleWarning": "警告",
     "notification.action.error": "发生错误，请检查并重试",
-    "notification.action.cannotDelete.subject": "无法删除，因为此主题具有子主题或笔记！要删除此主题，请删除此主题的所有子主题和笔记。",
+    "notification.action.cannotDelete.subject":
+        "您不能删除，因为此主题具有子主题或笔记！ 请删除所有子主题和笔记以删除此主题。",
     "notification.action.confirm.exitScreen": "请确认退出此屏幕。",
     "notification.action.confirm.delete": "请确认删除。",
     "notification.action.confirm.unlock": "请确认以解锁。",
     "notification.action.updatedSetting": "设置更新成功",
+    "notification.action.requiredNoteContent": "您还没有输入任何内容。",
+    "notification.action.requiredLabelName": "您还没有输入标签名称。",
+    "notification.action.requiredSubjectName": "您还没有输入主题名称。",
+    "notification.action.requiredSearchKeyWord": "您还没有输入搜索关键字。",
+
     ///
     "tooltip.button.notesHome": "笔记",
     "tooltip.button.createNote": "创建笔记",
@@ -924,14 +1072,18 @@ class CommonLanguages {
     "screen.title.selectedDate": "選択した日付",
     "screen.title.content": "コンテンツ",
     "screen.title.titleNotSet": "タイトルが設定されていません",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "メモのタイトルの背景色を設定する（メモのトピックの背景色）",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "メモのタイトルの背景色を設定する（メモのトピックの背景色）",
     "screen.title.settings.setNoteContentExpanded": "ノートの内容が拡張されました",
     "screen.title.settings.setTemplateContentExpanded": "ノートのテンプレートの内容が拡張されました",
-    "screen.title.settings.setSubjectActionsExpanded": "トピックのアクションリスト（リストビューモード）が拡張されました",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "ノートリストをスクロールするときにノートのタイトルを固定する",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "トピックのアクションリスト（リストビューモード）が拡張されました",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "ノートリストをスクロールするときにノートのタイトルを固定する",
     "screen.title.settings.setBackgroundImage": "背景画像を設定する",
     "screen.title.settings.opacityNumber": "透明度レベル",
     "screen.title.viewImage": "画像を見る",
+
     ///
     "screen.title.create": "新規作成",
     "screen.title.update": "更新",
@@ -970,6 +1122,8 @@ class CommonLanguages {
     "button.title.selectLabel": "ラベルを選択する",
     "button.title.selectSubject": "トピックを選択する",
     "button.title.selectPicture": "画像を選択する",
+    "button.title.colorPalette": "カラーパレット",
+
     ///
     "card.title.total": "合計",
     "card.title.youWroteAt": "あなたが書いたのは",
@@ -979,9 +1133,12 @@ class CommonLanguages {
     "form.field.title.subject": "トピック",
     "form.field.title.parentSubject": "親トピック",
     "form.field.title.label": "ラベル",
+    "form.field.title.labelName": "ラベル名",
+    "form.field.title.subjectName": "トピック名",
     "form.field.title.color": "色",
     "form.field.title.lock": "メモをロックする",
     "form.field.title.avatar": "プロフィール画像",
+    "form.field.title.images": "画像",
     "form.filter.filter": "フィルターする",
     "form.filter.subject": "トピック",
     "form.filter.label": "ラベル",
@@ -995,6 +1152,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "選択しない",
+    "form.field.enterContentNote": "ノートの内容を入力してください。",
+    "form.field.enterTitleNote": "ノートのタイトルを入力してください。",
+
     ///
     "notification.noItem.note": "ノートは見つかりません！",
     "notification.noItem.subject": "トピックは見つかりません！",
@@ -1009,11 +1169,17 @@ class CommonLanguages {
     "notification.action.titleError": "エラー",
     "notification.action.titleWarning": "警告",
     "notification.action.error": "エラーが発生しました、確認して再度実行してください",
-    "notification.action.cannotDelete.subject": "このトピックにサブトピックまたはノートがあるため、削除できません！このトピックを削除するには、このトピックのすべてのサブトピックとノートを削除してください。",
+    "notification.action.cannotDelete.subject":
+        "このトピックにはサブトピックやノートがあるため、削除できません！ このトピックを削除するには、すべてのサブトピックとノートを削除してください。",
     "notification.action.confirm.exitScreen": "この画面を終了するには確認してください。",
     "notification.action.confirm.delete": "削除するには確認してください。",
     "notification.action.confirm.unlock": "ロックを解除するには確認してください。",
     "notification.action.updatedSetting": "設定が更新されました",
+    "notification.action.requiredNoteContent": "コンテンツが入力されていません。",
+    "notification.action.requiredLabelName": "ラベル名が入力されていません。",
+    "notification.action.requiredSubjectName": "トピック名が入力されていません。",
+    "notification.action.requiredSearchKeyWord": "検索キーワードを入力していません。",
+
     ///
     "tooltip.button.notesHome": "ノート",
     "tooltip.button.createNote": "メモを作成する",
@@ -1061,14 +1227,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Tanggal yang dipilih",
     "screen.title.content": "Konten",
     "screen.title.titleNotSet": "Judul belum ditetapkan",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Atur warna latar belakang untuk judul catatan (warna latar belakang topik catatan)",
-    "screen.title.settings.setNoteContentExpanded": "Konten catatan telah diperluas",
-    "screen.title.settings.setTemplateContentExpanded": "Konten templat catatan telah diperluas",
-    "screen.title.settings.setSubjectActionsExpanded": "Daftar tindakan untuk Topik (mode tampilan daftar) telah diperluas",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Tetapkan judul catatan saat menggulir daftar catatan",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Atur warna latar belakang untuk judul catatan (warna latar belakang topik catatan)",
+    "screen.title.settings.setNoteContentExpanded":
+        "Konten catatan telah diperluas",
+    "screen.title.settings.setTemplateContentExpanded":
+        "Konten templat catatan telah diperluas",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "Daftar tindakan untuk Topik (mode tampilan daftar) telah diperluas",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Tetapkan judul catatan saat menggulir daftar catatan",
     "screen.title.settings.setBackgroundImage": "Atur gambar latar belakang",
     "screen.title.settings.opacityNumber": "Tingkat transparansi",
     "screen.title.viewImage": "Lihat gambar",
+
     ///
     "screen.title.create": "Buat baru",
     "screen.title.update": "Perbarui",
@@ -1103,10 +1275,13 @@ class CommonLanguages {
     "button.title.cancel": "Membatalkan",
     "button.title.close": "Tutup",
     "button.title.createNote": "Buat catatan",
-    "button.title.createNoteForSelectedDay": "Buat catatan untuk tanggal yang dipilih",
+    "button.title.createNoteForSelectedDay":
+        "Buat catatan untuk tanggal yang dipilih",
     "button.title.selectLabel": "Pilih label",
     "button.title.selectSubject": "Pilih sebuah topik",
     "button.title.selectPicture": "Pilih gambar",
+    "button.title.colorPalette": "Palet warna",
+
     ///
     "card.title.total": "Total",
     "card.title.youWroteAt": "Anda menulis pada pukul",
@@ -1116,9 +1291,12 @@ class CommonLanguages {
     "form.field.title.subject": "Topik",
     "form.field.title.parentSubject": "Topik induk",
     "form.field.title.label": "Label",
+    "form.field.title.labelName": "Nama label",
+    "form.field.title.subjectName": "Nama topik",
     "form.field.title.color": "Warna",
     "form.field.title.lock": "Kunci catatan",
     "form.field.title.avatar": "Foto profil",
+    "form.field.title.images": "Gambar",
     "form.filter.filter": "Menyaring",
     "form.filter.subject": "Topik",
     "form.filter.label": "Label",
@@ -1132,6 +1310,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Tidak memilih",
+    "form.field.enterContentNote": "Masukkan konten catatan Anda",
+    "form.field.enterTitleNote": "Masukkan judul catatan Anda",
+
     ///
     "notification.noItem.note": "Tidak ada catatan!",
     "notification.noItem.subject": "Tidak ada topik!",
@@ -1145,12 +1326,24 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Selesai",
     "notification.action.titleError": "Kesalahan",
     "notification.action.titleWarning": "Peringatan",
-    "notification.action.error": "Terjadi kesalahan, harap periksa dan coba lagi",
-    "notification.action.cannotDelete.subject": "Tidak dapat menghapus karena topik ini memiliki subtopik atau catatan! Untuk menghapus topik ini, harap hapus semua subtopik dan catatan dari topik ini.",
-    "notification.action.confirm.exitScreen": "Mohon konfirmasi untuk keluar dari layar ini.",
+    "notification.action.error":
+        "Terjadi kesalahan, harap periksa dan coba lagi",
+    "notification.action.cannotDelete.subject":
+        "Anda tidak dapat menghapus karena topik ini memiliki subtopik atau catatan! Harap hapus semua subtopik dan catatan untuk menghapus topik ini.",
+    "notification.action.confirm.exitScreen":
+        "Mohon konfirmasi untuk keluar dari layar ini.",
     "notification.action.confirm.delete": "Mohon konfirmasi untuk menghapus.",
-    "notification.action.confirm.unlock": "Mohon konfirmasi untuk membuka kunci.",
+    "notification.action.confirm.unlock":
+        "Mohon konfirmasi untuk membuka kunci.",
     "notification.action.updatedSetting": "Pengaturan berhasil diperbarui",
+    "notification.action.requiredNoteContent": "Anda belum memasukkan konten.",
+    "notification.action.requiredLabelName":
+        "Anda belum memasukkan nama label.",
+    "notification.action.requiredSubjectName":
+        "Anda belum memasukkan nama topik.",
+    "notification.action.requiredSearchKeyWord":
+        "Anda belum memasukkan kata kunci pencarian.",
+
     ///
     "tooltip.button.notesHome": "Catatan",
     "tooltip.button.createNote": "Buat catatan",
@@ -1198,14 +1391,20 @@ class CommonLanguages {
     "screen.title.selectedDate": "Date sélectionnée",
     "screen.title.content": "Contenu",
     "screen.title.titleNotSet": "Titre non défini",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "Définir la couleur de fond pour le titre de la note (la couleur de fond du sujet de la note)",
-    "screen.title.settings.setNoteContentExpanded": "Le contenu de la note a été étendu",
-    "screen.title.settings.setTemplateContentExpanded": "Le contenu du modèle de note a été étendu",
-    "screen.title.settings.setSubjectActionsExpanded": "La liste des actions pour le sujet (mode liste) a été élargie",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "Fixer le titre de la note lors du défilement de la liste des notes",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "Définir la couleur de fond pour le titre de la note (la couleur de fond du sujet de la note)",
+    "screen.title.settings.setNoteContentExpanded":
+        "Le contenu de la note a été étendu",
+    "screen.title.settings.setTemplateContentExpanded":
+        "Le contenu du modèle de note a été étendu",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "La liste des actions pour le sujet (mode liste) a été élargie",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "Fixer le titre de la note lors du défilement de la liste des notes",
     "screen.title.settings.setBackgroundImage": "Définir l'image de fond",
     "screen.title.settings.opacityNumber": "Niveau de transparence",
     "screen.title.viewImage": "Voir l'image",
+
     ///
     "screen.title.create": "Créer un nouveau",
     "screen.title.update": "Mettre à jour",
@@ -1240,19 +1439,25 @@ class CommonLanguages {
     "button.title.cancel": "Annuler",
     "button.title.close": "Fermer",
     "button.title.createNote": "Créer une note",
-    "button.title.createNoteForSelectedDay": "Créer une note pour la date sélectionnée",
+    "button.title.createNoteForSelectedDay":
+        "Créer une note pour la date sélectionnée",
     "button.title.selectLabel": "Sélectionner des étiquettes",
     "button.title.selectSubject": "Sélectionner un sujet",
     "button.title.selectPicture": "Sélectionner une image",
+    "button.title.colorPalette": "Palette de couleurs",
+
     ///
     "form.field.title.title": "Titre",
     "form.field.title.content": "Contenu",
     "form.field.title.subject": "Sujet",
     "form.field.title.parentSubject": "Sujet parent",
     "form.field.title.label": "Étiquettes",
+    "form.field.title.labelName": "Nom de l'étiquette",
+    "form.field.title.subjectName": "Nom du sujet",
     "form.field.title.color": "Couleur",
     "form.field.title.lock": "Verrouiller la note",
     "form.field.title.avatar": "Photo de profil",
+    "form.field.title.images": "Images",
     "form.filter.filter": "Filtrer",
     "form.filter.subject": "Sujet",
     "form.filter.label": "Étiquette",
@@ -1266,9 +1471,12 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "Ne pas sélectionner",
+    "form.field.enterContentNote": "Entrez le contenu de votre note",
+    "form.field.enterTitleNote": "Entrez le titre de votre note",
     //
     "card.title.total": "Total",
     "card.title.youWroteAt": "Vous avez écrit à",
+
     ///
     "notification.noItem.note": "Aucune note trouvée!",
     "notification.noItem.subject": "Aucun sujet trouvé!",
@@ -1282,12 +1490,25 @@ class CommonLanguages {
     "notification.action.titleCompleted": "Terminé",
     "notification.action.titleError": "Erreur",
     "notification.action.titleWarning": "Avertissement",
-    "notification.action.error": "Une erreur s'est produite, veuillez vérifier et réessayer",
-    "notification.action.cannotDelete.subject": "Impossible de supprimer car ce sujet possède des sous-thèmes ou des notes ! Pour supprimer ce sujet, veuillez supprimer tous les sous-thèmes et notes de ce sujet.",
-    "notification.action.confirm.exitScreen": "Veuillez confirmer pour quitter cet écran.",
+    "notification.action.error":
+        "Une erreur s'est produite, veuillez vérifier et réessayer",
+    "notification.action.cannotDelete.subject":
+        "Vous ne pouvez pas supprimer car ce sujet contient des sous-sujets ou des notes ! Veuillez supprimer tous les sous-sujets et les notes pour supprimer ce sujet.",
+    "notification.action.confirm.exitScreen":
+        "Veuillez confirmer pour quitter cet écran.",
     "notification.action.confirm.delete": "Veuillez confirmer pour supprimer.",
-    "notification.action.confirm.unlock": "Veuillez confirmer pour déverrouiller.",
+    "notification.action.confirm.unlock":
+        "Veuillez confirmer pour déverrouiller.",
     "notification.action.updatedSetting": "Paramètres mis à jour avec succès",
+    "notification.action.requiredNoteContent":
+        "Vous n'avez saisi aucun contenu.",
+    "notification.action.requiredLabelName":
+        "Vous n'avez pas saisi le nom de l'étiquette.",
+    "notification.action.requiredSubjectName":
+        "Vous n'avez pas saisi le nom du sujet.",
+    "notification.action.requiredSearchKeyWord":
+        "Vous n'avez pas saisi de mot-clé de recherche.",
+
     ///
     "tooltip.button.notesHome": "Notes",
     "tooltip.button.createNote": "Créer une note",
@@ -1335,14 +1556,18 @@ class CommonLanguages {
     "screen.title.selectedDate": "선택한 날짜",
     "screen.title.content": "콘텐츠",
     "screen.title.titleNotSet": "제목이 설정되지 않았습니다",
-    "screen.title.settings.setBackgroundColorIsSubjectColor": "노트 제목의 배경색을 설정하세요 (노트의 주제 배경색)",
+    "screen.title.settings.setBackgroundColorIsSubjectColor":
+        "노트 제목의 배경색을 설정하세요 (노트의 주제 배경색)",
     "screen.title.settings.setNoteContentExpanded": "노트의 내용이 확장되었습니다",
     "screen.title.settings.setTemplateContentExpanded": "노트 템플릿의 내용이 확장되었습니다",
-    "screen.title.settings.setSubjectActionsExpanded": "주제의 작업 목록 (목록 보기 모드)이 확장되었습니다",
-    "screen.title.settings.setStickTitleOfNoteWhenScroll": "노트 목록을 스크롤할 때 노트 제목을 고정합니다",
+    "screen.title.settings.setSubjectActionsExpanded":
+        "주제의 작업 목록 (목록 보기 모드)이 확장되었습니다",
+    "screen.title.settings.setStickTitleOfNoteWhenScroll":
+        "노트 목록을 스크롤할 때 노트 제목을 고정합니다",
     "screen.title.settings.setBackgroundImage": "배경 이미지 설정",
     "screen.title.settings.opacityNumber": "투명도 수준",
     "screen.title.viewImage": "이미지 보기",
+
     ///
     "screen.title.create": "새로 만들기",
     "screen.title.update": "업데이트",
@@ -1381,6 +1606,8 @@ class CommonLanguages {
     "button.title.selectLabel": "레이블 선택하기",
     "button.title.selectSubject": "주제를 선택하세요",
     "button.title.selectPicture": "이미지 선택",
+    "button.title.colorPalette": "색 팔레트",
+
     ///
     "card.title.total": "총액",
     "card.title.youWroteAt": "당신은 다음 시간에 썼습니다",
@@ -1390,9 +1617,12 @@ class CommonLanguages {
     "form.field.title.subject": "주제",
     "form.field.title.parentSubject": "상위 주제",
     "form.field.title.label": "라벨",
+    "form.field.title.labelName": "라벨 이름",
+    "form.field.title.subjectName": "주제 이름",
     "form.field.title.color": "색깔",
     "form.field.title.lock": "노트 잠금",
     "form.field.title.avatar": "프로필 사진",
+    "form.field.title.images": "이미지들",
     "form.filter.filter": "필터링하다",
     "form.filter.subject": "주제",
     "form.filter.label": "레이블",
@@ -1406,6 +1636,9 @@ class CommonLanguages {
     "form.filter.from": "From",
     "form.filter.to": "To",
     "form.field.dropdown.notSelect": "선택하지 않음",
+    "form.field.enterContentNote": "노트 내용을 입력하세요",
+    "form.field.enterTitleNote": "노트 제목을 입력하세요",
+
     ///
     "notification.noItem.note": "노트가 없습니다!",
     "notification.noItem.subject": "주제가 없습니다!",
@@ -1420,11 +1653,17 @@ class CommonLanguages {
     "notification.action.titleError": "오류",
     "notification.action.titleWarning": "경고",
     "notification.action.error": "오류가 발생했습니다. 확인 후 다시 시도하세요",
-    "notification.action.cannotDelete.subject": "이 주제에는 하위 주제 또는 노트가 있기 때문에 삭제할 수 없습니다! 이 주제를 삭제하려면이 주제의 모든 하위 주제와 노트를 삭제하십시오.",
+    "notification.action.cannotDelete.subject":
+        "이 주제에는 하위 주제 또는 노트가 있기 때문에 삭제할 수 없습니다! 이 주제를 삭제하려면 모든 하위 주제와 노트를 삭제하십시오.",
     "notification.action.confirm.exitScreen": "이 화면을 나가시려면 확인하세요.",
     "notification.action.confirm.delete": "삭제하려면 확인하세요.",
     "notification.action.confirm.unlock": "잠금 해제하려면 확인하세요.",
     "notification.action.updatedSetting": "설정이 성공적으로 업데이트되었습니다",
+    "notification.action.requiredNoteContent": "내용을 입력하지 않았습니다.",
+    "notification.action.requiredLabelName": "라벨 이름을 입력하지 않았습니다.",
+    "notification.action.requiredSubjectName": "주제 이름을 입력하지 않았습니다.",
+    "notification.action.requiredSearchKeyWord": "검색 키워드를 입력하지 않았습니다.",
+
     ///
     "tooltip.button.notesHome": "메모",
     "tooltip.button.createNote": "메모 만들기",
