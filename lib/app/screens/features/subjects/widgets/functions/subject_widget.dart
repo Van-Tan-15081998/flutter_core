@@ -1,14 +1,16 @@
-import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter_core_v3/app/library/common/themes/ThemeDataCenter.dart';
 import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/languages/CommonLanguages.dart';
 import '../../../../../library/common/styles/CommonStyles.dart';
+import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
 import '../../../../setting/providers/setting_notifier.dart';
 import '../../../note/models/note_condition_model.dart';
@@ -47,6 +49,8 @@ class SubjectWidget extends StatefulWidget {
 }
 
 class _SubjectWidgetState extends State<SubjectWidget> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   late int countChildren;
   late int countNotes;
 
@@ -74,24 +78,19 @@ class _SubjectWidgetState extends State<SubjectWidget> {
     });
   }
 
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
+  }
+
   Future<int> _onCountChildren() async {
     return await SubjectDatabaseManager.countChildren(widget.subject);
   }
 
   Future<int> _onCountNotes() async {
     return await SubjectDatabaseManager.countNotes(widget.subject);
-  }
-
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
   }
 
   @override
@@ -111,43 +110,66 @@ class _SubjectWidgetState extends State<SubjectWidget> {
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
           children: [
-            widget.subject.deletedAt == null ?
-            SlidableAction(
-              flex: 1,
-              onPressed: (context) {
-                setState(() {
-                  expandedActions = !expandedActions;
-                });
-              },
-              backgroundColor: const Color(0xFF202124),
-              foregroundColor: const Color(0xff8fc49b),
-              icon: Icons.keyboard_control_rounded,
-            ) : Container(),
+            widget.subject.deletedAt == null
+                ? SlidableAction(
+                    flex: 1,
+                    onPressed: (context) {
+                      setState(() {
+                        expandedActions = !expandedActions;
+                      });
+                    },
+                    backgroundColor:
+                        settingNotifier.isSetBackgroundImage == true
+                            ? settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.30)
+                                : Colors.transparent
+                            : ThemeDataCenter.getBackgroundColor(context),
+                    foregroundColor:
+                        ThemeDataCenter.getMoreSlidableActionColorStyle(
+                            context),
+                    icon: Icons.keyboard_control_rounded,
+                  )
+                : Container(),
             SlidableAction(
               flex: 1,
               onPressed: (context) {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            SubjectDetailScreen(subject: widget.subject)));
+                        builder: (context) => SubjectDetailScreen(
+                              subject: widget.subject,
+                              redirectFrom: null,
+                            )));
               },
-              backgroundColor: const Color(0xFF202124),
-              foregroundColor: const Color(0xff17a2b8),
-              icon: Icons.remove_red_eye_rounded,
+              backgroundColor: settingNotifier.isSetBackgroundImage == true
+                  ? settingNotifier.isSetBackgroundImage == true
+                      ? Colors.white.withOpacity(0.30)
+                      : Colors.transparent
+                  : ThemeDataCenter.getBackgroundColor(context),
+              foregroundColor:
+                  ThemeDataCenter.getViewSlidableActionColorStyle(context),
+              icon: Icons.search_rounded,
             ),
-            widget.subject.deletedAt == null ?
-            SlidableAction(
-              flex: 1,
-              onPressed: (context) {
-                if (widget.onDelete != null) {
-                  widget.onDelete!();
-                }
-              },
-              backgroundColor: const Color(0xFF202124),
-              foregroundColor: const Color(0xffffb90f),
-              icon: Icons.delete,
-            ) : Container()
+            widget.subject.deletedAt == null
+                ? SlidableAction(
+                    flex: 1,
+                    onPressed: (context) {
+                      if (widget.onDelete != null) {
+                        widget.onDelete!();
+                      }
+                    },
+                    backgroundColor:
+                        settingNotifier.isSetBackgroundImage == true
+                            ? settingNotifier.isSetBackgroundImage == true
+                                ? Colors.white.withOpacity(0.30)
+                                : Colors.transparent
+                            : ThemeDataCenter.getBackgroundColor(context),
+                    foregroundColor:
+                        ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                            context),
+                    icon: Icons.delete,
+                  )
+                : Container()
           ],
         ),
         child: Padding(
@@ -158,18 +180,46 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                 widget.subject.updatedAt == null &&
                         widget.subject.deletedAt == null
                     ? Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.index.toString(),
                                 style: CommonStyles.labelTextStyle),
-                            Text(getTimeString(widget.subject.createdAt!),
-                                style: const TextStyle(
-                                  fontSize: 13.0,
-                                  color: Colors.white54,
-                                )),
+                            Tooltip(
+                              message: 'Created time',
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.create_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.createdAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(
+                                                    context))),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       )
@@ -177,22 +227,47 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                 widget.subject.updatedAt != null &&
                         widget.subject.deletedAt == null
                     ? Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(widget.index.toString(),
+                            Text(
+                                widget.index != null
+                                    ? widget.index.toString()
+                                    : '',
                                 style: CommonStyles.labelTextStyle),
-                            Row(
-                              children: [
-                                const Icon(Icons.edit,
-                                    size: 13.0, color: Colors.white54),
-                                const SizedBox(width: 5.0),
-                                Text(getTimeString(widget.subject.updatedAt!),
-                                    style: const TextStyle(
-                                        fontSize: 13.0, color: Colors.white54))
-                              ],
+                            Tooltip(
+                              message: 'Updated time',
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.update_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.updatedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
+                              ),
                             )
                           ],
                         ),
@@ -200,37 +275,71 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                     : Container(),
                 widget.subject.deletedAt != null
                     ? Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 9.0, 0),
+                        padding: const EdgeInsets.fromLTRB(4.0, 0, 5.0, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(widget.index.toString(),
                                 style: CommonStyles.labelTextStyle),
-                            Row(
-                              children: [
-                                const Icon(Icons.delete_rounded,
-                                    size: 13.0, color: Colors.white54),
-                                const SizedBox(width: 5.0),
-                                Text(getTimeString(widget.subject.deletedAt!),
-                                    style: const TextStyle(
-                                        fontSize: 13.0, color: Colors.white54))
-                              ],
+                            Tooltip(
+                              message: 'Deleted time',
+                              child: Container(
+                                padding:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? const EdgeInsets.all(2.0)
+                                        : const EdgeInsets.all(0),
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(6.0)),
+                                    color:
+                                        settingNotifier.isSetBackgroundImage ==
+                                                true
+                                            ? Colors.white.withOpacity(0.65)
+                                            : Colors.transparent),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.delete_rounded,
+                                        size: 13.0,
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)),
+                                    const SizedBox(width: 5.0),
+                                    Text(
+                                        CommonConverters.toTimeString(
+                                            time: widget.subject.deletedAt!),
+                                        style: CommonStyles.dateTimeTextStyle(
+                                            color: ThemeDataCenter
+                                                .getTopCardLabelStyle(context)))
+                                  ],
+                                ),
+                              ),
                             )
                           ],
                         ),
                       )
                     : Container(),
                 GestureDetector(
-                  onDoubleTap: () {
+                  onTap: () {
                     setState(() {
-                      expandedActions = !expandedActions;
+                      expandedActions = true;
+                    });
+                  },
+                  onLongPress: () {
+                    setState(() {
+                      expandedActions = false;
                     });
                   },
                   child: Card(
+                    color: Colors.white
+                        .withOpacity(settingNotifier.opacityNumber ?? 1),
+                    shadowColor: const Color(0xff1f1f1f),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          5.0), // Đây là giá trị bo góc ở đây
+                      side: BorderSide(
+                          color:
+                              ThemeDataCenter.getBorderCardColorStyle(context),
+                          width: 1.0),
+                      borderRadius: BorderRadius.circular(5.0),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -239,7 +348,7 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                           // height: 150,
                           child: Container(
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              // color: Colors.white,
                               shape: BoxShape.rectangle,
                             ),
                             child: Padding(
@@ -317,8 +426,17 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                             child: Column(
                                               children: [
                                                 Tooltip(
-                                                  message: 'Update',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'tooltip.button.update'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
@@ -332,41 +450,69 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                                             .update,
                                                                     subject: widget
                                                                         .subject,
+                                                                    redirectFrom:
+                                                                        null,
+                                                                    breadcrumb:
+                                                                        null,
                                                                   )));
                                                     },
                                                     coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
-                                                    icon: const Icon(
-                                                        Icons.edit_note_rounded),
+                                                        ThemeDataCenter
+                                                            .getUpdateButtonStyle(
+                                                                context),
+                                                    icon: const Icon(Icons
+                                                        .edit_note_rounded),
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Create sub subject',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'tooltip.button.createSubSubject'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   SubjectCreateScreen(
-                                                                      parentSubject:
-                                                                          widget
-                                                                              .subject,
-                                                                      actionMode:
-                                                                          ActionModeEnum
-                                                                              .create)));
+                                                                    parentSubject:
+                                                                        widget
+                                                                            .subject,
+                                                                    actionMode:
+                                                                        ActionModeEnum
+                                                                            .create,
+                                                                    redirectFrom:
+                                                                        null,
+                                                                    breadcrumb:
+                                                                        null,
+                                                                  )));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getCreateSubSubjectButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .create_new_folder_rounded),
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Notes',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.notes'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       NoteConditionModel
                                                           noteConditionModel =
@@ -379,57 +525,99 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   NoteListScreen(
-                                                                      noteConditionModel:
-                                                                          noteConditionModel)));
+                                                                    noteConditionModel:
+                                                                        noteConditionModel,
+                                                                    isOpenSubjectsForFilter:
+                                                                        true,
+                                                                    redirectFrom:
+                                                                        RedirectFromEnum
+                                                                            .subjects,
+                                                                  )));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getViewNotesButtonStyle(
+                                                            context),
                                                     icon: const Icon(Icons
                                                         .playlist_play_rounded),
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Create note',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'screen.title.create.note'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                               builder: (context) =>
                                                                   NoteCreateScreen(
-                                                                      subject: widget
-                                                                          .subject,
-                                                                      actionMode:
-                                                                          ActionModeEnum
-                                                                              .create)));
+                                                                    note: null,
+                                                                    copyNote:
+                                                                        null,
+                                                                    subject: widget
+                                                                        .subject,
+                                                                    actionMode:
+                                                                        ActionModeEnum
+                                                                            .create,
+                                                                    redirectFrom:
+                                                                        RedirectFromEnum
+                                                                            .subjectCreateNote,
+                                                                  )));
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getCreateNoteButtonStyle(
+                                                            context),
                                                     icon: const Icon(
                                                         Icons.add_card_rounded),
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Parent subject',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'tooltip.button.parentSubject'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
-                                                      if (widget.onFilterParent !=
+                                                      if (widget
+                                                              .onFilterParent !=
                                                           null) {
-                                                        widget.onFilterParent!();
+                                                        widget
+                                                            .onFilterParent!();
                                                       }
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
-                                                    icon: const Icon(
-                                                        Icons.arrow_upward_rounded),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getFilterParentSubjectButtonStyle(
+                                                            context),
+                                                    icon: const Icon(Icons
+                                                        .arrow_upward_rounded),
                                                   ),
                                                 ),
                                                 Tooltip(
-                                                  message: 'Sub subjects',
-                                                  child: CoreElevatedButton.iconOnly(
+                                                  message: CommonLanguages.convert(
+                                                      lang: settingNotifier
+                                                              .languageString ??
+                                                          CommonLanguages
+                                                              .languageStringDefault(),
+                                                      word:
+                                                          'tooltip.button.subSubject'),
+                                                  child: CoreElevatedButton
+                                                      .iconOnly(
+                                                    buttonAudio:
+                                                        commonAudioOnPressButton,
                                                     onPressed: () {
                                                       if (widget
                                                               .onFilterChildren !=
@@ -438,11 +626,11 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                                             .onFilterChildren!();
                                                       }
                                                     },
-                                                    coreButtonStyle:
-                                                        CoreButtonStyle.dark(
-                                                            kitRadius: 6.0),
-                                                    icon: const Icon(
-                                                        Icons.arrow_downward_rounded),
+                                                    coreButtonStyle: ThemeDataCenter
+                                                        .getFilterSubSubjectButtonStyle(
+                                                            context),
+                                                    icon: const Icon(Icons
+                                                        .arrow_downward_rounded),
                                                   ),
                                                 ),
                                               ],
@@ -456,17 +644,28 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                               4.0, 0, 0, 0),
                                           child: Column(children: [
                                             Tooltip(
-                                              message: 'Restore',
-                                              child: CoreElevatedButton.iconOnly(
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                          .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word:
+                                                      'tooltip.button.restore'),
+                                              child:
+                                                  CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
-                                                  if (widget.onRestoreFromTrash !=
+                                                  if (widget
+                                                          .onRestoreFromTrash !=
                                                       null) {
-                                                    widget.onRestoreFromTrash!();
+                                                    widget
+                                                        .onRestoreFromTrash!();
                                                   }
                                                 },
-                                                coreButtonStyle:
-                                                    CoreButtonStyle.info(
-                                                        kitRadius: 6.0),
+                                                coreButtonStyle: ThemeDataCenter
+                                                    .getRestoreButtonStyle(
+                                                        context),
                                                 icon: const Icon(
                                                     Icons
                                                         .restore_from_trash_rounded,
@@ -475,19 +674,29 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                                             ),
                                             const SizedBox(height: 2.0),
                                             Tooltip(
-                                              message: 'Delete forever',
-                                              child: CoreElevatedButton.iconOnly(
+                                              message: CommonLanguages.convert(
+                                                  lang: settingNotifier
+                                                          .languageString ??
+                                                      CommonLanguages
+                                                          .languageStringDefault(),
+                                                  word:
+                                                      'tooltip.button.deleteForever'),
+                                              child:
+                                                  CoreElevatedButton.iconOnly(
+                                                buttonAudio:
+                                                    commonAudioOnPressButton,
                                                 onPressed: () {
                                                   if (widget.onDeleteForever !=
                                                       null) {
                                                     widget.onDeleteForever!();
                                                   }
                                                 },
-                                                coreButtonStyle:
-                                                    CoreButtonStyle.danger(
-                                                        kitRadius: 6.0),
+                                                coreButtonStyle: ThemeDataCenter
+                                                    .getDeleteForeverButtonStyle(
+                                                        context),
                                                 icon: const Icon(
-                                                    Icons.delete_forever_rounded,
+                                                    Icons
+                                                        .delete_forever_rounded,
                                                     size: 26.0),
                                               ),
                                             ),
@@ -504,27 +713,48 @@ class _SubjectWidgetState extends State<SubjectWidget> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                  padding: const EdgeInsets.fromLTRB(8.0, 0, 4.0, 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Text('Sub subjects: ',
-                          style: TextStyle(color: Colors.white54)),
-                      Text(
-                        countChildren.toString(),
-                        style: const TextStyle(
-                            color: Colors.white70, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(
-                        width: 30.0,
-                      ),
-                      const Text('Notes: ',
-                          style: TextStyle(color: Colors.white54)),
-                      Text(
-                        countNotes.toString(),
-                        style: const TextStyle(
-                            color: Colors.white70, fontWeight: FontWeight.w600),
-                      ),
+                      Container(
+                        padding: const EdgeInsets.all(5.0),
+                        decoration: CommonStyles.titleScreenDecorationStyle(
+                            settingNotifier.isSetBackgroundImage),
+                        child: Row(
+                          children: [
+                            Text('Sub subjects: ',
+                                style: TextStyle(
+                                    color:
+                                        ThemeDataCenter.getBottomCardLabelStyle(
+                                            context))),
+                            Text(
+                              countChildren.toString(),
+                              style: TextStyle(
+                                  color:
+                                      ThemeDataCenter.getBottomCardLabelStyle(
+                                          context),
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(
+                              width: 30.0,
+                            ),
+                            Text('Notes: ',
+                                style: TextStyle(
+                                    color:
+                                        ThemeDataCenter.getBottomCardLabelStyle(
+                                            context))),
+                            Text(
+                              countNotes.toString(),
+                              style: TextStyle(
+                                  color:
+                                      ThemeDataCenter.getBottomCardLabelStyle(
+                                          context),
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 )

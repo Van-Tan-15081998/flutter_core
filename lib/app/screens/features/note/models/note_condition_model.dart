@@ -5,10 +5,12 @@ class NoteConditionModel {
   int? createdAtEndOfDay;
   int? labelId;
   int? subjectId;
+  bool? onlyNoneSubject;
   String? searchText;
   bool? isDeleted;
   bool? recentlyUpdated;
   bool? favourite;
+  bool? createdForDay;
 
   NoteConditionModel({
     this.title,
@@ -17,9 +19,11 @@ class NoteConditionModel {
     this.createdAtEndOfDay,
     this.labelId,
     this.subjectId,
+    this.onlyNoneSubject,
     this.searchText,
     this.isDeleted,
     this.recentlyUpdated,
-    this.favourite
+    this.favourite,
+    this.createdForDay,
   });
 }

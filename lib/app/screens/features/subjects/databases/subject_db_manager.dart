@@ -10,6 +10,12 @@ class SubjectDatabaseManager {
     return subjects;
   }
 
+  static Future<List<SubjectModel>?> shortcuts() async {
+    List<SubjectModel>? subjects = await DatabaseProvider.getSubjectShortcut();
+
+    return subjects;
+  }
+
   static Future<List<SubjectModel>?> onGetSubjectPagination(
       CorePaginationModel corePaginationModel,
       SubjectConditionModel subjectConditionModel) async {
@@ -182,6 +188,40 @@ class SubjectDatabaseManager {
     }
   }
 
+  //
+  static Future<bool> createShortcut(
+      SubjectModel subject, int? isSetShortcut) async {
+    try {
+      SubjectModel? createShortcutModel;
+      createShortcutModel = await _onCreateShortcut(subject, isSetShortcut);
+
+      if (createShortcutModel != null) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
+  static Future<SubjectModel?> _onCreateShortcut(
+      SubjectModel subject, int? isSetShortcut) async {
+    try {
+      int result =
+          await DatabaseProvider.createShortcutSubject(subject, isSetShortcut);
+
+      if (result != 0) {
+        SubjectModel? createShortcutModel = await getById(subject.id!);
+
+        return createShortcutModel;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<SubjectModel?> getById(int id) async {
     try {
       SubjectModel? result = await DatabaseProvider.getSubjectById(id);
@@ -212,5 +252,24 @@ class SubjectDatabaseManager {
     } catch (e) {
       return 0;
     }
+  }
+
+  static Future<bool> checkCanDeleteSubject(SubjectModel subject) async {
+    // Only can delete subject it has not sub subjects and notes
+    try {
+      int? countNotes;
+      int? countChildren;
+
+      countNotes = await DatabaseProvider.countNotes(subject);
+      countChildren = await DatabaseProvider.countChildren(subject);
+
+      if (countNotes == 0 && countChildren == 0) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+
+    return false;
   }
 }

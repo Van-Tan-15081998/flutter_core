@@ -3,9 +3,15 @@ import 'package:flutter_core_v3/app/library/extensions/extensions.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import '../../../../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
+import 'package:provider/provider.dart';
 import '../../../../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
+import '../../../../../library/common/converters/CommonConverters.dart';
+import '../../../../../library/common/languages/CommonLanguages.dart';
+import '../../../../../library/common/styles/CommonStyles.dart';
+import '../../../../../library/common/themes/ThemeDataCenter.dart';
+import '../../../../../library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../../library/enums/CommonEnums.dart';
+import '../../../../setting/providers/setting_notifier.dart';
 import '../../models/label_model.dart';
 import '../label_create_screen.dart';
 import '../label_detail_screen.dart';
@@ -30,35 +36,25 @@ class LabelWidget extends StatefulWidget {
 }
 
 class _LabelWidgetState extends State<LabelWidget> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
   }
 
-  String getTimeString(int time) {
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time);
-
-    int year = dateTime.year;
-    int month = dateTime.month;
-    int day = dateTime.day;
-    int hour = dateTime.hour;
-    int minute = dateTime.minute;
-
-    return '$hour:$minute $day/$month/$year';
-  }
-
-  Widget onGetTitle() {
-    String defaultTitle =
-        'You wrote at ${getTimeString(widget.label.createdAt!)}';
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Text(defaultTitle),
-    );
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final settingNotifier = Provider.of<SettingNotifier>(context);
+
     return Slidable(
       key: const ValueKey(0),
       endActionPane: ActionPane(
@@ -70,13 +66,19 @@ class _LabelWidgetState extends State<LabelWidget> {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          LabelDetailScreen(label: widget.label)));
+                      builder: (context) => LabelDetailScreen(
+                            label: widget.label,
+                            redirectFrom: null,
+                          )));
             },
-            backgroundColor: const Color(0xFF202124),
-            foregroundColor: const Color(0xff17a2b8),
-            icon: Icons.remove_red_eye_rounded,
-            label: 'View',
+            backgroundColor: settingNotifier.isSetBackgroundImage == true
+                ? settingNotifier.isSetBackgroundImage == true
+                    ? Colors.white.withOpacity(0.30)
+                    : Colors.transparent
+                : ThemeDataCenter.getBackgroundColor(context),
+            foregroundColor:
+                ThemeDataCenter.getViewSlidableActionColorStyle(context),
+            icon: Icons.search_rounded,
           ),
           widget.label.deletedAt == null
               ? SlidableAction(
@@ -86,10 +88,15 @@ class _LabelWidgetState extends State<LabelWidget> {
                       widget.onDelete!();
                     }
                   },
-                  backgroundColor: const Color(0xFF202124),
-                  foregroundColor: const Color(0xffffb90f),
+                  backgroundColor: settingNotifier.isSetBackgroundImage == true
+                      ? settingNotifier.isSetBackgroundImage == true
+                          ? Colors.white.withOpacity(0.30)
+                          : Colors.transparent
+                      : ThemeDataCenter.getBackgroundColor(context),
+                  foregroundColor:
+                      ThemeDataCenter.getDeleteSlidableActionColorStyle(
+                          context),
                   icon: Icons.delete,
-                  label: 'Delete',
                 )
               : Container()
         ],
@@ -102,57 +109,138 @@ class _LabelWidgetState extends State<LabelWidget> {
             widget.label.updatedAt == null && widget.label.deletedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(getTimeString(widget.label.createdAt!),
-                            style: const TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.white54,
-                            )),
-                      ],
+                    child: Tooltip(
+                      message: 'Created time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.create_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.createdAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context))),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             widget.label.updatedAt != null && widget.label.deletedAt == null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.edit,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.label.updatedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
+                    child: Tooltip(
+                      message: 'Updated time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.update_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.updatedAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)))
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             widget.label.deletedAt != null
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        const Icon(Icons.delete_rounded,
-                            size: 13.0, color: Colors.white54),
-                        const SizedBox(width: 5.0),
-                        Text(getTimeString(widget.label.deletedAt!),
-                            style: const TextStyle(
-                                fontSize: 13.0, color: Colors.white54))
-                      ],
+                    child: Tooltip(
+                      message: 'Deleted time',
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding:
+                                settingNotifier.isSetBackgroundImage == true
+                                    ? const EdgeInsets.all(2.0)
+                                    : const EdgeInsets.all(0),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(6.0)),
+                                color:
+                                    settingNotifier.isSetBackgroundImage == true
+                                        ? Colors.white.withOpacity(0.65)
+                                        : Colors.transparent),
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_rounded,
+                                    size: 13.0,
+                                    color: ThemeDataCenter.getTopCardLabelStyle(
+                                        context)),
+                                const SizedBox(width: 5.0),
+                                Text(
+                                    CommonConverters.toTimeString(
+                                        time: widget.label.deletedAt!),
+                                    style: CommonStyles.dateTimeTextStyle(
+                                        color: ThemeDataCenter
+                                            .getTopCardLabelStyle(context)))
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   )
                 : Container(),
             Card(
+              color: Colors.white.withOpacity(settingNotifier.opacityNumber ?? 1),
+              shadowColor: const Color(0xff1f1f1f),
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.circular(5.0), // Đây là giá trị bo góc ở đây
+                side: BorderSide(
+                    color: ThemeDataCenter.getBorderCardColorStyle(context),
+                    width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
               ),
               clipBehavior: Clip.antiAlias,
               child: Column(
@@ -161,7 +249,7 @@ class _LabelWidgetState extends State<LabelWidget> {
                     // height: 150,
                     child: Container(
                       decoration: const BoxDecoration(
-                        color: Colors.white,
+                        // color: Colors.white,
                         shape: BoxShape.rectangle,
                       ),
                       child: Padding(
@@ -206,8 +294,12 @@ class _LabelWidgetState extends State<LabelWidget> {
                               ),
                               widget.label.deletedAt == null
                                   ? Tooltip(
-                                      message: 'Update',
+                                      message: CommonLanguages.convert(
+                                          lang: settingNotifier.languageString ??
+                                              CommonLanguages.languageStringDefault(),
+                                          word: 'tooltip.button.update'),
                                       child: CoreElevatedButton.iconOnly(
+                                        buttonAudio: commonAudioOnPressButton,
                                         onPressed: () {
                                           Navigator.push(
                                               context,
@@ -218,26 +310,31 @@ class _LabelWidgetState extends State<LabelWidget> {
                                                             ActionModeEnum
                                                                 .update,
                                                         label: widget.label,
+                                                        redirectFrom: null,
                                                       )));
                                         },
-                                        coreButtonStyle: CoreButtonStyle.dark(
-                                            kitRadius: 6.0),
+                                        coreButtonStyle: ThemeDataCenter
+                                            .getUpdateButtonStyle(context),
                                         icon:
                                             const Icon(Icons.edit_note_rounded),
                                       ),
                                     )
                                   : Column(children: [
                                       Tooltip(
-                                        message: 'Restore',
+                                        message: CommonLanguages.convert(
+                                            lang: settingNotifier.languageString ??
+                                                CommonLanguages.languageStringDefault(),
+                                            word: 'tooltip.button.restore'),
                                         child: CoreElevatedButton.iconOnly(
+                                          buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
                                             if (widget.onRestoreFromTrash !=
                                                 null) {
                                               widget.onRestoreFromTrash!();
                                             }
                                           },
-                                          coreButtonStyle: CoreButtonStyle.info(
-                                              kitRadius: 6.0),
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getRestoreButtonStyle(context),
                                           icon: const Icon(
                                               Icons.restore_from_trash_rounded,
                                               size: 26.0),
@@ -245,17 +342,21 @@ class _LabelWidgetState extends State<LabelWidget> {
                                       ),
                                       const SizedBox(height: 2.0),
                                       Tooltip(
-                                        message: 'Delete forever',
+                                        message: CommonLanguages.convert(
+                                            lang: settingNotifier.languageString ??
+                                                CommonLanguages.languageStringDefault(),
+                                            word: 'tooltip.button.deleteForever'),
                                         child: CoreElevatedButton.iconOnly(
+                                          buttonAudio: commonAudioOnPressButton,
                                           onPressed: () {
                                             if (widget.onDeleteForever !=
                                                 null) {
                                               widget.onDeleteForever!();
                                             }
                                           },
-                                          coreButtonStyle:
-                                              CoreButtonStyle.danger(
-                                                  kitRadius: 6.0),
+                                          coreButtonStyle: ThemeDataCenter
+                                              .getDeleteForeverButtonStyle(
+                                                  context),
                                           icon: const Icon(
                                               Icons.delete_forever_rounded,
                                               size: 26.0),

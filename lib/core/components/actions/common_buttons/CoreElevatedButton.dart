@@ -7,119 +7,140 @@ import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreButto
 import '../../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 
 class CoreElevatedButton extends ElevatedButton {
-
   ButtonStyle? style;
 
   CoreElevatedButton({
     Key? key,
-    required VoidCallback? onPressed,
+    bool playSound = true,
+    required VoidCallback onPressed,
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
     MaterialStatesController? statesController,
     required Widget child,
-
     required CoreButtonStyle coreButtonStyle,
-  })
-      : style = ButtonStyle(
-      foregroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitForegroundColor),
-      backgroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitBackgroundColor),
-      overlayColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitOverlayColor),
-      shadowColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitShadowColor),
-      elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
-      padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
-      textStyle: MaterialStateProperty.all(
-        TextStyle(fontSize: coreButtonStyle.kitFontSize),
-      ),
-      fixedSize: MaterialStateProperty.all(Size.fromHeight(coreButtonStyle.kitHeight)),
-      
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(coreButtonStyle.kitRadius)),
-          side: BorderSide(color: coreButtonStyle.kitBorderColor))
-      )
-  ),
+  })  : style = ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitForegroundColor),
+            backgroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitBackgroundColor),
+            overlayColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitOverlayColor),
+            shadowColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitShadowColor),
+            elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
+            padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
+            textStyle: MaterialStateProperty.all(
+              TextStyle(fontSize: coreButtonStyle.kitFontSize),
+            ),
+            fixedSize: MaterialStateProperty.all(
+                Size.fromHeight(coreButtonStyle.kitHeight)),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(coreButtonStyle.kitRadius)),
+                    side: BorderSide(color: coreButtonStyle.kitBorderColor)))),
         super(
-        key: key,
-        onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
-            if(value) {
-              onPressed!();
+          key: key,
+          onPressed: () {
+            if (playSound == true) {
+              buttonAudio.playAudioOnPress().then((value) {
+                if (value) {
+                  onPressed();
+                }
+              });
+            } else {
+              onPressed();
             }
-          });
-        },
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        clipBehavior: clipBehavior,
-        child: child,
-      );
+          },
+          onLongPress: onLongPress,
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          style: style,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          clipBehavior: clipBehavior,
+          child: child,
+        );
 
   CoreElevatedButton.icon({
     Key? key,
-    required VoidCallback? onPressed,
+    bool playSound = true,
+    required VoidCallback onPressed,
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
     MaterialStatesController? statesController,
-
     required Widget icon,
     required Widget label,
-
     Color kitForegroundColor = Colors.black,
     Color kitBorderColor = Colors.black,
     Color kitOverlayColor = Colors.black45,
     Color kitBackgroundColor = Colors.white,
     Color kitShadowColor = Colors.black,
-
     required CoreButtonStyle coreButtonStyle,
-  })
-      : style = ButtonStyle(
-      foregroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitForegroundColor),
-      backgroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitBackgroundColor),
-      overlayColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitOverlayColor),
-      shadowColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitShadowColor),
-      elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
-      padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
-      textStyle: MaterialStateProperty.all(
-        TextStyle(fontSize: coreButtonStyle.kitFontSize),
-      ),
-      fixedSize: MaterialStateProperty.all(Size.fromHeight(coreButtonStyle.kitHeight)),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(coreButtonStyle.kitRadius)),
-          side: BorderSide(color: coreButtonStyle.kitBorderColor ?? kitBorderColor)))),
+  })  : style = ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitForegroundColor),
+            backgroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitBackgroundColor),
+            overlayColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitOverlayColor),
+            shadowColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitShadowColor),
+            elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
+            padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
+            textStyle: MaterialStateProperty.all(
+              TextStyle(fontSize: coreButtonStyle.kitFontSize),
+            ),
+            fixedSize: MaterialStateProperty.all(
+                Size.fromHeight(coreButtonStyle.kitHeight)),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(coreButtonStyle.kitRadius)),
+                    side: BorderSide(
+                        color: coreButtonStyle.kitBorderColor ??
+                            kitBorderColor)))),
         super(
-        key: key,
-        onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
-            if(value) {
-              onPressed!();
+          key: key,
+          onPressed: () {
+            if (playSound == true) {
+              buttonAudio.playAudioOnPress().then((value) {
+                if (value) {
+                  onPressed();
+                }
+              });
+            } else {
+              onPressed();
             }
-          });
-        },
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        clipBehavior: clipBehavior,
-        child: _ElevatedButtonWithIconChild(icon: icon, label: label, kitGap: coreButtonStyle.kitGap,),
-      );
+          },
+          onLongPress: onLongPress,
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          style: style,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          clipBehavior: clipBehavior,
+          child: _ElevatedButtonWithIconChild(
+            icon: icon,
+            label: label,
+            kitGap: coreButtonStyle.kitGap,
+          ),
+        );
 
-  ButtonStyle _buttonStyle(Color kitForegroundColor,
+  ButtonStyle _buttonStyle(
+      Color kitForegroundColor,
       Color kitBorderColor,
       Color kitOverlayColor,
       Color kitBackgroundColor,
@@ -134,73 +155,87 @@ class CoreElevatedButton extends ElevatedButton {
         shadowColor: MaterialStateProperty.all<Color?>(kitShadowColor),
         elevation: MaterialStateProperty.all(kitElevation),
         padding: MaterialStateProperty.all(EdgeInsets.all(kitPadding)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(kitRadius)),
-            side: BorderSide(color: kitBorderColor))));
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(kitRadius)),
+                side: BorderSide(color: kitBorderColor))));
   }
 
   CoreElevatedButton.iconOnly({
     Key? key,
-    required VoidCallback? onPressed,
+    bool playSound = true,
+    required VoidCallback onPressed,
     VoidCallback? onLongPress,
     ValueChanged<bool>? onHover,
     ValueChanged<bool>? onFocusChange,
+    required CommonAudioOnPressButton buttonAudio,
     ButtonStyle? style,
     FocusNode? focusNode,
     bool autofocus = false,
     Clip clipBehavior = Clip.none,
     MaterialStatesController? statesController,
-
     required Widget icon,
-
     Color kitForegroundColor = Colors.black,
     Color kitBorderColor = Colors.black,
     Color kitOverlayColor = Colors.black45,
     Color kitBackgroundColor = Colors.white,
     Color kitShadowColor = Colors.black,
-
     required CoreButtonStyle coreButtonStyle,
-  })
-      : style = ButtonStyle(
-      foregroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitForegroundColor),
-      backgroundColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitBackgroundColor),
-      overlayColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitOverlayColor),
-      shadowColor: MaterialStateProperty.all<Color?>(coreButtonStyle.kitShadowColor),
-      elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
-      padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
-      textStyle: MaterialStateProperty.all(
-        TextStyle(fontSize: coreButtonStyle.kitFontSize),
-      ),
-      // fixedSize: MaterialStateProperty.all(Size.fromHeight(coreButtonStyle.kitHeight)),
-      minimumSize: coreButtonStyle.kitMinimumSize != const Size(0.0, 0.0) ? MaterialStateProperty.all<Size>(
-        coreButtonStyle.kitMinimumSize, // Đặt kích thước tối thiểu cho nút
-      ) : null,
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(coreButtonStyle.kitRadius)),
-          side: BorderSide(color: coreButtonStyle.kitBorderColor ?? kitBorderColor)))),
+  })  : style = ButtonStyle(
+            foregroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitForegroundColor),
+            backgroundColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitBackgroundColor),
+            overlayColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitOverlayColor),
+            shadowColor: MaterialStateProperty.all<Color?>(
+                coreButtonStyle.kitShadowColor),
+            elevation: MaterialStateProperty.all(coreButtonStyle.kitElevation),
+            padding: MaterialStateProperty.all(coreButtonStyle.kitPaddingLTRB),
+            textStyle: MaterialStateProperty.all(
+              TextStyle(fontSize: coreButtonStyle.kitFontSize),
+            ),
+            // fixedSize: MaterialStateProperty.all(Size.fromHeight(coreButtonStyle.kitHeight)),
+            minimumSize: coreButtonStyle.kitMinimumSize != const Size(0.0, 0.0)
+                ? MaterialStateProperty.all<Size>(
+                    coreButtonStyle
+                        .kitMinimumSize, // Đặt kích thước tối thiểu cho nút
+                  )
+                : null,
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(coreButtonStyle.kitRadius)),
+                    side: BorderSide(
+                        color: coreButtonStyle.kitBorderColor ??
+                            kitBorderColor)))),
         super(
-        key: key,
-        onPressed: () {
-          CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-          audio.playAudioOnPress().then((value) {
-            if(value) {
-              onPressed!();
+          key: key,
+          onPressed: () {
+            if (playSound == true) {
+              buttonAudio.playAudioOnPress().then((value) {
+                if (value) {
+                  onPressed();
+                }
+              });
+            } else {
+              onPressed();
             }
-          });
-        },
-        onLongPress: onLongPress,
-        onHover: onHover,
-        onFocusChange: onFocusChange,
-        style: style,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        clipBehavior: clipBehavior,
-        child: _ElevatedButtonWithIconChildOnly(icon: icon),
-      );
+          },
+          onLongPress: onLongPress,
+          onHover: onHover,
+          onFocusChange: onFocusChange,
+          style: style,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          clipBehavior: clipBehavior,
+          child: _ElevatedButtonWithIconChildOnly(icon: icon),
+        );
 }
 
 class _ElevatedButtonWithIconChild extends StatelessWidget {
-  const _ElevatedButtonWithIconChild({ required this.label, required this.icon, required this.kitGap });
+  const _ElevatedButtonWithIconChild(
+      {required this.label, required this.icon, required this.kitGap});
 
   final Widget label;
   final Widget icon;
@@ -231,13 +266,12 @@ class _ElevatedButtonWithIconChild extends StatelessWidget {
 }
 
 class _ElevatedButtonWithIconChildOnly extends StatelessWidget {
-  const _ElevatedButtonWithIconChildOnly({ required this.icon});
+  const _ElevatedButtonWithIconChildOnly({required this.icon});
 
   final Widget icon;
 
   @override
   Widget build(BuildContext context) {
-
     // final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return icon;
     /**

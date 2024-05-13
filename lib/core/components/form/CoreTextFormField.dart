@@ -56,7 +56,7 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
     return SizedBox(
         width: double.infinity,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 8.0),
           child: TextFormField(
             style: widget.style,
             focusNode: widget.focusNode,
@@ -65,7 +65,7 @@ class _CoreTextFormFieldState extends State<CoreTextFormField> {
               widget.onChanged(value); // Gửi sự thay đổi tới trang cha
             },
             validator: (value) {
-              if (value == null || value.isEmpty) {
+              if (value?.isEmpty ?? true) {
 
                 CommonAudioOnPressButton audio = CommonAudioOnPressButton();
                 audio.playAudioOnMessage();

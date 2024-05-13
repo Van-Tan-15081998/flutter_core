@@ -1,7 +1,9 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_core_v3/app/screens/setting/providers/setting_notifier.dart';
 
+import '../../../app/library/common/languages/CommonLanguages.dart';
 import '../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 
 enum CoreNotificationStatus { success, error, warning }
@@ -12,36 +14,48 @@ class CoreNotification {
   /*
   Function Show Notification With BuildContext
    */
-  static show(BuildContext context, CoreNotificationStatus status,
-      CoreNotificationAction action, String resourceName) {
-
+  static show(
+      BuildContext context,
+      SettingNotifier settingNotifier,
+      CoreNotificationStatus status,
+      CoreNotificationAction action,
+      String resourceName) {
     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
     audio.playAudioOnNotification();
 
-    final snackBar = buildContent(
-        context, status, getNotificationContent(status, action, resourceName));
+    final snackBar = buildContent(context, settingNotifier, status,
+        getNotificationContent(status, action, resourceName));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    // audio.dispose();
   }
 
-  static showMessage(BuildContext context, CoreNotificationStatus status, String message) {
-
+  static showMessage(BuildContext context, SettingNotifier settingNotifier,
+      CoreNotificationStatus status, String message) {
     CommonAudioOnPressButton audio = CommonAudioOnPressButton();
-    audio.playAudioOnMessage();
 
-    final snackBar = buildContent(
-        context, status, message);
+    if (status == CoreNotificationStatus.warning ||
+        status == CoreNotificationStatus.error) {
+      audio.playAudioOnMessage();
+    } else {
+      audio.playAudioOnNotification();
+    }
+
+    final snackBar = buildContent(context, settingNotifier, status, message);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    // audio.dispose();
   }
 
-
-
-  static SnackBar buildContent(BuildContext context,
-      CoreNotificationStatus status, String contentString) {
+  static SnackBar buildContent(
+      BuildContext context,
+      SettingNotifier settingNotifier,
+      CoreNotificationStatus status,
+      String contentString) {
     switch (status) {
       case CoreNotificationStatus.success:
         return SnackBar(
+          duration: const Duration(milliseconds: 1500),
           padding: const EdgeInsets.all(6.0),
           backgroundColor: Colors.green[400],
           content: Padding(
@@ -49,25 +63,22 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.green[400],
-                            child: const Icon(
-                              Icons.done_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.green[400],
+                          child: const Icon(
+                            Icons.done_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -75,8 +86,12 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Successfully',
-                            style: TextStyle(
+                        Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.titleCompleted'),
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 fontSize: 20.0)),
@@ -105,25 +120,22 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.red[400],
-                            child: const Icon(
-                              Icons.error_outline_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.red[400],
+                          child: const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -131,8 +143,12 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Error',
-                            style: TextStyle(
+                        Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.titleError'),
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 fontSize: 20.0)),
@@ -161,25 +177,22 @@ class CoreNotification {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.orange[400],
-                            child: const Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: Colors.orange[400],
+                          child: const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -187,8 +200,12 @@ class CoreNotification {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Warning',
-                            style: TextStyle(
+                        Text(
+                            CommonLanguages.convert(
+                                lang: settingNotifier.languageString ??
+                                    CommonLanguages.languageStringDefault(),
+                                word: 'notification.action.titleWarning'),
+                            style: const TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
                                 fontSize: 20.0)),
@@ -211,31 +228,28 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                BounceInLeft(
-                  duration: const Duration(milliseconds: 500),
-                  child: DottedBorder(
-                      borderType: BorderType.RRect,
-                      radius: const Radius.circular(30),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.black,
-                            child: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Colors.white,
-                              size: 34.0,
-                            )),
-                      )),
-                ),
+                DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(30),
+                    color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(30)),
+                      child: Container(
+                          width: 50,
+                          height: 50,
+                          color: const Color(0xff1f1f1f),
+                          child: const Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.white,
+                            size: 34.0,
+                          )),
+                    )),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(8.0, 2.0, 6.0, 2.0),
@@ -432,7 +446,7 @@ class CoreNotification {
       default:
         return SnackBar(
           padding: const EdgeInsets.all(6.0),
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xff1f1f1f),
           content: Padding(
             padding: const EdgeInsets.fromLTRB(4.0, 2.0, 2.0, 2.0),
             child: Row(
@@ -447,7 +461,7 @@ class CoreNotification {
                       child: Container(
                           width: 50,
                           height: 50,
-                          color: Colors.black,
+                          color: const Color(0xff1f1f1f),
                           child: const Icon(
                             Icons.notifications_none_rounded,
                             color: Colors.white,

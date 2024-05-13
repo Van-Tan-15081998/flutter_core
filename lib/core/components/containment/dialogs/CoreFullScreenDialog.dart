@@ -6,15 +6,20 @@ import 'package:flutter_core_v3/core/components/actions/common_buttons/CoreEleva
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
+import '../../../../app/library/common/dimensions/CommonDimensions.dart';
 import '../../../../app/library/common/styles/CommonStyles.dart';
+import '../../../../app/library/common/themes/ThemeDataCenter.dart';
+import '../../../../app/library/common/utils/CommonAudioOnPressButton.dart';
 import '../../../../app/screens/home/home_screen.dart';
+import '../../../../app/screens/setting/providers/setting_notifier.dart';
 import '../../helper_widgets/CoreHelperWidget.dart';
 
 enum AppBarActionButtonEnum { save, cancel, home }
 
 class CoreFullScreenDialog extends StatefulWidget {
-  final String? title;
+  final Widget? title;
 
   final Widget child;
 
@@ -32,6 +37,8 @@ class CoreFullScreenDialog extends StatefulWidget {
   final AppBarActionButtonEnum actions;
 
   String? homeLabel;
+
+  final Widget? appbarLeading;
 
   final Function? onSubmit;
   final Function? onUndo;
@@ -53,7 +60,8 @@ class CoreFullScreenDialog extends StatefulWidget {
       required this.onRedo,
       required this.onBack,
       required this.onGoHome,
-        this.homeLabel,
+      required this.appbarLeading,
+      required this.homeLabel,
       required this.isShowGeneralActionButton,
       required this.isShowOptionActionButton,
       required this.isShowBottomActionButton});
@@ -63,10 +71,20 @@ class CoreFullScreenDialog extends StatefulWidget {
 }
 
 class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
+  CommonAudioOnPressButton commonAudioOnPressButton =
+      CommonAudioOnPressButton();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    commonAudioOnPressButton.dispose();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   Widget get _fullWidthPath {
@@ -89,44 +107,50 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
         {
           return Padding(
             padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.floppyDisk, size: 18.0),
-              label: Text('Save', style: CommonStyles.labelTextStyle),
-              onPressed: () {
-                if (widget.onSubmit != null) {
-                  widget.onSubmit!();
-                }
-              },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitForegroundColorOption: Colors.black,
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+            child: Tooltip(
+              message: 'Save',
+              child: CoreElevatedButton.iconOnly(
+                buttonAudio: commonAudioOnPressButton,
+                icon: const Padding(
+                  padding: EdgeInsets.fromLTRB(15.0, 0, 15.0, 0),
+                  child: Icon(Icons.save_alt_rounded, size: 25.0),
+                ),
+                onPressed: () {
+                  if (widget.onSubmit != null) {
+                    widget.onSubmit!();
+                  }
+                },
+                coreButtonStyle:
+                    ThemeDataCenter.getCoreScreenButtonStyle(context: context),
+              ),
             ),
           );
         }
         break;
       case AppBarActionButtonEnum.home:
         {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-            child: CoreElevatedButton.icon(
-              icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
-              label: Text(widget.homeLabel != null ? widget.homeLabel! : 'Home',  style: CommonStyles.buttonTextStyle),
-              onPressed: () {
-                if (widget.onGoHome != null) {
-                  widget.onGoHome!();
-                }
-              },
-              coreButtonStyle: CoreButtonStyle.options(
-                  coreStyle: CoreStyle.outlined,
-                  coreColor: CoreColor.dark,
-                  coreRadius: CoreRadius.radius_6,
-                  kitForegroundColorOption: Colors.black,
-                  coreFixedSizeButton: CoreFixedSizeButton.medium_40),
-            ),
-          );
+          return widget.homeLabel != null
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                  child: CoreElevatedButton.icon(
+                    buttonAudio: commonAudioOnPressButton,
+                    icon: const FaIcon(FontAwesomeIcons.house, size: 18.0),
+                    label: Text(widget.homeLabel!,
+                        style: CommonStyles.buttonTextStyle),
+                    onPressed: () {
+                      if (widget.onGoHome != null) {
+                        widget.onGoHome!();
+                      }
+                    },
+                    coreButtonStyle: CoreButtonStyle.options(
+                        coreStyle: CoreStyle.outlined,
+                        coreColor: CoreColor.dark,
+                        coreRadius: CoreRadius.radius_6,
+                        kitForegroundColorOption: Colors.black,
+                        coreFixedSizeButton: CoreFixedSizeButton.medium_40),
+                  ),
+                )
+              : Container();
         }
         break;
 
@@ -140,34 +164,42 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    final settingNotifier = Provider.of<SettingNotifier>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title!,
-          style: GoogleFonts.montserrat(
-              fontStyle: FontStyle.italic,
-              fontSize: 26,
-              color: const Color(0xFF404040),
-              fontWeight: FontWeight.bold),
-        ),
-        actions: [_buildAppBarActionButtons()],
-        backgroundColor: const Color(0xFF202124),
-        iconTheme: const IconThemeData(
-          color: Color(0xFF404040), // Set the color you desire
-        ),
-      ),
-      body: widget.child,
-      backgroundColor: const Color(0xFF202124),
+      extendBodyBehindAppBar:
+          settingNotifier.isSetBackgroundImage == true ? true : false,
+      appBar: _buildAppBar(context, settingNotifier),
+      body: settingNotifier.isSetBackgroundImage == true
+          ? DecoratedBox(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(
+                        settingNotifier.backgroundImageSourceString ??
+                            CommonStyles.backgroundImageSourceStringDefault()),
+                    fit: BoxFit.cover),
+              ),
+              child: Column(
+                children: [
+                  SizedBox(
+                      height: CommonDimensions.scaffoldAppBarHeight(context)),
+                  Expanded(child: SingleChildScrollView(child: widget.child))
+                ],
+              ),
+            )
+          : widget.child,
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.all(6.0),
+        padding: const EdgeInsets.fromLTRB(6.0, 6.0, 6.0, 0),
         child: widget.isShowBottomActionButton!
             ? Container(
                 padding: const EdgeInsets.fromLTRB(4, 1, 4, 0),
                 width:
                     screenWidth, // Đặt chiều rộng của container bằng chiều ngang của màn hình
                 decoration: BoxDecoration(
-                  color: const Color(0xFF404040),
+                  color: const Color(0xFF404040).withOpacity(0.99),
                   borderRadius: BorderRadius.circular(8.0), // Bo góc
                 ),
                 child: Column(
@@ -179,6 +211,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 onPressed: () {
                                   if (widget.onUndo != null) {
                                     widget.onUndo!();
@@ -195,6 +228,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                     size: 18.0),
                               ),
                               CoreElevatedButton.iconOnly(
+                                buttonAudio: commonAudioOnPressButton,
                                 onPressed: () {
                                   if (widget.onRedo != null) {
                                     widget.onRedo!();
@@ -211,17 +245,23 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                     size: 18.0),
                               ),
                               CoreElevatedButton.icon(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const FaIcon(FontAwesomeIcons.xmark,
                                     size: 18.0),
                                 label: const Text('Cancel'),
                                 onPressed: () async {
                                   if (widget.isConfirmToClose!) {
                                     if (await CoreHelperWidget.confirmFunction(
-                                        context)) {
-                                      Navigator.pop(context);
+                                        context: context,
+                                        settingNotifier: settingNotifier)) {
+                                      if (Navigator.canPop(context)) {
+                                        Navigator.pop(context);
+                                      }
                                     }
                                   } else {
-                                    Navigator.pop(context);
+                                    if (Navigator.canPop(context)) {
+                                      Navigator.pop(context);
+                                    }
                                   }
                                 },
                                 coreButtonStyle: CoreButtonStyle.options(
@@ -233,6 +273,7 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                         CoreFixedSizeButton.medium_40),
                               ),
                               CoreElevatedButton.icon(
+                                buttonAudio: commonAudioOnPressButton,
                                 icon: const FaIcon(FontAwesomeIcons.floppyDisk,
                                     size: 18.0),
                                 label: Text('Save',
@@ -262,7 +303,9 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                 Row(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment: MainAxisAlignment.end,
-                                  children: widget.bottomActionBar != null ? widget.bottomActionBar! :  [Container()],
+                                  children: widget.bottomActionBar != null
+                                      ? widget.bottomActionBar!
+                                      : [Container()],
                                 ),
                                 SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
@@ -273,19 +316,53 @@ class _CoreFullScreenDialogState extends State<CoreFullScreenDialog> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceEvenly,
                                         children:
-                                            widget.bottomActionBarScrollable != null ? widget.bottomActionBarScrollable! : [Container()])),
+                                            widget.bottomActionBarScrollable !=
+                                                    null
+                                                ? widget
+                                                    .bottomActionBarScrollable!
+                                                : [Container()])),
                               ],
                             ),
                           )
                         : Container(),
-                    widget.optionActionContent != null ? widget.optionActionContent! : Container()
+                    widget.optionActionContent != null
+                        ? widget.optionActionContent!
+                        : Container()
                   ],
                 ),
               )
             : Container(),
       ),
+      // floatingActionButtonLocation:
+      //     FloatingActionButtonLocation.startDocked,
       floatingActionButtonLocation:
-          FloatingActionButtonLocation.miniCenterDocked,
+      FloatingActionButtonLocation.miniCenterFloat,
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, SettingNotifier settingNotifier) {
+    return AppBar(
+      titleSpacing: 0,
+      iconTheme: IconThemeData(
+        color: ThemeDataCenter.getScreenTitleTextColor(context),
+        size: 26,
+      ),
+      leading: widget.appbarLeading ??
+          IconButton(
+            style: CommonStyles.appbarLeadingBackButtonStyle(
+                whiteBlur: settingNotifier.isSetBackgroundImage == true
+                    ? true
+                    : false),
+            icon: const FaIcon(FontAwesomeIcons.chevronLeft),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+      title: widget.title,
+      actions: [_buildAppBarActionButtons()],
+      backgroundColor: settingNotifier.isSetBackgroundImage == true
+          ? Colors.transparent
+          : ThemeDataCenter.getBackgroundColor(context),
     );
   }
 }

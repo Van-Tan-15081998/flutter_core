@@ -5,7 +5,7 @@
         decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(
-              color: Colors.black,
+              color: Color(0xff1f1f1f),
               width: 1.0,
             ),
             borderRadius: BorderRadius.circular(6.0)),

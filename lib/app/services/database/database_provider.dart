@@ -7,20 +7,26 @@ import '../../screens/features/note/models/note_condition_model.dart';
 import '../../screens/features/note/models/note_model.dart';
 import '../../screens/features/subjects/models/subject_condition_model.dart';
 import '../../screens/features/subjects/models/subject_model.dart';
+import '../../screens/features/template/models/template_condition_model.dart';
+import '../../screens/features/template/models/template_model.dart';
 
 class DatabaseProvider {
-  static const int _version = 1;
-  static const String _dbName = "hi_notes.db";
+  static const int _version = 2;
+  static const String _dbName = "hi_notes_v26.db";
 
   static Future<Database> _getDB() async {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, images TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, parentId INTEGER NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NOT NULL, color TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, avatarSourceString TEXT  NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+      await db.execute(
+          "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+      await db.execute(
+          "CREATE TABLE images(id INTEGER PRIMARY KEY, title TEXT NULL, path TEXT NULL, noteId INTEGER, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
     }, version: _version);
   }
 
@@ -53,6 +59,22 @@ class DatabaseProvider {
   static Future<int> favouriteNote(NoteModel note, int? isFavourite) async {
     final db = await _getDB();
     return await db.update("notes", {'isFavourite': isFavourite},
+        where: 'id = ?',
+        whereArgs: [note.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> pinNote(NoteModel note, int? isPin) async {
+    final db = await _getDB();
+    return await db.update("notes", {'isPinned': isPin},
+        where: 'id = ?',
+        whereArgs: [note.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> lockNote(NoteModel note, int? isLock) async {
+    final db = await _getDB();
+    return await db.update("notes", {'isLocked': isLock},
         where: 'id = ?',
         whereArgs: [note.id],
         conflictAlgorithm: ConflictAlgorithm.replace);
@@ -99,10 +121,48 @@ class DatabaseProvider {
         maps.length, (index) => NoteModel.fromJson(maps[index]));
   }
 
+  static Future<List<NoteModel>?> getAllNotesDistinctCreatedAt() async {
+    final db = await _getDB();
+
+    List<NoteModel> mapsResult = [];
+
+    final List<Map<String, dynamic>> distinctCreatedAtDayFormatMaps =
+        await db.rawQuery(
+      'SELECT DISTINCT notes.createdAtDayFormat FROM notes WHERE notes.deletedAt IS NULL',
+    );
+
+    final List<Map<String, dynamic>> distinctCreatedForDayMaps =
+        await db.rawQuery(
+      'SELECT DISTINCT notes.createdForDay FROM notes WHERE notes.deletedAt IS NULL',
+    );
+
+    if (distinctCreatedAtDayFormatMaps.isEmpty &&
+        distinctCreatedForDayMaps.isEmpty) {
+      return null;
+    }
+
+    if (distinctCreatedAtDayFormatMaps.isNotEmpty) {
+      for (var element in distinctCreatedAtDayFormatMaps) {
+        mapsResult.add(NoteModel.fromJson(element));
+      }
+    }
+
+    if (distinctCreatedForDayMaps.isNotEmpty) {
+      for (var element in distinctCreatedForDayMaps) {
+        mapsResult.add(NoteModel.fromJson(element));
+      }
+    }
+
+    return mapsResult;
+  }
+
   static Future<List<NoteModel>?> getNotePagination(
       CorePaginationModel corePaginationModel,
       NoteConditionModel noteConditionModel) async {
     final db = await _getDB();
+    int toDay =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .millisecondsSinceEpoch;
 
     final List<Map<String, dynamic>> maps = await db.query("notes",
         limit: corePaginationModel.itemPerPage,
@@ -110,14 +170,17 @@ class DatabaseProvider {
             corePaginationModel.itemPerPage,
         where:
             ' ${noteConditionModel.isDeleted == null || noteConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
-            ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND createdAt >= ${noteConditionModel.createdAtStartOfDay} "
-                "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} " : ""}'
+            ' ${noteConditionModel.createdAtStartOfDay != null && noteConditionModel.createdAtEndOfDay != null ? "AND ((createdAt >= ${noteConditionModel.createdAtStartOfDay} "
+                "AND createdAt <= ${noteConditionModel.createdAtEndOfDay} ) OR (createdForDay >= ${noteConditionModel.createdAtStartOfDay} AND createdForDay <= ${noteConditionModel.createdAtEndOfDay}))" : ""}'
             ' ${noteConditionModel.subjectId != null ? " AND subjectID = ${noteConditionModel.subjectId}" : ""}'
-            ' ${noteConditionModel.favourite != null ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${noteConditionModel.labelId != null ? " AND (label01Id = ${noteConditionModel.labelId} OR label02Id = ${noteConditionModel.labelId} OR label03Id = ${noteConditionModel.labelId} OR label04Id = ${noteConditionModel.labelId} OR label05Id = ${noteConditionModel.labelId})" : ""}'
+            ' ${noteConditionModel.onlyNoneSubject == true ? " AND subjectID IS NULL" : ""}'
+            ' ${noteConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${noteConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
+            ' ${noteConditionModel.createdForDay == true ? " AND createdForDay IS NOT NULL AND createdForDay > $toDay" : ""}'
             ' ${noteConditionModel.searchText != null && noteConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${noteConditionModel.searchText}%\' OR description LIKE \'%${noteConditionModel.searchText}%\')" : ""}',
-        orderBy: noteConditionModel.recentlyUpdated != null
-            ? "updatedAt DESC"
-            : "id DESC");
+        orderBy:
+            "isPinned DESC, ${noteConditionModel.isDeleted == true ? 'deletedAt DESC,' : ''} ${noteConditionModel.createdForDay == true ? 'createdForDay ASC,' : ''} ${noteConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -260,7 +323,8 @@ class DatabaseProvider {
         where:
             ' ${subjectConditionModel.isDeleted == null || subjectConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
             ' ${subjectConditionModel.id != null ? " AND id = ${subjectConditionModel.id}" : ""}'
-            ' ${subjectConditionModel.isRootSubject != null ? " AND parentId IS NULL" : ""}'
+            ' ${subjectConditionModel.isRootSubject == true ? " AND parentId IS NULL" : ""}'
+            ' ${subjectConditionModel.onlyParentId != null ? " AND parentId = ${subjectConditionModel.onlyParentId}" : ""}'
             ' ${subjectConditionModel.parentId != null ? " AND (parentId = ${subjectConditionModel.parentId} OR id = ${subjectConditionModel.parentId})" : ""}'
             ' ${subjectConditionModel.searchText != null && subjectConditionModel.searchText!.isNotEmpty ? " AND title LIKE \'%${subjectConditionModel.searchText}%\'" : ""}',
         orderBy: subjectConditionModel.parentId != null ? "id ASC" : "id DESC");
@@ -298,6 +362,15 @@ class DatabaseProvider {
         conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
+  static Future<int> createShortcutSubject(
+      SubjectModel subject, int? isSetShortcut) async {
+    final db = await _getDB();
+    return await db.update("subjects", {'isSetShortcut': isSetShortcut},
+        where: 'id = ?',
+        whereArgs: [subject.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   static Future<SubjectModel?> getSubjectById(int id) async {
     final db = await _getDB();
     final List<Map<String, dynamic>> maps = await db.query(
@@ -318,6 +391,21 @@ class DatabaseProvider {
 
     final List<Map<String, dynamic>> maps = await db.query("subjects",
         where: 'deletedAt IS NULL', orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => SubjectModel.fromJson(maps[index]));
+  }
+
+  static Future<List<SubjectModel>?> getSubjectShortcut() async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps = await db.query("subjects",
+        where: 'deletedAt IS NULL AND isSetShortcut IS NOT NULL',
+        orderBy: "isSetShortcut DESC, id DESC");
 
     if (maps.isEmpty) {
       return null;
@@ -375,5 +463,125 @@ class DatabaseProvider {
       return 0;
     }
     return countAll;
+  }
+
+  /// TEMPLATES
+  static Future<int> countAllTemplates() async {
+    final db = await _getDB();
+    int? countAll = Sqflite.firstIntValue(await db
+        .rawQuery('SELECT COUNT(*) FROM templates WHERE deletedAt IS NULL'));
+
+    if (countAll == null) {
+      return 0;
+    }
+    return countAll;
+  }
+
+  static Future<int> createTemplate(TemplateModel template) async {
+    final db = await _getDB();
+    return await db.insert("templates", template.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> updateTemplate(TemplateModel template) async {
+    final db = await _getDB();
+    return await db.update("templates", template.toJson(),
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> favouriteTemplate(
+      TemplateModel template, int? isFavourite) async {
+    final db = await _getDB();
+    return await db.update("templates", {'isFavourite': isFavourite},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteTemplate(
+      TemplateModel template, int deleteTime) async {
+    final db = await _getDB();
+    return await db.update("templates", {'deletedAt': deleteTime},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<int> deleteForeverTemplate(TemplateModel template) async {
+    final db = await _getDB();
+
+    return await db.delete(
+      "templates",
+      where: 'id = ?',
+      whereArgs: [template.id],
+    );
+  }
+
+  static Future<int> restoreTemplate(
+      TemplateModel template, int restoreTime) async {
+    final db = await _getDB();
+    return await db.update(
+        "templates", {'deletedAt': null, 'updatedAt': restoreTime},
+        where: 'id = ?',
+        whereArgs: [template.id],
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<List<TemplateModel>?> getAllTemplates() async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps =
+        await db.query("templates", orderBy: "id DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => TemplateModel.fromJson(maps[index]));
+  }
+
+  static Future<List<TemplateModel>?> getTemplatePagination(
+      CorePaginationModel corePaginationModel,
+      TemplateConditionModel templateConditionModel) async {
+    final db = await _getDB();
+
+    final List<Map<String, dynamic>> maps = await db.query("templates",
+        limit: corePaginationModel.itemPerPage,
+        offset: corePaginationModel.currentPageIndex *
+            corePaginationModel.itemPerPage,
+        where:
+            ' ${templateConditionModel.isDeleted == null || templateConditionModel.isDeleted == false ? "deletedAt IS NULL" : "deletedAt IS NOT NULL"}'
+            ' ${templateConditionModel.subjectId != null ? " AND subjectID = ${templateConditionModel.subjectId}" : ""}'
+            ' ${templateConditionModel.favourite == true ? " AND isFavourite IS NOT NULL" : ""}'
+            ' ${templateConditionModel.recentlyUpdated == true ? " AND updatedAt IS NOT NULL" : ""}'
+            ' ${templateConditionModel.searchText != null && templateConditionModel.searchText!.isNotEmpty ? " AND (title LIKE \'%${templateConditionModel.searchText}%\' OR description LIKE \'%${templateConditionModel.searchText}%\')" : ""}',
+        orderBy:
+            "${templateConditionModel.recentlyUpdated == true ? 'updatedAt DESC,' : ''} createdAt DESC");
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return List.generate(
+        maps.length, (index) => TemplateModel.fromJson(maps[index]));
+  }
+
+  static Future<TemplateModel?> getTemplateById(int id) async {
+    final db = await _getDB();
+    final List<Map<String, dynamic>> maps = await db.query(
+      "templates",
+      where: 'id = ?', // Điều kiện WHERE để lấy ghi chú theo ID
+      whereArgs: [id], // Giá trị ID
+    );
+
+    if (maps.isEmpty) {
+      return null; // Trả về null nếu không tìm thấy ghi chú với ID tương ứng
+    }
+
+    return TemplateModel.fromJson(
+        maps.first); // Trả về ghi chú đầu tiên (nếu có)
   }
 }

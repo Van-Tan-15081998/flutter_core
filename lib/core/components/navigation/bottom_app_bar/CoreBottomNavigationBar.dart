@@ -17,6 +17,7 @@ class _CoreBottomNavigationBarState extends State<CoreBottomNavigationBar> {
   Widget build(BuildContext context) {
     return Container(
         decoration: const BoxDecoration(
+          color: Colors.transparent,
           border: Border(
             top: BorderSide(
               color: Colors.black,

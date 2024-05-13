@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../../../core/common/pagination/models/CorePaginationModel.dart';
 import '../databases/note_db_manager.dart';
 import '../models/note_condition_model.dart';
@@ -15,9 +14,9 @@ class NoteNotifier with ChangeNotifier {
     onCountAll();
   }
 
-   Future onCountAll() async {
-      _countAllNotes = await NoteDatabaseManager.onCountAll();
-      notifyListeners();
+  Future onCountAll() async {
+    _countAllNotes = await NoteDatabaseManager.onCountAll();
+    notifyListeners();
   }
 
   bool deleteNote(NoteModel note) {
@@ -52,9 +51,12 @@ class NoteNotifier with ChangeNotifier {
     return null;
   }
 
-  Future<List<NoteModel>?> getNotePagination(CorePaginationModel corePaginationModel, NoteConditionModel noteConditionModel) async {
+  Future<List<NoteModel>?> getNotePagination(
+      CorePaginationModel corePaginationModel,
+      NoteConditionModel noteConditionModel) async {
     List<NoteModel>? result = [];
-    result = await NoteDatabaseManager.onGetNotePagination(corePaginationModel, noteConditionModel);
+    result = await NoteDatabaseManager.onGetNotePagination(
+        corePaginationModel, noteConditionModel);
 
     if (result != null) {
       _notes = result;
