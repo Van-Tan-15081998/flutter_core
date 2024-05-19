@@ -11,8 +11,8 @@ import '../../screens/features/template/models/template_condition_model.dart';
 import '../../screens/features/template/models/template_model.dart';
 
 class DatabaseProvider {
-  static const int _version = 2;
-  static const String _dbName = "hi_notes_v26.db";
+  static const int _version = 1;
+  static const String _dbName = "hi_notes_v1.db";
 
   static Future<Database> _getDB() async {
     return openDatabase(join(await getDatabasesPath(), _dbName),
