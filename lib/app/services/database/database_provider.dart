@@ -18,15 +18,15 @@ class DatabaseProvider {
     return openDatabase(join(await getDatabasesPath(), _dbName),
         onCreate: (db, version) async {
       await db.execute(
-          "CREATE TABLE notes(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, images TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE notes(id INTEGER PRIMARY KEY, recordVersion INTEGER NULL,  title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, images TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, isLocked INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, createdAtDayFormat INTEGER NULL, createdForDay INTEGER NULL, planedAlertHour INTEGER NULL,  updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE templates(id INTEGER PRIMARY KEY, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE templates(id INTEGER PRIMARY KEY, recordVersion INTEGER NULL, title TEXT NULL, description TEXT NULL, subjectId INTEGER NULL, labels TEXT  NULL, isFavourite INTEGER NULL, isPinned INTEGER NULL, label01Id INTEGER NULL, label02Id INTEGER NULL, label03Id INTEGER NULL, label04Id INTEGER NULL, label05Id INTEGER NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, avatarSourceString TEXT  NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE subjects(id INTEGER PRIMARY KEY, recordVersion INTEGER NULL, title TEXT NULL, color TEXT NULL, parentId INTEGER NULL, isSetShortcut INTEGER NULL, avatarSourceString TEXT  NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE labels(id INTEGER PRIMARY KEY, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE labels(id INTEGER PRIMARY KEY, recordVersion INTEGER NULL, title TEXT NULL, color TEXT NULL, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
       await db.execute(
-          "CREATE TABLE images(id INTEGER PRIMARY KEY, title TEXT NULL, path TEXT NULL, noteId INTEGER, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
+          "CREATE TABLE images(id INTEGER PRIMARY KEY, recordVersion INTEGER NULL, title TEXT NULL, path TEXT NULL, noteId INTEGER, createdAt INTEGER NULL, updatedAt INTEGER NULL, deletedAt INTEGER NULL);");
     }, version: _version);
   }
 

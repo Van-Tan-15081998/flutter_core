@@ -978,7 +978,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                                                                             context:
                                                                                 context,
                                                                             settingNotifier:
-                                                                                settingNotifier)) {
+                                                                                settingNotifier, confirmUnlock: true)) {
                                                                           _onUnlockNote(context, widget.note)
                                                                               .then((result) {
                                                                             if (result) {

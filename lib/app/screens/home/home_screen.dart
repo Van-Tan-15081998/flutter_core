@@ -603,6 +603,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                           _subjectShortcutList
                                                                               .removeAt(index);
                                                                         });
+                                                                        CoreNotification.showMessage(
+                                                                            context,
+                                                                            settingNotifier,
+                                                                            CoreNotificationStatus
+                                                                                .success,
+                                                                            CommonLanguages.convert(
+                                                                                lang: settingNotifier.languageString ?? CommonLanguages.languageStringDefault(),
+                                                                                word: 'notification.action.deletedShortcut'));
                                                                       } else {
                                                                         CoreNotification.show(
                                                                             context,
@@ -1109,7 +1117,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: CommonStyles.screenTitleTextStyle(
                             fontSize: 30.0,
                             fontWeight: FontWeight.bold,
-                            color: ThemeDataCenter.getScreenTitleTextColor(context))),
+                            color: ThemeDataCenter.getScreenTitleTextColor(
+                                context))),
                   ),
                 ),
               ],
@@ -1118,8 +1127,7 @@ class _HomeScreenState extends State<HomeScreen> {
           DecoratedBox(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage(CommonStyles
-                        .avatarImageSourceString()),
+                    image: AssetImage(CommonStyles.avatarImageSourceString()),
                     fit: BoxFit.contain),
               ),
               child: const SizedBox(
@@ -1202,7 +1210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: DecoratedBox(
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: Colors.white54,
+                                  color: Colors.transparent,
                                   width: 1.0,
                                 ),
                                 borderRadius: const BorderRadius.all(

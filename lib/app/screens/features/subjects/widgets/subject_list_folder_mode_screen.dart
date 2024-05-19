@@ -541,7 +541,7 @@ class _SubjectListFolderModeScreenState
               onPressed: () {
                 _resetPage();
               },
-              icon: const Icon(Icons.folder_rounded),
+              icon: const Icon(Icons.folder_rounded, color: Color(0xFF023E8A)),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -631,7 +631,8 @@ class _SubjectListFolderModeScreenState
                     _reloadPage();
                   }
                 },
-                icon: const Icon(Icons.create_new_folder_rounded),
+                icon: const Icon(Icons.create_new_folder_rounded,
+                    color: Color(0xFF023E8A)),
               ),
             ),
           ],
@@ -770,7 +771,8 @@ class _SubjectListFolderModeScreenState
                                         lang: settingNotifier.languageString ??
                                             CommonLanguages
                                                 .languageStringDefault(),
-                                        word: 'notification.action.updated'));
+                                        word:
+                                            'notification.action.createdShortcut'));
                               } else {
                                 CoreNotification.showMessage(
                                     context,
