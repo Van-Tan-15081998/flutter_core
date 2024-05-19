@@ -58,10 +58,10 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
               Flexible(child: widget.confirmTitle),
             ],
           ),
-          const SizedBox(height: 12.0),
+          const SizedBox(height: 25.0),
           widget.isOnlyWarning == true
               ? Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                       CoreElevatedButton.icon(
                         buttonAudio: commonAudioOnPressButton,
@@ -89,7 +89,7 @@ class _CoreConfirmDialogState extends State<CoreConfirmDialog> {
                       ),
                     ])
               : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     CoreElevatedButton.icon(
                       buttonAudio: commonAudioOnPressButton,

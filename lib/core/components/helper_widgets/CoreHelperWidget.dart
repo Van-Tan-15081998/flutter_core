@@ -48,7 +48,7 @@ class CoreHelperWidget {
                 return result;
               },
               child: Dialog(
-                  insetPadding : const EdgeInsets.all(5.0),
+                  insetPadding: const EdgeInsets.all(5.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
