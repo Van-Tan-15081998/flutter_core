@@ -1,19 +1,15 @@
 import 'dart:io';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_create_screen.dart';
 import 'package:flutter_core_v3/app/screens/features/note/note_list_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import '../../../core/components/actions/common_buttons/CoreButtonStyle.dart';
 import '../../../core/components/actions/common_buttons/CoreElevatedButton.dart';
 import '../../../core/components/form/CoreTextFormField.dart';
 import '../../../core/components/navigation/bottom_app_bar/CoreBottomNavigationBar.dart';
@@ -30,7 +26,6 @@ import '../features/label/widgets/label_list_screen.dart';
 import '../features/note/databases/note_db_manager.dart';
 import '../features/note/providers/note_notifier.dart';
 import '../features/subjects/databases/subject_db_manager.dart';
-import '../features/subjects/models/subject_condition_model.dart';
 import '../features/subjects/models/subject_model.dart';
 import '../features/subjects/providers/subject_notifier.dart';
 import '../features/subjects/widgets/functions/subject_shortcut_widget.dart';
@@ -54,24 +49,6 @@ enum NavigationBarEnum { masterHome, masterSearch, masterAdd, masterDrawer }
 class _HomeScreenState extends State<HomeScreen> {
   CommonAudioOnPressButton commonAudioOnPressButton =
       CommonAudioOnPressButton();
-  late BannerAd bannerAd;
-  bool isAdLoaded = false;
-  initBannerAd() {
-    bannerAd = BannerAd(
-        size: AdSize.banner,
-        // adUnitId: "ca-app-pub-7127345763306561/2981583992",
-        adUnitId: 'ca-app-pub-3940256099942544/9214589741',
-        listener: BannerAdListener(onAdLoaded: (ad) {
-          setState(() {
-            isAdLoaded = true;
-          });
-        }, onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        }),
-        request: const AdRequest());
-
-    bannerAd.load();
-  }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -92,129 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<bool> _onUnShortcut(BuildContext context, SubjectModel subject) async {
     return await SubjectDatabaseManager.createShortcut(subject, null);
-  }
-
-  Widget _buildAd() {
-    if (isAdLoaded) {
-      return SizedBox(
-        height: bannerAd.size.height.toDouble(),
-        width: bannerAd.size.width.toDouble(),
-        child: AdWidget(
-          ad: bannerAd,
-        ),
-      );
-    }
-    return Container(
-      height: 100,
-      width: 200,
-      color: Colors.yellow,
-    );
-  }
-
-  Widget _buildAdB(BuildContext context, SettingNotifier settingNotifier) {
-    if (isAdLoaded) {
-      return FadeIn(
-        duration: const Duration(milliseconds: 200),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(4.0, 2.0, 4.0, 2.0),
-          child: Card(
-            color: Colors.transparent,
-            shadowColor: const Color(0xff1f1f1f),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              side: BorderSide(
-                  color:
-                      ThemeDataCenter.getTemplateBorderCardColorStyle(context),
-                  width: 1.0),
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  // height: 150,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: ThemeDataCenter.getTopBannerCardBackgroundColor(
-                          context),
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Icon(
-                            Icons.ad_units_rounded,
-                            size: 26.0,
-                          ),
-                          Expanded(
-                            child: Text(
-                              CommonLanguages.convert(
-                                  lang: settingNotifier.languageString ??
-                                      CommonLanguages.languageStringDefault(),
-                                  word: 'screen.title.advertisements'),
-                              style: const TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          Tooltip(
-                            message: '...',
-                            child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: ThemeDataCenter
-                                        .getFilteringTextColorStyle(context),
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(6.0)),
-                                  image: DecorationImage(
-                                      image: AssetImage(CommonStyles
-                                              .adImageSourceStringList()[
-                                          CommonConverters.getRandomNumber(
-                                              maxNumber: CommonStyles
-                                                      .adImageSourceStringList()
-                                                  .length)]),
-                                      fit: BoxFit.cover),
-                                ),
-                                child: const SizedBox(
-                                  width: 70.0,
-                                  height: 50.0,
-                                )),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 10.0, 0, 10.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: bannerAd.size.height.toDouble(),
-                          width: bannerAd.size.width.toDouble(),
-                          child: AdWidget(
-                            ad: bannerAd,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-    return Container();
   }
 
   Widget _buildStatisticHomeScreen(
@@ -912,8 +766,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-
-                _buildAdB(context, settingNotifier)
               ],
             ),
           ),
@@ -977,8 +829,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    initBannerAd();
 
     _fetchSubjectShortcut().then((subjectsResult) {
       if (subjectsResult != null && subjectsResult.isNotEmpty) {

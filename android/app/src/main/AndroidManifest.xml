@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Include "neverForLocation" only if you can strongly assert that
+         your app never derives physical location from Bluetooth scan results. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+
     <application
         android:label="Hi Notes"
         android:name="${applicationName}"
@@ -32,9 +38,5 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-7127345763306561~1301686727"/>
     </application>
 </manifest>
